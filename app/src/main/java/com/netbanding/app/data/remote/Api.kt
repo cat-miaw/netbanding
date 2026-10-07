@@ -19,7 +19,7 @@ interface NetbandingApi {
     suspend fun history(): ResponseBody
 }
 
-/** TODO: point at the real Pages URL once `pages.yml` has deployed. */
+/** GitHub Pages URL serving data/ via pages.yml (blueprint D4). */
 const val DEFAULT_BASE_URL = "https://cat-miaw.github.io/netbanding/"
 
 @Serializable
