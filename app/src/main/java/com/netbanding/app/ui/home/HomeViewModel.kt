@@ -48,7 +48,7 @@ data class HomeUiState(
     val items: List<Package> = emptyList(),
     val isps: List<IspOption> = emptyList(),
     val query: String = "",
-    val type: String = Types.BROADBAND,
+    val type: String = Types.CELLULAR,
     val maxMonthly: Long? = null,
     val minSpeed: Int? = null,
     val ispIds: Set<String> = emptySet(),
@@ -72,7 +72,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val query = savedState.getStateFlow("q", "")
-    private val tab = savedState.getStateFlow("tab", Types.BROADBAND)
+    private val tab = savedState.getStateFlow("tab", Types.CELLULAR)
     private val maxMonthly = savedState.getStateFlow("max", -1L)
     private val minSpeed = savedState.getStateFlow("spd", -1)
     private val sort = savedState.getStateFlow("sort", Sorts.CHEAPEST)

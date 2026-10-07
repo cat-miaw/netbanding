@@ -23,6 +23,11 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -93,8 +98,18 @@ fun HomeScreen(
                     if (compareCount > 0) TextButton(onClick = onOpenCompare) {
                         Text(stringResource(R.string.compare_open, compareCount))
                     }
-                    TextButton(onClick = onOpenFavorites) { Text(stringResource(R.string.favorites_title)) }
-                    TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings)) }
+                    IconButton(onClick = onOpenFavorites) {
+                        Icon(
+                            Icons.Filled.FavoriteBorder,
+                            contentDescription = stringResource(R.string.favorites_title),
+                        )
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(
+                            Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
+                    }
                 },
             )
         },
@@ -107,16 +122,16 @@ fun HomeScreen(
             // Tabs stay pinned; search + filters scroll away with the list so
             // first paint shows packages, not chrome.
             Column(modifier = Modifier.fillMaxSize()) {
-                TabRow(selectedTabIndex = if (isCellular) 1 else 0) {
-                    Tab(
-                        selected = !isCellular,
-                        onClick = { onType(Types.BROADBAND) },
-                        text = { Text(stringResource(R.string.tab_broadband)) },
-                    )
+                TabRow(selectedTabIndex = if (isCellular) 0 else 1) {
                     Tab(
                         selected = isCellular,
                         onClick = { onType(Types.CELLULAR) },
                         text = { Text(stringResource(R.string.tab_cellular)) },
+                    )
+                    Tab(
+                        selected = !isCellular,
+                        onClick = { onType(Types.BROADBAND) },
+                        text = { Text(stringResource(R.string.tab_broadband)) },
                     )
                 }
                 when {
