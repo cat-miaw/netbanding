@@ -56,7 +56,7 @@ class SeedAndDaoTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "pergb").first()
-        assertEquals(21, rows.size)
+        assertEquals(29, rows.size)
         val ratios = rows.map { it.monthly_total.toDouble() / (it.quota_mb ?: 1) }
         assertEquals(ratios.sorted(), ratios)
     }
