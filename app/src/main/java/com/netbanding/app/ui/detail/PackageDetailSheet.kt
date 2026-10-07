@@ -21,6 +21,8 @@ import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
 import com.netbanding.app.domain.model.PricePoint
 import com.netbanding.app.domain.usecase.CalculateTrueCost
+import com.netbanding.app.ui.components.formatQuota
+import com.netbanding.app.ui.home.Types
 import com.netbanding.app.ui.home.formatIdr
 
 /** Blueprint 7.6 detail sheet: True Cost breakdown + history + disclaimer + source. */
@@ -52,11 +54,15 @@ fun PackageDetailSheet(
             stringResource(R.string.monthly_total, formatIdr(cost.monthlyTotal)),
             style = MaterialTheme.typography.titleLarge,
         )
-        Text(
-            if (pkg.installFee == null) stringResource(R.string.install_unknown)
-            else stringResource(R.string.install_line, formatIdr(pkg.installFee)),
-        )
-        Text(stringResource(R.string.first_month, formatIdr(cost.firstMonthTotal)))
+        pkg.quotaMb?.let { Text(stringResource(R.string.quota_line, formatQuota(it))) }
+        pkg.validityDays?.let { Text(stringResource(R.string.validity_line, it)) }
+        if (pkg.type == Types.BROADBAND) {
+            Text(
+                if (pkg.installFee == null) stringResource(R.string.install_unknown)
+                else stringResource(R.string.install_line, formatIdr(pkg.installFee)),
+            )
+            Text(stringResource(R.string.first_month, formatIdr(cost.firstMonthTotal)))
+        }
         cost.pricePerMbps?.let { Text(stringResource(R.string.per_mbps, formatIdr(it))) }
         HistorySection(history)
         Text(stringResource(R.string.disclaimer), style = MaterialTheme.typography.bodySmall)

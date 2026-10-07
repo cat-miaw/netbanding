@@ -20,7 +20,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.home.Types
 import com.netbanding.app.ui.home.formatIdr
+import java.text.NumberFormat
+import java.util.Locale
+
+fun formatQuota(quotaMb: Int): String {
+    val gb = quotaMb / 1024.0
+    val s = NumberFormat.getNumberInstance(Locale("id", "ID")).format(gb)
+        .trimEnd('0').trimEnd(',')
+    return "$s GB"
+}
 
 @Composable
 fun PackageCard(
@@ -49,7 +59,12 @@ fun PackageCard(
                 buildString {
                     append(formatIdr(pkg.monthlyTotal))
                     append("/bln")
-                    pkg.speedMbps?.let { append(" • $it Mbps") }
+                    if (pkg.type == Types.CELLULAR) {
+                        pkg.quotaMb?.let { append(" • ${formatQuota(it)}") }
+                        pkg.validityDays?.let { append(" • $it hr") }
+                    } else {
+                        pkg.speedMbps?.let { append(" • $it Mbps") }
+                    }
                 },
                 style = MaterialTheme.typography.bodyLarge,
             )

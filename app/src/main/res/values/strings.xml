@@ -43,7 +43,13 @@
     <string name="compare_install">Biaya pasang</string>
     <string name="compare_included">Termasuk PPN</string>
     <string name="compare_excluded">Belum PPN</string>
+    <string name="compare_quota">Kuota</string>
+    <string name="compare_validity">Masa aktif</string>
     <string name="install_unknown_short">Tanya provider</string>
+    <string name="tab_broadband">Broadband</string>
+    <string name="tab_cellular">Seluler</string>
+    <string name="quota_line">Kuota: %1$s</string>
+    <string name="validity_line">Masa aktif: %1$d hari</string>
     <string name="alert_channel_name">Penurunan harga</string>
     <string name="alert_channel_desc">Notifikasi saat harga paket favorit turun.</string>
     <string name="alert_title">Harga paket turun</string>

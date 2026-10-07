@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.formatQuota
 import com.netbanding.app.ui.home.formatIdr
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,6 +96,16 @@ fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modi
                 item {
                     CompareRow(stringResource(R.string.compare_install), items,
                         { it.installFee?.let(::formatIdr) ?: unknownShort },
+                        { false })
+                }
+                item {
+                    CompareRow(stringResource(R.string.compare_quota), items,
+                        { it.quotaMb?.let(::formatQuota) ?: "-" },
+                        { false })
+                }
+                item {
+                    CompareRow(stringResource(R.string.compare_validity), items,
+                        { it.validityDays?.let { d -> "$d hari" } ?: "-" },
                         { false })
                 }
                 item {

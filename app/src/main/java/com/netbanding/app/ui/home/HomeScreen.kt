@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -60,6 +62,7 @@ fun HomeScreen(
     onBudget: (Long?) -> Unit,
     onSpeed: (Int?) -> Unit,
     onSort: (String) -> Unit,
+    onType: (String) -> Unit,
     onToggleIsp: (String) -> Unit,
     onToggleFavorite: (Package) -> Unit,
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
@@ -96,6 +99,18 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+            TabRow(selectedTabIndex = if (state.type == Types.CELLULAR) 1 else 0) {
+                Tab(
+                    selected = state.type == Types.BROADBAND,
+                    onClick = { onType(Types.BROADBAND) },
+                    text = { Text(stringResource(R.string.tab_broadband)) },
+                )
+                Tab(
+                    selected = state.type == Types.CELLULAR,
+                    onClick = { onType(Types.CELLULAR) },
+                    text = { Text(stringResource(R.string.tab_cellular)) },
+                )
+            }
             OutlinedTextField(
                 value = state.query,
                 onValueChange = onQuery,
@@ -117,38 +132,48 @@ fun HomeScreen(
                         onBudget(if (state.maxMonthly == 500_000L) null else 500_000L)
                     }, label = { Text(stringResource(R.string.budget_500)) },
                 )
-                FilterChip(
-                    selected = state.minSpeed == 50, onClick = {
-                        onSpeed(if (state.minSpeed == 50) null else 50)
-                    }, label = { Text(stringResource(R.string.speed_50)) },
-                )
-                FilterChip(
-                    selected = state.minSpeed == 100, onClick = {
-                        onSpeed(if (state.minSpeed == 100) null else 100)
-                    }, label = { Text(stringResource(R.string.speed_100)) },
-                )
+                if (state.type == Types.BROADBAND) {
+                    FilterChip(
+                        selected = state.minSpeed == 50, onClick = {
+                            onSpeed(if (state.minSpeed == 50) null else 50)
+                        }, label = { Text(stringResource(R.string.speed_50)) },
+                    )
+                    FilterChip(
+                        selected = state.minSpeed == 100, onClick = {
+                            onSpeed(if (state.minSpeed == 100) null else 100)
+                        }, label = { Text(stringResource(R.string.speed_100)) },
+                    )
+                }
                 FilterChip(
                     selected = state.sort == Sorts.CHEAPEST, onClick = { onSort(Sorts.CHEAPEST) },
                     label = { Text(stringResource(R.string.sort_cheapest)) },
                 )
-                FilterChip(
-                    selected = state.sort == Sorts.VALUE, onClick = { onSort(Sorts.VALUE) },
-                    label = { Text(stringResource(R.string.sort_value)) },
-                )
+                if (state.type == Types.BROADBAND) {
+                    FilterChip(
+                        selected = state.sort == Sorts.VALUE, onClick = { onSort(Sorts.VALUE) },
+                        label = { Text(stringResource(R.string.sort_value)) },
+                    )
+                }
                 FilterChip(
                     selected = state.sort == Sorts.FASTEST, onClick = { onSort(Sorts.FASTEST) },
                     label = { Text(stringResource(R.string.sort_fastest)) },
                 )
             }
-            if (state.isps.isNotEmpty()) {
+            val tabIsps = remember(state.isps, state.type) {
+                state.isps.filter {
+                    (state.type == Types.CELLULAR && it.category == "cellular") ||
+                        (state.type != Types.CELLULAR && it.category != "cellular")
+                }
+            }
+            if (tabIsps.isNotEmpty()) {
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    state.isps.forEach { isp ->
+                    tabIsps.forEach { isp ->
                         FilterChip(
-                            selected = isp in state.ispIds, onClick = { onToggleIsp(isp) },
-                            label = { Text(isp) },
+                            selected = isp.id in state.ispIds, onClick = { onToggleIsp(isp.id) },
+                            label = { Text(isp.name) },
                         )
                     }
                 }

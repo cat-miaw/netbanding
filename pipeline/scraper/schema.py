@@ -20,7 +20,7 @@ class Package(BaseModel):
     quota_mb: int | None = None
     validity_days: int | None = None
     contract_months: int | None = None
-    base_price: int = Field(ge=100_000, le=2_000_000)
+    base_price: int = Field(ge=5_000, le=2_000_000)
     tax_inclusive: bool  # required, never guessed
     device_rental_fee: int = Field(ge=0, default=0)
     install_fee: int | None = Field(default=None, ge=0, le=2_000_000)

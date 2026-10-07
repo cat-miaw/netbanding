@@ -24,6 +24,7 @@ class PackageRepository(
 ) {
     fun observePackages(
         region: String = "JAVA_ALL",
+        type: String? = null,
         maxMonthly: Long? = null,
         minSpeed: Int? = null,
         query: String? = null,
@@ -31,7 +32,7 @@ class PackageRepository(
         sort: String = "cheapest",
     ): Flow<List<Package>> =
         db.packageDao().observePackages(
-            region, maxMonthly, minSpeed, query?.takeIf { it.isNotBlank() },
+            region, type, maxMonthly, minSpeed, query?.takeIf { it.isNotBlank() },
             ispIds.toList(), ispIds.size, sort,
         )
             .map { rows -> rows.map { it.toDomain() } }

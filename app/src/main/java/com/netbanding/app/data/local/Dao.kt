@@ -12,7 +12,10 @@ data class PackageWithIsp(
     val isp_id: String,
     val isp_name: String,
     val name: String,
+    val type: String,
     val speed_mbps: Int?,
+    val quota_mb: Int?,
+    val validity_days: Int?,
     val base_price: Long,
     val tax_inclusive: Boolean,
     val device_rental_fee: Long,
@@ -28,7 +31,8 @@ interface PackageDao {
     /** Filtering/sorting in SQL per blueprint rule 6. Region join handles JAVA_ALL. */
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.speed_mbps, p.base_price,
+        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+               p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at,
                (f.package_id IS NOT NULL) AS is_favorite
@@ -37,6 +41,7 @@ interface PackageDao {
         LEFT JOIN favorites f ON f.package_id = p.id
         LEFT JOIN package_regions r ON r.package_id = p.id
         WHERE p.is_active = 1
+          AND (:type IS NULL OR p.type = :type)
           AND (:region = 'JAVA_ALL' OR r.region_code = :region OR r.region_code = 'JAVA_ALL')
           AND (:maxMonthly IS NULL OR p.monthly_total <= :maxMonthly)
           AND (:minSpeed IS NULL OR p.speed_mbps >= :minSpeed)
@@ -53,6 +58,7 @@ interface PackageDao {
     )
     fun observePackages(
         region: String,
+        type: String?,
         maxMonthly: Long?,
         minSpeed: Int?,
         query: String?,
@@ -90,7 +96,8 @@ interface PackageDao {
 
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.speed_mbps, p.base_price,
+        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+               p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at, 1 AS is_favorite
         FROM packages p
@@ -104,7 +111,8 @@ interface PackageDao {
 
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.speed_mbps, p.base_price,
+        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+               p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at,
                (f.package_id IS NOT NULL) AS is_favorite

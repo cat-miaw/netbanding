@@ -124,5 +124,110 @@
       "tax_inclusive": false,
       "recorded_at": "2026-10-07T00:00:00Z"
     }
+  ],
+  "telkomsel-seru-harian-55gb": [
+    {
+      "price": 20000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-harian-10gb": [
+    {
+      "price": 30000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-harian-15gb": [
+    {
+      "price": 42000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-mingguan-5gb": [
+    {
+      "price": 31000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-mingguan-10gb": [
+    {
+      "price": 40000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-mingguan-20gb": [
+    {
+      "price": 50000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-bulanan-6gb": [
+    {
+      "price": 55000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-bulanan-15gb": [
+    {
+      "price": 110000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-flex-s": [
+    {
+      "price": 37000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-flex-m": [
+    {
+      "price": 50000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-flex-l": [
+    {
+      "price": 70000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-flex-xl": [
+    {
+      "price": 100000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-vip-20gb": [
+    {
+      "price": 100000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-combo-vip-52gb": [
+    {
+      "price": 195000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-xtra-kuota-2gb": [
+    {
+      "price": 5600,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
   ]
 }

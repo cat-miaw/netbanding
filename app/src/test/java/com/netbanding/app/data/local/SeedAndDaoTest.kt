@@ -26,20 +26,30 @@ class SeedAndDaoTest {
     @Test fun seedImporter_loads18Packages() = runTest {
         val ok = SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         assertTrue(ok)
-        assertEquals(18, db.packageDao().activeCount())
+        assertEquals(33, db.packageDao().activeCount())
     }
 
     @Test fun sqlSort_cheapestFirst_andBudgetFilter() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
-        val all = dao.observePackages("JAVA_ALL", null, null, null, emptyList(), 0, "cheapest").first()
-        assertEquals(18, all.size)
+        val all = dao.observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, "cheapest").first()
+        assertEquals(33, all.size)
         val totals = all.map { it.monthly_total }
         assertEquals(totals.sorted(), totals)
-        // Cheapest = FirstMedia Starter: 185_000 * 1.11 = 205_350 + install not monthly
-        assertEquals(205_350, totals.first())
-        val budget = dao.observePackages("JAVA_ALL", 300_000, null, null, emptyList(), 0, "cheapest").first()
+        // Cheapest overall = XL Xtra Kuota 2GB: Rp5.600 incl. PPN.
+        assertEquals(5_600, totals.first())
+        val budget = dao.observePackages("JAVA_ALL", null, 300_000, null, null, emptyList(), 0, "cheapest").first()
         assertTrue(budget.isNotEmpty() && budget.all { it.monthly_total <= 300_000 })
+    }
+
+    @Test fun typeFilter_broadbandVsCellular() = runTest {
+        SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
+        val dao = db.packageDao()
+        val bb = dao.observePackages("JAVA_ALL", "broadband", null, null, null, emptyList(), 0, "cheapest").first()
+        val cell = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, "cheapest").first()
+        assertEquals(18, bb.size)
+        assertEquals(15, cell.size)
+        assertTrue(cell.all { it.monthly_total >= 5_000 })
     }
 
     @Test fun history_seededWithInitialPoint() = runTest {

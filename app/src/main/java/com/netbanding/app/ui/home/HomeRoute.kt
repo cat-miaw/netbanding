@@ -25,6 +25,7 @@ fun HomeRoute(
         onSort = viewModel::setSort,
         onToggleIsp = viewModel::toggleIsp,
         onToggleFavorite = viewModel::toggleFavorite,
+        onType = viewModel::setType,
         onHistory = viewModel::history,
         onRefresh = viewModel::refresh,
         onOpenSettings = onOpenSettings,

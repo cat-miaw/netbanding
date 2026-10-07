@@ -208,7 +208,7 @@ price_per_mbps  = monthly_total / speed_mbps       (only if speed known)
 2. **Clean**: strip scripts/nav/footer, convert to compact text, compute SHA-256. If hash equals last run's, **skip LLM** (saves cost, avoids drift).
 3. **Extract** with DeepSeek: `temperature=0`, JSON output, schema from `schema.py`.
 4. **Validate** with Pydantic + sanity rules:
-   - broadband `base_price` 100,000-2,000,000; `speed_mbps` 5-2000; `install_fee` 0-2,000,000
+   - broadband `base_price` 100,000-2,000,000; cellular `base_price` 5,000-500,000; `speed_mbps` 5-2000 (broadband only); `install_fee` 0-2,000,000
    - `tax_inclusive` must be non-null; `id` must match slug pattern
    - Reject output that includes fields not in the schema
 5. **Diff** vs `data/catalog.json`. Mark **needs-review** if: price change > 30%, `tax_inclusive` flipped, speed changed, package count for an ISP drops > 30%, or any validation failure.

@@ -26,6 +26,18 @@ isps:
     pages:
       - url: https://www.firstmediapromo.com/promo-first-media/
         mode: static
+  - id: telkomsel
+    note: "SERU packs, PPN-inclusive. Hand-curated seed; site is JS-heavy."
+    extract: manual
+    pages:
+      - url: https://www.telkomsel.com/en/paket/seruinternet
+        mode: static
+  - id: xl
+    note: "Xtra Combo/Flex packs, PPN-inclusive per XL T&C. Hand-curated seed; promo prices (e.g. 2GB Rp5.600) change often, re-verify each cycle."
+    extract: manual
+    pages:
+      - url: https://www.xl.co.id/produk/paket-dan-addon/xtra-combo-flex
+        mode: static
 settings:
   ppn_rate: 0.11
   deactivate_after_misses: 3

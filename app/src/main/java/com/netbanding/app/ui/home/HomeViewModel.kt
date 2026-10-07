@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,14 +26,22 @@ object Sorts {
     const val FASTEST = "fastest"
 }
 
+object Types {
+    const val BROADBAND = "broadband"
+    const val CELLULAR = "cellular"
+}
+
 enum class SyncStatus { IDLE, SYNCING, FAILED }
+
+data class IspOption(val id: String, val name: String, val category: String)
 
 /** Filters survive rotation + process death via SavedStateHandle; region persists in DataStore. */
 data class HomeUiState(
     val isLoading: Boolean = true,
     val items: List<Package> = emptyList(),
-    val isps: List<String> = emptyList(),
+    val isps: List<IspOption> = emptyList(),
     val query: String = "",
+    val type: String = Types.BROADBAND,
     val maxMonthly: Long? = null,
     val minSpeed: Int? = null,
     val ispIds: Set<String> = emptySet(),
@@ -57,6 +64,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val query = savedState.getStateFlow("q", "")
+    private val tab = savedState.getStateFlow("tab", Types.BROADBAND)
     private val maxMonthly = savedState.getStateFlow("max", -1L)
     private val minSpeed = savedState.getStateFlow("spd", -1)
     private val sort = savedState.getStateFlow("sort", Sorts.CHEAPEST)
@@ -66,42 +74,54 @@ class HomeViewModel(
     private val syncStatus = MutableStateFlow(SyncStatus.IDLE)
     private val updateApp = MutableStateFlow(false)
 
-    private data class Keys5(val region: String, val q: String, val max: Long, val spd: Int, val sort: String)
-    private data class Keys(val k5: Keys5, val isps: Set<String>)
+    private data class Keys(
+        val region: String, val q: String, val type: String,
+        val max: Long, val spd: Int, val sort: String, val isps: Set<String>,
+    )
 
     private val keys: kotlinx.coroutines.flow.Flow<Keys> = combine(
-        prefs.region, query, maxMonthly, minSpeed, sort,
-    ) { r, q, m, sp, so -> Keys5(r as String, q as String, m as Long, sp as Int, so as String) }
-        .combine(ispIds) { k5, isps -> Keys(k5, isps) }
+        combine(prefs.region, query, tab) { r, q, t -> Triple(r, q, t) },
+        combine(maxMonthly, minSpeed, sort) { m, sp, so -> Triple(m, sp, so) },
+        ispIds,
+    ) { a, b, isps ->
+        Keys(
+            region = a.first, q = a.second, type = a.third,
+            max = b.first, spd = b.second, sort = b.third, isps = isps,
+        )
+    }
 
     val uiState: StateFlow<HomeUiState> = combine(
-        keys.flatMapLatest { (k5, isps) ->
+        keys.flatMapLatest { k ->
+            // Speed filter is meaningless for cellular (speeds unstated); drop it there.
+            val spd = k.spd.takeIf { it > 0 && k.type == Types.BROADBAND }
+            val effectiveSort =
+                if (k.type == Types.CELLULAR && k.sort == Sorts.VALUE) Sorts.CHEAPEST else k.sort
             combine(
                 repository.observePackages(
-                    region = k5.region,
-                    maxMonthly = k5.max.takeIf { it > 0 },
-                    minSpeed = k5.spd.takeIf { it > 0 },
-                    query = k5.q,
-                    ispIds = isps,
-                    sort = k5.sort,
+                    region = k.region,
+                    type = k.type,
+                    maxMonthly = k.max.takeIf { it > 0 },
+                    minSpeed = spd,
+                    query = k.q,
+                    ispIds = k.isps,
+                    sort = effectiveSort,
                 ),
                 repository.observeIsps(),
             ) { items, ispList ->
-                Triple(items, ispList.map { it.id }, k5 to isps)
+                Triple(items, ispList.map { IspOption(it.id, it.name, it.category) }, k)
             }
         },
         syncStatus,
         updateApp,
         prefs.syncState,
     ) { data, status, needUpdate, syncState ->
-        val (items, ispList, keysNow) = data
-        val (k5, isps) = keysNow
+        val (items, ispList, k) = data
         HomeUiState(
             isLoading = false, items = items,
             isps = ispList,
-            query = k5.q, maxMonthly = k5.max.takeIf { it > 0 },
-            minSpeed = k5.spd.takeIf { it > 0 },
-            ispIds = isps, sort = k5.sort, region = k5.region,
+            query = k.q, type = k.type, maxMonthly = k.max.takeIf { it > 0 },
+            minSpeed = k.spd.takeIf { it > 0 },
+            ispIds = k.isps, sort = k.sort, region = k.region,
             syncStatus = status,
             lastUpdated = syncState.generatedAt,
             showStale = isStale(syncState.generatedAt),
@@ -122,7 +142,7 @@ class HomeViewModel(
         if (syncStatus.value == SyncStatus.SYNCING) return
         viewModelScope.launch {
             syncStatus.value = SyncStatus.SYNCING
-            when (val r = sync.sync()) {
+            when (sync.sync()) {
                 is SyncResult.Updated -> {
                     updateApp.value = false
                     syncStatus.value = SyncStatus.IDLE
@@ -142,6 +162,12 @@ class HomeViewModel(
     }
 
     fun setQuery(q: String) { savedState["q"] = q }
+    fun setType(t: String) {
+        savedState["tab"] = t
+        // ISP selection rarely carries across types; reset it on tab switch.
+        ispIds.value = emptySet()
+        savedState["isps"] = ArrayList<String>()
+    }
     fun setBudget(max: Long?) { savedState["max"] = max ?: -1L }
     fun setMinSpeed(spd: Int?) { savedState["spd"] = spd ?: -1 }
     fun setSort(s: String) { savedState["sort"] = s }
