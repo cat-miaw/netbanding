@@ -42,11 +42,13 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 1. **Manual DI, not Hilt** (blueprint D6 amended 2026-10-07): cold start <2s
    on 2 GB devices matters more than DI fashion. All deps `by lazy`.
 2. **No chart dependency**: custom Canvas step-line for price history.
-3. **MyRepublic + XL = `manual` sources** (JS shells): hand-curated seed,
-   pipeline skips them. Biznet = DeepSeek LLM. FirstMedia + Telkomsel =
-   deterministic regex parsers (no LLM, $0). Telkomsel `keep`s its SERU packs
-   (different page, still curated); express-purchase is number-gated, out of scope.
-   FirstMedia summary table is stale — trust numbered blocks 1A-3C.
+3. **MyRepublic = `manual` source** (JS shell): hand-curated seed,
+   pipeline skips it. Biznet = DeepSeek LLM. FirstMedia, Telkomsel, XL =
+   deterministic regex/JSON parsers (no LLM, $0). Telkomsel `keep`s its SERU
+   packs (different page, still curated); XL `keep`s its Flex/VIP packs
+   (ULTRA 5G+ family page is the automated one). Express-purchase flows are
+   number-gated, out of scope. FirstMedia summary table is stale — trust
+   numbered blocks 1A-3C.
 4. **Evidence must be verbatim** (`verify_evidence`): LLM quotes are checked
    as substrings of page text. Fabricated evidence → validation failure →
    review PR. This caught real hallucinations (Biznet PPN/install quotes).
@@ -89,8 +91,8 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 
 ## Current state (2026-10-07)
 
-- Data v7, 33 packages: Biznet 4, MyRepublic 5, FirstMedia 9 broadband;
-  Telkomsel 8 + XL 7 cellular. App + pipeline + Pages deploy all live.
+- Data v10+, 47 packages: Biznet 4, MyRepublic 5, FirstMedia 9 broadband;
+  Telkomsel 14 + XL 15 cellular. App + pipeline + Pages deploy all live.
 - v1.1 shipped: favorites, compare (max 3, best-value highlights),
   price-drop alerts, cellular tab. 22 JVM tests + 13 pytest, all green.
 - Release AAB 3.74 MB (< 8 MB). Baseline Profile NOT yet generated
