@@ -9,6 +9,7 @@ fun PackageWithIsp.toDomain(): Package {
         id = id,
         ispId = isp_id,
         ispName = isp_name,
+        ispWebsite = isp_website,
         name = name,
         type = type,
         speedMbps = speed_mbps,

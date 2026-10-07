@@ -19,7 +19,7 @@
       "name": "First Media",
       "category": "broadband",
       "logo_asset": "ic_isp_firstmedia",
-      "website_url": "https://firstmedia.com"
+      "website_url": "https://firstmedia-tv.id/"
     },
     {
       "id": "telkomsel",
@@ -130,34 +130,9 @@
       "updated_at": "2026-10-07T02:00:00Z"
     },
     {
-      "id": "firstmedia-extreme-1000",
-      "isp_id": "firstmedia",
-      "name": "Internet Only Extreme",
-      "type": "broadband",
-      "speed_mbps": 1000,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": null,
-      "base_price": 900000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 0,
-      "fup_note": null,
-      "promo_note": null,
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
       "id": "firstmedia-family-350",
       "isp_id": "firstmedia",
-      "name": "Internet Only Family",
+      "name": "Internet 350 Mbps",
       "type": "broadband",
       "speed_mbps": 350,
       "quota_mb": null,
@@ -168,71 +143,46 @@
       "device_rental_fee": 0,
       "install_fee": 0,
       "fup_note": null,
-      "promo_note": null,
+      "promo_note": "Speed Booster 150 Mbps menjadi 350 Mbps.",
       "regions": [
         "ID-JK",
         "ID-JB",
         "ID-BT"
       ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
+      "source_url": "https://firstmedia-tv.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
     },
     {
-      "id": "firstmedia-joy-pro-150",
+      "id": "firstmedia-internet-400",
       "isp_id": "firstmedia",
-      "name": "Combo Joy Pro",
+      "name": "Internet 400 Mbps",
       "type": "broadband",
-      "speed_mbps": 150,
+      "speed_mbps": 400,
       "quota_mb": null,
       "validity_days": null,
-      "contract_months": 12,
-      "base_price": 425000,
+      "contract_months": null,
+      "base_price": 300000,
       "tax_inclusive": false,
       "device_rental_fee": 0,
       "install_fee": 0,
       "fup_note": null,
-      "promo_note": "Kontrak 12 bulan; penalti Rp1jt bila berhenti sebelum 12 bulan.",
+      "promo_note": "Speed Booster 300 Mbps menjadi 400 Mbps.",
       "regions": [
         "ID-JK",
         "ID-JB",
         "ID-BT"
       ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
+      "source_url": "https://firstmedia-tv.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
-      "id": "firstmedia-joy-value-100",
-      "isp_id": "firstmedia",
-      "name": "Combo Joy Value",
-      "type": "broadband",
-      "speed_mbps": 100,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": 12,
-      "base_price": 350000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 0,
-      "fup_note": null,
-      "promo_note": "Kontrak 12 bulan; penalti Rp1jt bila berhenti sebelum 12 bulan.",
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
     },
     {
       "id": "firstmedia-smart-250",
       "isp_id": "firstmedia",
-      "name": "Internet Only Smart",
+      "name": "Internet 250 Mbps",
       "type": "broadband",
       "speed_mbps": 250,
       "quota_mb": null,
@@ -243,116 +193,16 @@
       "device_rental_fee": 0,
       "install_fee": 0,
       "fup_note": null,
-      "promo_note": null,
+      "promo_note": "Speed Booster 100 Mbps menjadi 250 Mbps.",
       "regions": [
         "ID-JK",
         "ID-JB",
         "ID-BT"
       ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
+      "source_url": "https://firstmedia-tv.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
-      "id": "firstmedia-star-value-300",
-      "isp_id": "firstmedia",
-      "name": "Combo Star Value",
-      "type": "broadband",
-      "speed_mbps": 300,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": 12,
-      "base_price": 985000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 0,
-      "fup_note": null,
-      "promo_note": "Kontrak 12 bulan; penalti Rp1jt bila berhenti sebelum 12 bulan.",
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
-      "id": "firstmedia-starter-20",
-      "isp_id": "firstmedia",
-      "name": "Internet Only Starter",
-      "type": "broadband",
-      "speed_mbps": 20,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": null,
-      "base_price": 185000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 111000,
-      "fup_note": null,
-      "promo_note": null,
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
-      "id": "firstmedia-superuser-350",
-      "isp_id": "firstmedia",
-      "name": "Internet Only Superuser",
-      "type": "broadband",
-      "speed_mbps": 350,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": null,
-      "base_price": 300000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 0,
-      "fup_note": null,
-      "promo_note": null,
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
-    },
-    {
-      "id": "firstmedia-ultraspeed-600",
-      "isp_id": "firstmedia",
-      "name": "Internet Ultra Speed",
-      "type": "broadband",
-      "speed_mbps": 600,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": null,
-      "base_price": 500000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": 0,
-      "fup_note": null,
-      "promo_note": null,
-      "regions": [
-        "ID-JK",
-        "ID-JB",
-        "ID-BT"
-      ],
-      "source_url": "https://www.firstmediapromo.com/promo-first-media/",
-      "is_active": true,
-      "last_verified_at": "2026-10-07T05:49:40Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
     },
     {
       "id": "myrepublic-nexus-300",
@@ -811,8 +661,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-150gb-28d",
@@ -834,8 +684,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-400gb-400gb-5g-28d",
@@ -851,14 +701,14 @@
       "device_rental_fee": 0,
       "install_fee": null,
       "fup_note": null,
-      "promo_note": "Termasuk bonus kuota 5G.",
+      "promo_note": "Bonus kuota 5G.",
       "regions": [
         "JAVA_ALL"
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-600gb-600gb-5g-28d",
@@ -874,14 +724,14 @@
       "device_rental_fee": 0,
       "install_fee": null,
       "fup_note": null,
-      "promo_note": "Termasuk bonus kuota 5G.",
+      "promo_note": "Bonus kuota 5G.",
       "regions": [
         "JAVA_ALL"
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-65gb-28d",
@@ -903,8 +753,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-150gb-14d",
@@ -926,8 +776,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-14d",
@@ -949,8 +799,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-7d",
@@ -972,8 +822,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-l",

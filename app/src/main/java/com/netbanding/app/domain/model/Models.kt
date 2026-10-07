@@ -15,6 +15,7 @@ data class Package(
     val id: String,
     val ispId: String,
     val ispName: String,
+    val ispWebsite: String,
     val name: String,
     val type: String = "broadband",
     val speedMbps: Int?,

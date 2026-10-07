@@ -78,7 +78,7 @@ fun PackageDetailSheet(
         cost.pricePerMbps?.let { Text(stringResource(R.string.per_mbps, formatIdr(it))) }
         HistorySection(history)
         Text(stringResource(R.string.disclaimer), style = MaterialTheme.typography.bodySmall)
-        Button(onClick = { uri.openUri(pkg.sourceUrl) }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = { uri.openUri(pkg.ispWebsite) }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.open_provider))
         }
         OutlinedButton(

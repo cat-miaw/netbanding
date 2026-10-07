@@ -62,69 +62,6 @@
       "recorded_at": "2026-10-07T00:00:00Z"
     }
   ],
-  "firstmedia-starter-20": [
-    {
-      "price": 185000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-smart-250": [
-    {
-      "price": 229000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-family-350": [
-    {
-      "price": 279000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-superuser-350": [
-    {
-      "price": 300000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-ultraspeed-600": [
-    {
-      "price": 500000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-extreme-1000": [
-    {
-      "price": 900000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-joy-value-100": [
-    {
-      "price": 350000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-joy-pro-150": [
-    {
-      "price": 425000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
-  "firstmedia-star-value-300": [
-    {
-      "price": 985000,
-      "tax_inclusive": false,
-      "recorded_at": "2026-10-07T00:00:00Z"
-    }
-  ],
   "telkomsel-seru-harian-55gb": [
     {
       "price": 20000,
@@ -325,6 +262,27 @@
     {
       "price": 100000,
       "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-smart-250": [
+    {
+      "price": 229000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-family-350": [
+    {
+      "price": 279000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-internet-400": [
+    {
+      "price": 300000,
+      "tax_inclusive": false,
       "recorded_at": "2026-10-07T00:00:00Z"
     }
   ]
