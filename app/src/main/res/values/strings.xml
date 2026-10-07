@@ -9,6 +9,7 @@
     <string name="speed_50">Min. 50 Mbps</string>
     <string name="speed_100">Min. 100 Mbps</string>
     <string name="sort_cheapest">Termurah</string>
+    <string name="sort_pergb">Per GB termurah</string>
     <string name="sort_value">Harga/Mbps terbaik</string>
     <string name="sort_fastest">Terkencang</string>
     <string name="onboarding_title">Pilih wilayah Anda</string>

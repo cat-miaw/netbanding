@@ -24,6 +24,7 @@ object Sorts {
     const val CHEAPEST = "cheapest"
     const val VALUE = "value"
     const val FASTEST = "fastest"
+    const val PERGB = "pergb"
 }
 
 object Types {
@@ -94,8 +95,11 @@ class HomeViewModel(
         keys.flatMapLatest { k ->
             // Speed filter is meaningless for cellular (speeds unstated); drop it there.
             val spd = k.spd.takeIf { it > 0 && k.type == Types.BROADBAND }
-            val effectiveSort =
-                if (k.type == Types.CELLULAR && k.sort == Sorts.VALUE) Sorts.CHEAPEST else k.sort
+            val effectiveSort = when {
+                k.type == Types.CELLULAR && (k.sort == Sorts.VALUE || k.sort == Sorts.FASTEST) -> Sorts.CHEAPEST
+                k.type == Types.BROADBAND && k.sort == Sorts.PERGB -> Sorts.CHEAPEST
+                else -> k.sort
+            }
             combine(
                 repository.observePackages(
                     region = k.region,

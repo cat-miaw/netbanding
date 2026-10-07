@@ -52,6 +52,15 @@ class SeedAndDaoTest {
         assertTrue(cell.all { it.monthly_total >= 5_000 })
     }
 
+    @Test fun perGbSort_ordersByPricePerQuota() = runTest {
+        SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
+        val dao = db.packageDao()
+        val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, "pergb").first()
+        assertEquals(15, rows.size)
+        val ratios = rows.map { it.monthly_total.toDouble() / (it.quota_mb ?: 1) }
+        assertEquals(ratios.sorted(), ratios)
+    }
+
     @Test fun history_seededWithInitialPoint() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val pts = db.packageDao().observeHistory("biznet-home-150").first()

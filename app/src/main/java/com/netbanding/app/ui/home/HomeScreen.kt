@@ -154,6 +154,12 @@ fun HomeScreen(
                         label = { Text(stringResource(R.string.sort_value)) },
                     )
                 }
+                if (state.type == Types.CELLULAR) {
+                    FilterChip(
+                        selected = state.sort == Sorts.PERGB, onClick = { onSort(Sorts.PERGB) },
+                        label = { Text(stringResource(R.string.sort_pergb)) },
+                    )
+                }
                 FilterChip(
                     selected = state.sort == Sorts.FASTEST, onClick = { onSort(Sorts.FASTEST) },
                     label = { Text(stringResource(R.string.sort_fastest)) },

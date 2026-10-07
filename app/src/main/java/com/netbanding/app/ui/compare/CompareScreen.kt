@@ -56,6 +56,9 @@ fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modi
             val cheapest = items.minOf { it.monthlyTotal }
             val fastest = items.mapNotNull { it.speedMbps }.maxOrNull()
             val bestValue = items.mapNotNull { it.pricePerMbps }.minOrNull()
+            val bestPerGb = items.mapNotNull { p ->
+                p.quotaMb?.takeIf { it > 0 }?.let { p.monthlyTotal.toDouble() / it }
+            }.minOrNull()
             val unknownShort = stringResource(R.string.install_unknown_short)
             val ppnYes = stringResource(R.string.compare_included)
             val ppnNo = stringResource(R.string.compare_excluded)
@@ -101,7 +104,11 @@ fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modi
                 item {
                     CompareRow(stringResource(R.string.compare_quota), items,
                         { it.quotaMb?.let(::formatQuota) ?: "-" },
-                        { false })
+                        { p ->
+                            p.quotaMb?.takeIf { it > 0 }
+                                ?.let { p.monthlyTotal.toDouble() / it } == bestPerGb &&
+                                bestPerGb != null
+                        })
                 }
                 item {
                     CompareRow(stringResource(R.string.compare_validity), items,

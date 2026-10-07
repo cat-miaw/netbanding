@@ -53,6 +53,8 @@ interface PackageDao {
           CASE WHEN :sort = 'fastest' THEN p.speed_mbps END DESC,
           CASE WHEN :sort = 'value' THEN
             CASE WHEN p.speed_mbps > 0 THEN CAST(p.monthly_total AS REAL) / p.speed_mbps END END ASC,
+          CASE WHEN :sort = 'pergb' THEN
+            CASE WHEN p.quota_mb > 0 THEN CAST(p.monthly_total AS REAL) / p.quota_mb END END ASC,
           p.monthly_total ASC
         """,
     )

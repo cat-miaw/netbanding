@@ -26,6 +26,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 fun formatQuota(quotaMb: Int): String {
+    if (quotaMb % 1024 == 0) return "${quotaMb / 1024} GB"
     val gb = quotaMb / 1024.0
     val s = NumberFormat.getNumberInstance(Locale("id", "ID")).format(gb)
         .trimEnd('0').trimEnd(',')
