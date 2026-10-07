@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "data_version": 1,
+  "generated_at": "2026-10-07T03:45:42Z",
+  "ppn_rate": 0.11,
+  "files": {
+    "catalog": {
+      "path": "catalog.json",
+      "sha256": "342b5f654ca7b5cff8b77c93ab56197c9258584009686ce7cb7ba0167f931b37",
+      "bytes": 9352
+    },
+    "history": {
+      "path": "history.json",
+      "sha256": "80253ff3c037fb51e484bdf37d9ab039ff2075b173229efd0b4f3b6f6e45e53c",
+      "bytes": 2687
+    }
+  }
+}

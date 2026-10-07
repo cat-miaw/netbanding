@@ -1,0 +1,142 @@
+"""Weekly orchestrator. Per-ISP isolation: one broken page never blocks others.
+Failed/empty extractions keep previous data (only last_verified_at goes stale).
+
+First run: use --fetch-only to baseline page hashes with zero LLM cost and
+zero data changes. Real extraction needs DEEPSEEK_API_KEY.
+"""
+import argparse
+import json
+import os
+from datetime import datetime, timezone
+
+import yaml
+
+from scraper.checks import validate_catalog, validate_package
+from scraper.clean import clean, content_hash
+from scraper.diff import classify
+from scraper.extract import DeepSeekExtractor, make_id
+from scraper.fetch import fetch
+from scraper.publish import publish
+from scraper.schema import Catalog
+
+STATE_DIR = "pipeline/state"
+RUNS_DIR = "pipeline/runs"
+REVIEW_FILE = "pipeline/review.json"
+DEACTIVATE_AFTER_MISSES = 3
+
+
+def _load(path: str, default):
+    try:
+        return json.load(open(path))
+    except FileNotFoundError:
+        return default
+
+
+def _save(path: str, data) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    json.dump(data, open(path, "w"), indent=2)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fetch-only", action="store_true")
+    ap.add_argument("--isp", default=None)
+    args = ap.parse_args()
+
+    sources = yaml.safe_load(open("pipeline/sources.yaml"))
+    catalog = validate_catalog(json.load(open("data/catalog.json")))
+    history = json.load(open("data/history.json"))
+    hashes: dict = _load(f"{STATE_DIR}/hashes.json", {})
+    misses: dict = _load(f"{STATE_DIR}/misses.json", {})
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    run_log: dict = {"date": today, "fetch_only": args.fetch_only, "isps": {}}
+    review: dict = {"needs_review": False, "items": []}
+    extractor = DeepSeekExtractor()
+
+    for isp in sources["isps"]:
+        if args.isp and isp["id"] != args.isp:
+            continue
+        log: dict = {"status": "ok", "pages": 0, "tokens": 0, "changed": []}
+        try:
+            texts = []
+            for page in isp["pages"]:
+                texts.append(fetch(page["url"], page.get("mode", "static")))
+                log["pages"] += 1
+        except Exception as e:  # noqa: BLE001 - isolate per ISP
+            log.update(status="fetch_failed", error=str(e))
+            run_log["isps"][isp["id"]] = log
+            continue
+        text = clean("\n".join(texts))
+        h = content_hash(text)
+        if hashes.get(isp["id"]) == h:
+            log["status"] = "unchanged_skip"
+            run_log["isps"][isp["id"]] = log
+            continue
+        hashes[isp["id"]] = h
+        if args.fetch_only or not os.environ.get("DEEPSEEK_API_KEY"):
+            log["status"] = "baseline_no_llm" if args.fetch_only else "skipped_no_key"
+            run_log["isps"][isp["id"]] = log
+            continue
+        try:
+            out = extractor.extract(text)
+        except Exception as e:  # noqa: BLE001 - keep previous data
+            log.update(status="extract_failed", error=str(e))
+            run_log["isps"][isp["id"]] = log
+            continue
+        log["tokens"] = out.get("tokens", 0)
+        log["evidence"] = out.get("evidence", {})
+        pkgs, errs = [], []
+        for i, raw in enumerate(out.get("packages", [])):
+            raw = dict(raw)
+            raw["id"] = make_id(isp["id"], raw.pop("product", f"plan-{i}"), raw.get("speed_mbps"))
+            raw.setdefault("regions", ["JAVA_ALL"])
+            raw.setdefault("source_url", isp["pages"][0]["url"])
+            raw.setdefault("last_verified_at", f"{today}T02:00:00Z")
+            raw.setdefault("updated_at", f"{today}T02:00:00Z")
+            pkg, e = validate_package(raw, isp["id"])
+            if pkg is None:
+                errs.append({"item": i, "errors": e})
+            else:
+                pkgs.append(pkg)
+        if errs:
+            log.update(status="validation_failed", errors=errs)
+            review["needs_review"] = True
+            review["items"].append({"isp": isp["id"], "reason": "validation", "errors": errs})
+            run_log["isps"][isp["id"]] = log
+            continue
+        old_isp = [p for p in catalog.packages if p.isp_id == isp["id"] and p.is_active]
+        seen = {p.id for p in pkgs}
+        for p in old_isp:
+            if p.id not in seen:
+                misses[p.id] = misses.get(p.id, 0) + 1
+                if misses[p.id] >= DEACTIVATE_AFTER_MISSES:
+                    d = p.model_dump()
+                    d["is_active"] = False
+                    pkgs.append(type(p)(**d))
+            else:
+                misses.pop(p.id, None)
+        result = classify(old_isp, pkgs)
+        log["changed"] = result["changed"]
+        if result["needs_review"]:
+            log.update(status="needs_review", reasons=result["reasons"])
+            review["needs_review"] = True
+            review["items"].append({"isp": isp["id"], "reasons": result["reasons"]})
+        else:
+            info = publish(catalog, isp["id"], pkgs, history)
+            catalog = validate_catalog(json.load(open("data/catalog.json")))
+            log.update(status="published", **info)
+        run_log["isps"][isp["id"]] = log
+
+    _save(f"{STATE_DIR}/hashes.json", hashes)
+    _save(f"{STATE_DIR}/misses.json", misses)
+    _save(f"{RUNS_DIR}/{today}.json", run_log)
+    if review["needs_review"]:
+        _save(REVIEW_FILE, review)
+    elif os.path.exists(REVIEW_FILE):
+        os.remove(REVIEW_FILE)
+    print(json.dumps({k: v.get("status") for k, v in run_log["isps"].items()}, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

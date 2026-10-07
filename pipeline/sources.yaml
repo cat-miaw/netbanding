@@ -1,0 +1,20 @@
+isps:
+  - id: biznet
+    note: "Ex-PPN prices; device rental 50rb/mo treated as final (verify vs PPN, blueprint Q2)."
+    pages:
+      - url: https://biznethome.net/product/packages
+        mode: static
+  - id: myrepublic
+    note: "Pricelist page lists PPN-inclusive prices; cross-check ex-PPN promo pages."
+    pages:
+      - url: https://www.myrepublic.co.id/pricelist
+        mode: static
+  - id: firstmedia
+    note: "CAUTION (Phase 4 review): seed data came from reseller promo site firstmediapromo.com; re-verify against official firstmedia.com before trusting."
+    pages:
+      - url: https://www.firstmediapromo.com/promo-first-media/
+        mode: static
+settings:
+  ppn_rate: 0.11
+  deactivate_after_misses: 3
+  review_price_change_pct: 30

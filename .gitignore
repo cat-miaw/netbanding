@@ -1,0 +1,18 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.hprof
+# Pipeline: per-run logs go to workflow artifacts, not the repo (evidence
+# quotes stay out of data/ per blueprint 4.6 either way).
+pipeline/runs/
+pipeline/state/*_tmp.json
+__pycache__/
+.pytest_cache/

@@ -1,0 +1,128 @@
+{
+  "biznet-home-50": [
+    {
+      "price": 250000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "biznet-home-150": [
+    {
+      "price": 375000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "biznet-home-250": [
+    {
+      "price": 575000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "biznet-gamers-300": [
+    {
+      "price": 700000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "myrepublic-velo-150": [
+    {
+      "price": 277500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "myrepublic-nexus-300": [
+    {
+      "price": 333000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "myrepublic-prime-500": [
+    {
+      "price": 555000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "myrepublic-wonder-750": [
+    {
+      "price": 721500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "myrepublic-ultra-1000": [
+    {
+      "price": 943500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-starter-20": [
+    {
+      "price": 185000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-smart-250": [
+    {
+      "price": 229000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-family-350": [
+    {
+      "price": 279000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-superuser-350": [
+    {
+      "price": 300000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-ultraspeed-600": [
+    {
+      "price": 500000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-extreme-1000": [
+    {
+      "price": 900000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-joy-value-100": [
+    {
+      "price": 350000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-joy-pro-150": [
+    {
+      "price": 425000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "firstmedia-star-value-300": [
+    {
+      "price": 985000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ]
+}
