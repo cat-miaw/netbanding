@@ -32,6 +32,15 @@
     <string name="unfavorite">Hapus favorit</string>
     <string name="favorites_title">Favorit</string>
     <string name="favorites_empty">Belum ada paket favorit. Ketuk ikon hati pada paket untuk menyimpannya.</string>
+    <string name="filter_all">Semua</string>
+    <string name="filter_sort">Urutkan</string>
+    <string name="filter_budget">Harga maks</string>
+    <string name="filter_speed">Kecepatan</string>
+    <string name="filter_period">Masa aktif</string>
+    <string name="filter_provider">Provider</string>
+    <string name="period_daily">Harian (1-6 hari)</string>
+    <string name="period_weekly">Mingguan (7-21 hari)</string>
+    <string name="period_monthly">Bulanan (>21 hari)</string>
     <string name="compare_title">Bandingkan</string>
     <string name="compare_empty">Pilih minimal 2 paket dari detail paket untuk membandingkan.</string>
     <string name="compare_clear">Hapus</string>

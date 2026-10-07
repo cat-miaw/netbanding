@@ -29,11 +29,12 @@ class PackageRepository(
         minSpeed: Int? = null,
         query: String? = null,
         ispIds: Set<String> = emptySet(),
+        periods: Set<String> = emptySet(),
         sort: String = "cheapest",
     ): Flow<List<Package>> =
         db.packageDao().observePackages(
             region, type, maxMonthly, minSpeed, query?.takeIf { it.isNotBlank() },
-            ispIds.toList(), ispIds.size, sort,
+            ispIds.toList(), ispIds.size, periods.toList(), periods.size, sort,
         )
             .map { rows -> rows.map { it.toDomain() } }
             .onStart { withContext(Dispatchers.IO) { seedImporter.importIfEmpty() } }

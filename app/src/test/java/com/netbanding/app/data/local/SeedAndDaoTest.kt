@@ -32,21 +32,21 @@ class SeedAndDaoTest {
     @Test fun sqlSort_cheapestFirst_andBudgetFilter() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
-        val all = dao.observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, "cheapest").first()
+        val all = dao.observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         assertEquals(33, all.size)
         val totals = all.map { it.monthly_total }
         assertEquals(totals.sorted(), totals)
         // Cheapest overall = XL Xtra Kuota 2GB: Rp5.600 incl. PPN.
         assertEquals(5_600, totals.first())
-        val budget = dao.observePackages("JAVA_ALL", null, 300_000, null, null, emptyList(), 0, "cheapest").first()
+        val budget = dao.observePackages("JAVA_ALL", null, 300_000, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         assertTrue(budget.isNotEmpty() && budget.all { it.monthly_total <= 300_000 })
     }
 
     @Test fun typeFilter_broadbandVsCellular() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
-        val bb = dao.observePackages("JAVA_ALL", "broadband", null, null, null, emptyList(), 0, "cheapest").first()
-        val cell = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, "cheapest").first()
+        val bb = dao.observePackages("JAVA_ALL", "broadband", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
+        val cell = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         assertEquals(18, bb.size)
         assertEquals(15, cell.size)
         assertTrue(cell.all { it.monthly_total >= 5_000 })
@@ -55,10 +55,21 @@ class SeedAndDaoTest {
     @Test fun perGbSort_ordersByPricePerQuota() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
-        val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, "pergb").first()
+        val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "pergb").first()
         assertEquals(15, rows.size)
         val ratios = rows.map { it.monthly_total.toDouble() / (it.quota_mb ?: 1) }
         assertEquals(ratios.sorted(), ratios)
+    }
+
+    @Test fun periodFilter_buckets() = runTest {
+        SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
+        val dao = db.packageDao()
+        val daily = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, listOf("daily"), 1, "cheapest").first()
+        assertTrue(daily.isNotEmpty() && daily.all { (it.validity_days ?: 99) <= 6 })
+        val weekly = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, listOf("weekly"), 1, "cheapest").first()
+        assertTrue(weekly.isNotEmpty() && weekly.all { (it.validity_days ?: 0) in 7..21 })
+        val both = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, listOf("daily", "weekly"), 2, "cheapest").first()
+        assertEquals(daily.size + weekly.size, both.size)
     }
 
     @Test fun history_seededWithInitialPoint() = runTest {

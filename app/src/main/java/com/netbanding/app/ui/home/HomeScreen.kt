@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -39,7 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.MultiSelectDropdown
 import com.netbanding.app.ui.components.PackageCard
+import com.netbanding.app.ui.components.SingleSelectDropdown
 import com.netbanding.app.ui.detail.PackageDetailSheet
 import java.text.NumberFormat
 import java.util.Locale
@@ -58,6 +60,9 @@ fun HomeScreen(
     onSort: (String) -> Unit,
     onType: (String) -> Unit,
     onToggleIsp: (String) -> Unit,
+    onSetIsps: (Set<String>) -> Unit,
+    onTogglePeriod: (String) -> Unit,
+    onSetPeriods: (Set<String>) -> Unit,
     onToggleFavorite: (Package) -> Unit,
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
     onRefresh: () -> Unit,
@@ -136,66 +141,100 @@ fun HomeScreen(
                             )
                         }
                         item(key = "filters", contentType = "header") {
+                            val sortOptions = if (isCellular) listOf(
+                                Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
+                                Sorts.PERGB to stringResource(R.string.sort_pergb),
+                            ) else listOf(
+                                Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
+                                Sorts.VALUE to stringResource(R.string.sort_value),
+                                Sorts.FASTEST to stringResource(R.string.sort_fastest),
+                            )
+                            val allLabel = stringResource(R.string.filter_all)
+                            val periodOptions = listOf(
+                                Periods.DAILY to stringResource(R.string.period_daily),
+                                Periods.WEEKLY to stringResource(R.string.period_weekly),
+                                Periods.MONTHLY to stringResource(R.string.period_monthly),
+                            )
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState())
                                     .padding(top = 8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                if (!isCellular) {
-                                    FilterChip(
-                                        selected = state.maxMonthly == 300_000L, onClick = {
-                                            onBudget(if (state.maxMonthly == 300_000L) null else 300_000L)
-                                        }, label = { Text(stringResource(R.string.budget_300)) },
-                                    )
-                                    FilterChip(
-                                        selected = state.maxMonthly == 500_000L, onClick = {
-                                            onBudget(if (state.maxMonthly == 500_000L) null else 500_000L)
-                                        }, label = { Text(stringResource(R.string.budget_500)) },
-                                    )
-                                    FilterChip(
-                                        selected = state.minSpeed == 50, onClick = {
-                                            onSpeed(if (state.minSpeed == 50) null else 50)
-                                        }, label = { Text(stringResource(R.string.speed_50)) },
-                                    )
-                                    FilterChip(
-                                        selected = state.minSpeed == 100, onClick = {
-                                            onSpeed(if (state.minSpeed == 100) null else 100)
-                                        }, label = { Text(stringResource(R.string.speed_100)) },
-                                    )
-                                }
-                                FilterChip(
-                                    selected = state.sort == Sorts.CHEAPEST, onClick = { onSort(Sorts.CHEAPEST) },
-                                    label = { Text(stringResource(R.string.sort_cheapest)) },
+                                SingleSelectDropdown(
+                                    label = stringResource(R.string.filter_sort),
+                                    options = sortOptions,
+                                    selected = state.sort,
+                                    onSelect = { it?.let(onSort) },
+                                    modifier = Modifier.width(190.dp),
                                 )
                                 if (!isCellular) {
-                                    FilterChip(
-                                        selected = state.sort == Sorts.VALUE, onClick = { onSort(Sorts.VALUE) },
-                                        label = { Text(stringResource(R.string.sort_value)) },
+                                    SingleSelectDropdown(
+                                        label = stringResource(R.string.filter_budget),
+                                        options = listOf(
+                                            "all" to allLabel,
+                                            "300" to stringResource(R.string.budget_300),
+                                            "500" to stringResource(R.string.budget_500),
+                                        ),
+                                        selected = when (state.maxMonthly) {
+                                            300_000L -> "300"
+                                            500_000L -> "500"
+                                            else -> "all"
+                                        },
+                                        onSelect = {
+                                            onBudget(when (it) {
+                                                "300" -> 300_000L
+                                                "500" -> 500_000L
+                                                else -> null
+                                            })
+                                        },
+                                        modifier = Modifier.width(190.dp),
                                     )
-                                    FilterChip(
-                                        selected = state.sort == Sorts.FASTEST, onClick = { onSort(Sorts.FASTEST) },
-                                        label = { Text(stringResource(R.string.sort_fastest)) },
+                                    SingleSelectDropdown(
+                                        label = stringResource(R.string.filter_speed),
+                                        options = listOf(
+                                            "all" to allLabel,
+                                            "50" to stringResource(R.string.speed_50),
+                                            "100" to stringResource(R.string.speed_100),
+                                        ),
+                                        selected = when (state.minSpeed) {
+                                            50 -> "50"
+                                            100 -> "100"
+                                            else -> "all"
+                                        },
+                                        onSelect = {
+                                            onSpeed(when (it) {
+                                                "50" -> 50
+                                                "100" -> 100
+                                                else -> null
+                                            })
+                                        },
+                                        modifier = Modifier.width(170.dp),
                                     )
                                 } else {
-                                    FilterChip(
-                                        selected = state.sort == Sorts.PERGB, onClick = { onSort(Sorts.PERGB) },
-                                        label = { Text(stringResource(R.string.sort_pergb)) },
+                                    MultiSelectDropdown(
+                                        label = stringResource(R.string.filter_period),
+                                        allLabel = allLabel,
+                                        options = periodOptions,
+                                        selected = state.periods,
+                                        onToggle = onTogglePeriod,
+                                        onSelectAll = {
+                                            onSetPeriods(setOf(Periods.DAILY, Periods.WEEKLY, Periods.MONTHLY))
+                                        },
+                                        onClear = { onSetPeriods(emptySet()) },
+                                        modifier = Modifier.width(190.dp),
                                     )
                                 }
-                            }
-                        }
-                        if (tabIsps.isNotEmpty()) {
-                            item(key = "isps", contentType = "header") {
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    tabIsps.forEach { isp ->
-                                        FilterChip(
-                                            selected = isp.id in state.ispIds, onClick = { onToggleIsp(isp.id) },
-                                            label = { Text(isp.name) },
-                                        )
-                                    }
+                                if (tabIsps.isNotEmpty()) {
+                                    MultiSelectDropdown(
+                                        label = stringResource(R.string.filter_provider),
+                                        allLabel = allLabel,
+                                        options = tabIsps.map { it.id to it.name },
+                                        selected = state.ispIds,
+                                        onToggle = onToggleIsp,
+                                        onSelectAll = { onSetIsps(tabIsps.map { it.id }.toSet()) },
+                                        onClear = { onSetIsps(emptySet()) },
+                                        modifier = Modifier.width(170.dp),
+                                    )
                                 }
                             }
                         }

@@ -32,6 +32,12 @@ object Types {
     const val CELLULAR = "cellular"
 }
 
+object Periods {
+    const val DAILY = "daily"
+    const val WEEKLY = "weekly"
+    const val MONTHLY = "monthly"
+}
+
 enum class SyncStatus { IDLE, SYNCING, FAILED }
 
 data class IspOption(val id: String, val name: String, val category: String)
@@ -46,6 +52,7 @@ data class HomeUiState(
     val maxMonthly: Long? = null,
     val minSpeed: Int? = null,
     val ispIds: Set<String> = emptySet(),
+    val periods: Set<String> = emptySet(),
     val sort: String = Sorts.CHEAPEST,
     val region: String = "JAVA_ALL",
     val syncStatus: SyncStatus = SyncStatus.IDLE,
@@ -72,22 +79,27 @@ class HomeViewModel(
     private val ispIds = MutableStateFlow<Set<String>>(
         savedState.get<ArrayList<String>>("isps")?.toSet() ?: emptySet(),
     )
+    private val periods = MutableStateFlow<Set<String>>(
+        savedState.get<ArrayList<String>>("periods")?.toSet() ?: emptySet(),
+    )
     private val syncStatus = MutableStateFlow(SyncStatus.IDLE)
     private val updateApp = MutableStateFlow(false)
 
     private data class Keys(
         val region: String, val q: String, val type: String,
-        val max: Long, val spd: Int, val sort: String, val isps: Set<String>,
+        val max: Long, val spd: Int, val sort: String,
+        val isps: Set<String>, val periods: Set<String>,
     )
 
     private val keys: kotlinx.coroutines.flow.Flow<Keys> = combine(
         combine(prefs.region, query, tab) { r, q, t -> Triple(r, q, t) },
         combine(maxMonthly, minSpeed, sort) { m, sp, so -> Triple(m, sp, so) },
-        ispIds,
-    ) { a, b, isps ->
+        combine(ispIds, periods) { isps, per -> isps to per },
+    ) { a, b, c ->
         Keys(
             region = a.first, q = a.second, type = a.third,
-            max = b.first, spd = b.second, sort = b.third, isps = isps,
+            max = b.first, spd = b.second, sort = b.third,
+            isps = c.first, periods = c.second,
         )
     }
 
@@ -108,6 +120,7 @@ class HomeViewModel(
                     minSpeed = spd,
                     query = k.q,
                     ispIds = k.isps,
+                    periods = k.periods,
                     sort = effectiveSort,
                 ),
                 repository.observeIsps(),
@@ -125,7 +138,7 @@ class HomeViewModel(
             isps = ispList,
             query = k.q, type = k.type, maxMonthly = k.max.takeIf { it > 0 },
             minSpeed = k.spd.takeIf { it > 0 },
-            ispIds = k.isps, sort = k.sort, region = k.region,
+            ispIds = k.isps, periods = k.periods, sort = k.sort, region = k.region,
             syncStatus = status,
             lastUpdated = syncState.generatedAt,
             showStale = isStale(syncState.generatedAt),
@@ -168,9 +181,11 @@ class HomeViewModel(
     fun setQuery(q: String) { savedState["q"] = q }
     fun setType(t: String) {
         savedState["tab"] = t
-        // ISP selection rarely carries across types; reset it on tab switch.
+        // Selections rarely carry across types; reset them on tab switch.
         ispIds.value = emptySet()
         savedState["isps"] = ArrayList<String>()
+        periods.value = emptySet()
+        savedState["periods"] = ArrayList<String>()
     }
     fun setBudget(max: Long?) { savedState["max"] = max ?: -1L }
     fun setMinSpeed(spd: Int?) { savedState["spd"] = spd ?: -1 }
@@ -179,6 +194,22 @@ class HomeViewModel(
         val next = if (id in ispIds.value) ispIds.value - id else ispIds.value + id
         ispIds.value = next
         savedState["isps"] = ArrayList(next.toList())
+    }
+
+    fun togglePeriod(id: String) {
+        val next = if (id in periods.value) periods.value - id else periods.value + id
+        periods.value = next
+        savedState["periods"] = ArrayList(next.toList())
+    }
+
+    fun setIspIds(ids: Set<String>) {
+        ispIds.value = ids
+        savedState["isps"] = ArrayList(ids.toList())
+    }
+
+    fun setPeriods(ids: Set<String>) {
+        periods.value = ids
+        savedState["periods"] = ArrayList(ids.toList())
     }
 
     fun toggleFavorite(pkg: Package) {

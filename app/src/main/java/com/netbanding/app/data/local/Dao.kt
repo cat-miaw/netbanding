@@ -47,6 +47,10 @@ interface PackageDao {
           AND (:minSpeed IS NULL OR p.speed_mbps >= :minSpeed)
           AND (:query IS NULL OR p.name LIKE '%' || :query || '%' OR i.name LIKE '%' || :query || '%')
           AND (:ispCount = 0 OR p.isp_id IN (:ispIds))
+          AND (:periodCount = 0
+            OR ('daily' IN (:periods) AND p.validity_days BETWEEN 1 AND 6)
+            OR ('weekly' IN (:periods) AND p.validity_days BETWEEN 7 AND 21)
+            OR ('monthly' IN (:periods) AND (p.validity_days > 21 OR p.validity_days IS NULL)))
         GROUP BY p.id
         ORDER BY
           CASE WHEN :sort = 'cheapest' THEN p.monthly_total END ASC,
@@ -66,6 +70,8 @@ interface PackageDao {
         query: String?,
         ispIds: List<String>,
         ispCount: Int,
+        periods: List<String>,
+        periodCount: Int,
         sort: String,
     ): Flow<List<PackageWithIsp>>
 

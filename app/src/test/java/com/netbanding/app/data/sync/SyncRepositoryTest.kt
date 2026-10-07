@@ -66,7 +66,7 @@ class SyncRepositoryTest {
         assertEquals(1, db.packageDao().activeCount())
         assertEquals(1, store.state.dataVersion)
         // monthly_total = 250_000 * 1.11 = 277_500
-        val rows = db.packageDao().observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, "cheapest")
+        val rows = db.packageDao().observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, emptyList(), 0, "cheapest")
         assertEquals(277_500, rows.first().single().monthly_total)
     }
 
