@@ -28,6 +28,8 @@
     <string name="per_mbps">Per Mbps: %1$s</string>
     <string name="disclaimer">Harga dapat berbeda. Pastikan ke provider.</string>
     <string name="open_provider">Buka situs provider</string>
+    <string name="share">Bagikan</string>
+    <string name="report_price">Lapor harga</string>
     <string name="favorite">Simpan favorit</string>
     <string name="unfavorite">Hapus favorit</string>
     <string name="favorites_title">Favorit</string>

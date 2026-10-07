@@ -1,8 +1,10 @@
 package com.netbanding.app.ui.detail
 
+import android.content.Intent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,13 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import java.net.URLEncoder
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
 import com.netbanding.app.domain.model.PricePoint
 import com.netbanding.app.domain.usecase.CalculateTrueCost
+import com.netbanding.app.ui.components.formatPricePeriode
 import com.netbanding.app.ui.components.formatQuota
 import com.netbanding.app.ui.components.formatValidity
 import com.netbanding.app.ui.components.periodeFor
@@ -47,6 +52,7 @@ fun PackageDetailSheet(
         )
     }
     Column(modifier = modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val context = LocalContext.current
         Text(pkg.name, style = MaterialTheme.typography.headlineSmall)
         Text(pkg.ispName, style = MaterialTheme.typography.labelLarge)
         Text(stringResource(R.string.base_price, formatIdr(pkg.basePrice)))
@@ -88,6 +94,42 @@ fun PackageDetailSheet(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.compare_add))
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = {
+                    val text = "${pkg.name} – ${formatPricePeriode(pkg.monthlyTotal, pkg.validityDays)} " +
+                        "(${pkg.ispName}) via NetBanding\n${pkg.sourceUrl}"
+                    context.startActivity(
+                        Intent.createChooser(
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, text)
+                            },
+                            null,
+                        ),
+                    )
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.share))
+            }
+            OutlinedButton(
+                onClick = {
+                    val title = URLEncoder.encode("[Salah harga] ${pkg.name}", "UTF-8")
+                    val body = URLEncoder.encode(
+                        "Paket: ${pkg.id}\nHarga tampil: ${formatIdr(pkg.basePrice)}\n" +
+                            "Harga benar: (isi di sini)\nSumber/bukti: (tautan atau tangkapan layar)",
+                        "UTF-8",
+                    )
+                    uri.openUri(
+                        "https://github.com/cat-miaw/netbanding/issues/new?title=$title&body=$body",
+                    )
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(stringResource(R.string.report_price))
+            }
         }
     }
 }
