@@ -58,5 +58,5 @@ def publish(
     }
     open(f"{DATA_DIR}/catalog.json", "wb").write(cat_bytes)
     open(f"{DATA_DIR}/history.json", "wb").write(hist_bytes)
-    json.dump(manifest, open(f"{DATA_DIR}/manifest.json", "w"), indent=2)
+    json.dump(manifest, open(f"{DATA_DIR}/manifest.json", "w", newline=""), indent=2)
     return {"data_version": manifest["data_version"], "generated_at": now}

@@ -138,6 +138,7 @@ class SyncRepository(
             putState(manifest.data_version, manifest.generated_at, catalogSha, historySha)
             SyncResult.Updated(manifest.data_version)
         } catch (e: Exception) {
+            android.util.Log.e("NetBandingSync", "sync failed", e)
             SyncResult.Failed(e.message ?: "sync failed")
         }
     }

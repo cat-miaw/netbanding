@@ -1,0 +1,4 @@
+# Contract data must be byte-identical everywhere (Windows, Linux, GitHub Pages):
+# the app verifies sha256 against these bytes. LF always, no conversion.
+data/*.json text eol=lf
+app/src/main/assets/seed/*.json text eol=lf
