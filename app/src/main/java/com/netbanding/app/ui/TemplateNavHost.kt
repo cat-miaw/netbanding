@@ -71,6 +71,7 @@ fun TemplateNavHost(
                                 container.packageRepository,
                                 container.userPrefs,
                                 container.syncRepository,
+                                container.priceDropMonitor,
                                 container::scheduleSync,
                                 SavedStateHandle(),
                             ) as T

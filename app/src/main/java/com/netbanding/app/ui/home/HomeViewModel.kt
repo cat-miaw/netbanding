@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netbanding.app.data.prefs.UserPrefs
+import com.netbanding.app.data.notify.PriceDropMonitor
 import com.netbanding.app.data.repo.PackageRepository
 import com.netbanding.app.data.sync.SyncRepository
 import com.netbanding.app.data.sync.SyncResult
@@ -50,6 +51,7 @@ class HomeViewModel(
     private val repository: PackageRepository,
     private val prefs: UserPrefs,
     private val sync: SyncRepository,
+    private val monitor: PriceDropMonitor,
     private val onScheduleWorker: () -> Unit = {},
     private val savedState: SavedStateHandle,
 ) : ViewModel() {
@@ -121,7 +123,12 @@ class HomeViewModel(
         viewModelScope.launch {
             syncStatus.value = SyncStatus.SYNCING
             when (val r = sync.sync()) {
-                is SyncResult.Updated, SyncResult.NoChange -> {
+                is SyncResult.Updated -> {
+                    updateApp.value = false
+                    syncStatus.value = SyncStatus.IDLE
+                    runCatching { monitor.checkAndNotify() }
+                }
+                SyncResult.NoChange -> {
                     updateApp.value = false
                     syncStatus.value = SyncStatus.IDLE
                 }

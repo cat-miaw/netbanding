@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.netbanding.app.data.local.NetbandingDb
+import com.netbanding.app.data.notify.PriceDropMonitor
 import com.netbanding.app.data.prefs.UserPrefs
 import com.netbanding.app.data.remote.DEFAULT_BASE_URL
 import com.netbanding.app.data.remote.NetbandingApi
@@ -27,6 +28,7 @@ interface AppContainer {
     val packageRepository: PackageRepository
     val userPrefs: UserPrefs
     val syncRepository: SyncRepository
+    val priceDropMonitor: PriceDropMonitor
     fun scheduleSync()
 }
 
@@ -48,6 +50,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     override val userPrefs: UserPrefs by lazy {
         UserPrefs(context.applicationContext)
     }
+    override val priceDropMonitor: PriceDropMonitor by lazy {
+        PriceDropMonitor(context.applicationContext, db, userPrefs)
+    }
     private val api: NetbandingApi by lazy {
         Retrofit.Builder()
             .baseUrl(DEFAULT_BASE_URL)
@@ -67,7 +72,7 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     }
 
     val workerFactory: SyncWorker.Factory by lazy {
-        SyncWorker.Factory { syncRepository }
+        SyncWorker.Factory({ syncRepository }, { priceDropMonitor })
     }
 
     override fun scheduleSync() {

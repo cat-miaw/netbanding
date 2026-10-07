@@ -9,26 +9,38 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import com.netbanding.app.data.notify.PriceDropMonitor
 import java.util.concurrent.TimeUnit
 
 /** Weekly background refresh, network required (blueprint 7.4). Deferred off the startup path. */
-class SyncWorker(appContext: Context, params: WorkerParameters, private val repo: SyncRepository) :
-    CoroutineWorker(appContext, params) {
+class SyncWorker(
+    appContext: Context,
+    params: WorkerParameters,
+    private val repo: SyncRepository,
+    private val monitor: PriceDropMonitor,
+) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
-        return when (repo.sync()) {
-            is SyncResult.Updated, SyncResult.NoChange -> Result.success()
+        return when (val r = repo.sync()) {
+            is SyncResult.Updated -> {
+                runCatching { monitor.checkAndNotify() }
+                Result.success()
+            }
+            SyncResult.NoChange -> Result.success()
             SyncResult.NeedsAppUpdate -> Result.success()
             is SyncResult.Failed -> Result.retry()
         }
     }
 
-    class Factory(private val repo: () -> SyncRepository) : WorkerFactory() {
+    class Factory(
+        private val repo: () -> SyncRepository,
+        private val monitor: () -> PriceDropMonitor,
+    ) : WorkerFactory() {
         override fun createWorker(
             appContext: Context,
             workerClassName: String,
             workerParameters: WorkerParameters,
         ) = if (workerClassName == SyncWorker::class.java.name) {
-            SyncWorker(appContext, workerParameters, repo())
+            SyncWorker(appContext, workerParameters, repo(), monitor())
         } else {
             null
         }

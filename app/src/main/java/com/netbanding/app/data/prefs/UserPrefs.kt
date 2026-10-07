@@ -12,6 +12,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 
 private val Context.prefsStore: DataStore<Preferences> by preferencesDataStore("netbanding")
 
@@ -23,6 +24,7 @@ object PrefKeys {
     val LAST_CHECK_AT = longPreferencesKey("last_check_at")
     val CATALOG_SHA = stringPreferencesKey("catalog_sha256")
     val HISTORY_SHA = stringPreferencesKey("history_sha256")
+    val PRICE_BASELINE = stringPreferencesKey("price_alert_baseline") // JSON {packageId: monthlyTotal}
 }
 
 /** Provinces per blueprint 4.4. JAVA_ALL = all six. */
@@ -80,6 +82,19 @@ class UserPrefs(private val context: Context) {
     }
 
     suspend fun snapshot(): SyncState = syncState.first()
+
+    /** Baseline monthly totals used by price-drop alerts (packageId -> monthlyTotal). */
+    val priceBaseline: Flow<Map<String, Long>> = context.prefsStore.data.map { prefs ->
+        runCatching {
+            Json.decodeFromString<Map<String, Long>>(
+                prefs[PrefKeys.PRICE_BASELINE] ?: "{}",
+            )
+        }.getOrDefault(emptyMap())
+    }
+
+    suspend fun setPriceBaseline(map: Map<String, Long>) {
+        context.prefsStore.edit { it[PrefKeys.PRICE_BASELINE] = Json.encodeToString(map) }
+    }
 }
 
 /** In-memory fake for SyncRepository unit tests (no DataStore needed). */

@@ -4,8 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import com.netbanding.app.data.notify.PriceDropMonitor
 import com.netbanding.app.ui.TemplateNavHost
 import com.netbanding.app.ui.theme.TemplateTheme
 
@@ -14,6 +17,9 @@ import com.netbanding.app.ui.theme.TemplateTheme
  * think about insets.
  */
 class MainActivity : ComponentActivity() {
+
+    private val requestNotifications =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Must be called before super.onCreate. On API 31+ it draws the system
@@ -28,6 +34,14 @@ class MainActivity : ComponentActivity() {
         // else should render immediately and fill in.
         //
         // splashScreen.setKeepOnScreenCondition { viewModel.isBlocking }
+
+        PriceDropMonitor.ensureChannel(this)
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            requestNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         setContent {
             TemplateTheme {

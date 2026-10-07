@@ -44,6 +44,11 @@
     <string name="compare_included">Termasuk PPN</string>
     <string name="compare_excluded">Belum PPN</string>
     <string name="install_unknown_short">Tanya provider</string>
+    <string name="alert_channel_name">Penurunan harga</string>
+    <string name="alert_channel_desc">Notifikasi saat harga paket favorit turun.</string>
+    <string name="alert_title">Harga paket turun</string>
+    <string name="alert_text_one">%1$s: %2$s → %3$s/bln</string>
+    <string name="alert_text_many">%1$d paket favorit turun harga, termasuk %2$s.</string>
     <string name="sync_failed">Gagal memperbarui, menampilkan data terakhir.</string>
     <string name="stale_banner">Data mungkin sudah usang (lebih dari 14 hari).</string>
     <string name="update_app_banner">Data baru tersedia — perbarui aplikasi untuk melihatnya.</string>
