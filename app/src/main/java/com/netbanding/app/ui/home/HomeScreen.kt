@@ -79,6 +79,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<Package?>(null) }
+    // Local text buffer: the field must never be driven by the DB round-trip
+    // (per-keystroke re-query desyncs cursor/composition). The ViewModel is
+    // the single writer of saved "q", so init-once is safe; DB reads it
+    // debounced (see keys flow).
+    var text by remember { mutableStateOf(state.query) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val isCellular = state.type == Types.CELLULAR
@@ -134,6 +139,13 @@ fun HomeScreen(
                         text = { Text(stringResource(R.string.tab_broadband)) },
                     )
                 }
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it; onQuery(it) },
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                )
                 when {
                     state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -146,15 +158,6 @@ fun HomeScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        item(key = "search", contentType = "header") {
-                            OutlinedTextField(
-                                value = state.query,
-                                onValueChange = onQuery,
-                                placeholder = { Text(stringResource(R.string.search_hint)) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
                         item(key = "filters", contentType = "header") {
                             val sortOptions = if (isCellular) listOf(
                                 Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),

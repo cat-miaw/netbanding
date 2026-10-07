@@ -11,11 +11,13 @@ import com.netbanding.app.data.sync.SyncResult
 import com.netbanding.app.data.sync.isStale
 import com.netbanding.app.domain.model.Package
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -61,7 +63,7 @@ data class HomeUiState(
     val showUpdateApp: Boolean = false,
 )
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class HomeViewModel(
     private val repository: PackageRepository,
     private val prefs: UserPrefs,
@@ -92,7 +94,7 @@ class HomeViewModel(
     )
 
     private val keys: kotlinx.coroutines.flow.Flow<Keys> = combine(
-        combine(prefs.region, query, tab) { r, q, t -> Triple(r, q, t) },
+        combine(prefs.region, query.debounce(400), tab) { r, q, t -> Triple(r, q, t) },
         combine(maxMonthly, minSpeed, sort) { m, sp, so -> Triple(m, sp, so) },
         combine(ispIds, periods) { isps, per -> isps to per },
     ) { a, b, c ->
