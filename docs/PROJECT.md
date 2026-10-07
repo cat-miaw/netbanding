@@ -100,6 +100,46 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 - OPEN: Biznet modem rental Rp 50rb (unverifiable on site); FirstMedia
   seed is reseller data (re-verify vs official site); more islands.
 
+## Scraping playbook & per-ISP quirks
+
+New ISP, same drill every time:
+
+1. **Probe readability**: fetch with a browser UA, run through
+   `clean.clean`, check char count. <1k chars = JS shell or wall →
+   `manual` source, hand seed, stop.
+2. **Embedded JSON first** (`type="application/json"`, `__NEXT_DATA__`):
+   integer prices + typed rows beat text scraping. Template: `xlultra.py`.
+3. **Else rigid text blocks** → regex extractor + curated id map
+   (`firstmedia.py`, `telkomsel.py`). Else → DeepSeek LLM last resort
+   (costs money; needs PPN/install stated on-page or every run reviews).
+4. **Ids deterministic** (`{isp}-{slug}-{speed|validity}`); renames in
+   `aliases:`, other-page packs in `keep:` (never counted as removed).
+   Trailing `+` is a tier marker (M vs M+) — `xlultra._slug` preserves it.
+5. **Seed via `tmp_*.py`** (canonical pretty JSON, LF, manifest bump,
+   history initials, assets copy, then DELETE the script). Validate, pytest,
+   fix counts in `SeedAndDaoTest`, push, prove in CI via `gh`.
+6. **Numbers**: `_gb` handles `2.5`, `2,5` (decimals) vs `1.500`
+   (thousands) — a dot-strip once ate "2.5" into 25 GB. Regression-tested.
+
+Quirks ledger:
+
+- **XL**: hub-discovered families (`xlhub.discover`); unknown slugs trip
+  review, never silent skip. `skip_families`: flexmax/flexmini (dupe the
+  curated Flex line), bebas-puas (custom sachet structure, deferred),
+  disneyplus (streaming, not data). VIP Plus 20/52GB dupes aliased to
+  curated ids. Flex-mc is a separate edition lineup (own prices). Quotas
+  vary by location picker — national defaults recorded.
+- **Telkomsel**: only `/simpati` cards (regex); express-purchase is
+  number-gated skeletons, out of scope. SERU packs live on another page,
+  kept as curated. `keep:` guards them.
+- **FirstMedia**: official domain JS-walled; reseller data retired
+  2026-10-07 (wrong Superuser tier). 3 official plans curated; button
+  opens official site, `source_url` keeps provenance.
+- **Biznet**: page states no PPN/install/rental → evidence gate fails
+  every run by design; PR #4 is the standing watch item. Curated seed
+  stands. Cards repeat 50 Mbps for all tiers — true speeds come from the
+  comparison table (prompt rule).
+
 ## Everyday commands
 
 ```bash
