@@ -285,5 +285,229 @@
       "tax_inclusive": false,
       "recorded_at": "2026-10-07T00:00:00Z"
     }
+  ],
+  "xl-akrab-s": [
+    {
+      "price": 61000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-sm": [
+    {
+      "price": 81500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-m": [
+    {
+      "price": 115000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-l": [
+    {
+      "price": 187000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-xl-28d": [
+    {
+      "price": 293000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-xxl-28d": [
+    {
+      "price": 469000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-mini-7gb": [
+    {
+      "price": 15000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-mini-17gb": [
+    {
+      "price": 28000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-akrab-mini-34gb": [
+    {
+      "price": 45000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-s-plus-28d": [
+    {
+      "price": 37000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-m-28d": [
+    {
+      "price": 53000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-m-plus-28d": [
+    {
+      "price": 64000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-l-28d": [
+    {
+      "price": 74000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-l-plus-28d": [
+    {
+      "price": 85000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-xl-28d": [
+    {
+      "price": 110000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-xxl-28d": [
+    {
+      "price": 150000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-xxxl-28d": [
+    {
+      "price": 180000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-4xl-28d": [
+    {
+      "price": 200000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-flex-5xl-45d": [
+    {
+      "price": 245000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-mini-2-5-gb-7d": [
+    {
+      "price": 15300,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-mini-15gb-7d": [
+    {
+      "price": 40000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-mini-10gb-7d": [
+    {
+      "price": 32000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-mini-6-gb-7d": [
+    {
+      "price": 25000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-mini-4-gb-7d": [
+    {
+      "price": 20000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-vip-plus-10-gb-30d": [
+    {
+      "price": 73000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-vip-plus-32-gb-30d": [
+    {
+      "price": 143500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-vip-plus-75-gb-30d": [
+    {
+      "price": 257000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-10-gb-28d": [
+    {
+      "price": 61500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-20-gb-28d": [
+    {
+      "price": 92000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-32-gb-28d": [
+    {
+      "price": 136000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-52-gb-28d": [
+    {
+      "price": 185500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
+  ],
+  "xl-xtra-combo-plus-75-gb-28d": [
+    {
+      "price": 247500,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T12:46:46Z"
+    }
   ]
 }

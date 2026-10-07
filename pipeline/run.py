@@ -72,11 +72,36 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         extractor = EXTRACTORS.get(isp.get("extractor", "deepseek"), DeepSeekExtractor)()
+        family_pages: dict = {}
         try:
             texts = []
-            for page in isp["pages"]:
-                texts.append(fetch(page["url"], page.get("mode", "static")))
+            if isp.get("hub"):
+                from scraper.xlhub import discover
+                hub_html = fetch(isp["hub"], "static")
+                texts.append(hub_html)
                 log["pages"] += 1
+                found = discover(hub_html)
+                known = {f["slug"]: f["url"] for f in isp.get("families", [])}
+                skipped = set(isp.get("skip_families", {}).keys())
+                unknown = sorted(set(found) - set(known) - skipped)
+                if unknown:
+                    review["needs_review"] = True
+                    review["items"].append(
+                        {"isp": isp["id"], "reason": "new families", "slugs": unknown})
+                    log["new_families"] = unknown
+                for slug in sorted(set(known) & set(found) - skipped):
+                    family_pages[slug] = fetch(known[slug], "static")
+                    texts.append(family_pages[slug])
+                    log["pages"] += 1
+                if skipped:
+                    log["skipped_families"] = sorted(skipped)
+                missing = sorted(set(known) - set(found) - skipped)
+                if missing:
+                    log["missing_families"] = missing
+            else:
+                for page in isp["pages"]:
+                    texts.append(fetch(page["url"], page.get("mode", "static")))
+                    log["pages"] += 1
         except Exception as e:  # noqa: BLE001 - isolate per ISP
             log.update(status="fetch_failed", error=str(e))
             run_log["isps"][isp["id"]] = log
@@ -97,8 +122,38 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         try:
-            payload = raw_html if getattr(extractor, "wants_raw", False) else text
-            out = extractor.extract(payload)
+            if family_pages and getattr(extractor, "wants_raw", False):
+                merged, ev, toks, conflicts = [], {}, 0, []
+                for slug, html in family_pages.items():
+                    part = extractor.extract(html)
+                    if not part.get("packages"):
+                        # A known family yielding zero packs = broken parse,
+                        # never a silent miss.
+                        review["needs_review"] = True
+                        review["items"].append(
+                            {"isp": isp["id"], "reason": "family empty", "slug": slug})
+                        log.setdefault("empty_families", []).append(slug)
+                    for i, p in enumerate(part.get("packages", [])):
+                        dup = next((q for q in merged if q["id"] == p["id"]), None)
+                        if dup is not None:
+                            if any(dup.get(k) != p.get(k) for k in
+                                   ("base_price", "quota_mb", "validity_days", "tax_inclusive")):
+                                conflicts.append(p["id"])
+                            continue
+                        merged.append(p)
+                        ev[str(len(merged) - 1)] = part.get("evidence", {}).get(str(i), {})
+                    toks += part.get("tokens", 0)
+                out = {"packages": merged, "evidence": ev, "tokens": toks}
+                if conflicts:
+                    review["needs_review"] = True
+                    review["items"].append(
+                        {"isp": isp["id"], "reason": "duplicate ids differ", "ids": conflicts})
+                    log.update(status="needs_review", reasons=[f"duplicate ids differ: {conflicts}"])
+                    run_log["isps"][isp["id"]] = log
+                    continue
+            else:
+                payload = raw_html if getattr(extractor, "wants_raw", False) else text
+                out = extractor.extract(payload)
         except Exception as e:  # noqa: BLE001 - keep previous data
             log.update(status="extract_failed", error=str(e))
             run_log["isps"][isp["id"]] = log
@@ -149,10 +204,13 @@ def main() -> int:
         result = classify(old_isp, pkgs, keep)
         log["changed"] = result["changed"]
         log["extracted"] = sorted(p.id for p in pkgs)
-        if result["needs_review"]:
-            log.update(status="needs_review", reasons=result["reasons"])
+        flagged = any(i.get("isp") == isp["id"] for i in review["items"])
+        if result["needs_review"] or flagged:
+            log.update(status="needs_review",
+                       reasons=result["reasons"] or ["see review items"])
             review["needs_review"] = True
-            review["items"].append({"isp": isp["id"], "reasons": result["reasons"]})
+            if result["needs_review"]:
+                review["items"].append({"isp": isp["id"], "reasons": result["reasons"]})
         else:
             info = publish(catalog, isp["id"], pkgs, history, keep_ids=keep)
             catalog = validate_catalog(json.load(open("data/catalog.json")))

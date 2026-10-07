@@ -138,6 +138,17 @@ def test_xlultra_parser_reads_json_cards():
         "xl-flexmax-65gb-28d", 66560, 28, 100000)
 
 
+def test_xlultra_trailing_plus_disambiguates():
+    from scraper.xlultra import _slug, _gb
+    assert _slug("Xtra Combo Flex M+") == "xtra-combo-flex-m-plus"
+    assert _slug("Xtra Combo Flex M") == "xtra-combo-flex-m"
+    assert _slug("Flexmax 400GB+400GB 5G") == "flexmax-400gb-400gb-5g"
+    assert _gb("2.5 GB") == 2560  # dot decimal, not thousands
+    assert _gb("2,5 GB") == 2560  # comma decimal
+    assert _gb("1.500 GB") == 1536000  # thousands separator
+    assert _gb("65 GB") == 66560
+
+
 def test_diff_flags_40pct_but_not_5pct():
     old = [validate_package(good_raw(250000), ISP)[0]]
     big = [validate_package(good_raw(350000), ISP)[0]]  # +40%
