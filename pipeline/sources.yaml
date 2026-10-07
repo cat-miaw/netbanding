@@ -27,8 +27,12 @@ isps:
       - url: https://www.firstmediapromo.com/promo-first-media/
         mode: static
   - id: telkomsel
-    note: "Recommendation cards on /simpati via deterministic regex (name/quota/validity/price/Beli blocks). express-purchase needs a SIMPATI number (skeleton loaders) — out of scope."
+    note: "Recommendation cards on /simpati via deterministic regex (name/quota/validity/price/Beli blocks). SERU packs live on a different page and are curated (keep). express-purchase needs a SIMPATI number (skeleton loaders) — out of scope."
     extractor: regex-telkomsel
+    keep: [telkomsel-seru-harian-55gb, telkomsel-seru-harian-10gb,
+      telkomsel-seru-harian-15gb, telkomsel-seru-mingguan-5gb,
+      telkomsel-seru-mingguan-10gb, telkomsel-seru-mingguan-20gb,
+      telkomsel-seru-bulanan-6gb, telkomsel-seru-bulanan-15gb]
     pages:
       - url: https://www.telkomsel.com/simpati
         mode: static

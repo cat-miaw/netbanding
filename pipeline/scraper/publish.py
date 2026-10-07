@@ -22,9 +22,12 @@ def publish(
     new_packages: list,
     history: dict,
     now: str | None = None,
+    keep_ids: set | None = None,
 ) -> dict:
     now = now or _now()
-    old_pkgs = [p for p in old_catalog.packages if p.isp_id != isp_id]
+    keep_ids = keep_ids or set()
+    old_pkgs = [p for p in old_catalog.packages
+                if p.isp_id != isp_id or p.id in keep_ids]
     kept_ids = {p.id for p in old_pkgs}
     for pkg in new_packages:
         d = pkg.model_dump()

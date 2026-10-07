@@ -129,9 +129,12 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         old_isp = [p for p in catalog.packages if p.isp_id == isp["id"] and p.is_active]
+        keep = set(isp.get("keep", []))
         seen = {p.id for p in pkgs}
         for p in old_isp:
-            if p.id not in seen:
+            if p.id in keep:
+                misses.pop(p.id, None)
+            elif p.id not in seen:
                 misses[p.id] = misses.get(p.id, 0) + 1
                 if misses[p.id] >= DEACTIVATE_AFTER_MISSES:
                     d = p.model_dump()
@@ -139,7 +142,7 @@ def main() -> int:
                     pkgs.append(type(p)(**d))
             else:
                 misses.pop(p.id, None)
-        result = classify(old_isp, pkgs)
+        result = classify(old_isp, pkgs, keep)
         log["changed"] = result["changed"]
         log["extracted"] = sorted(p.id for p in pkgs)
         if result["needs_review"]:
@@ -147,7 +150,7 @@ def main() -> int:
             review["needs_review"] = True
             review["items"].append({"isp": isp["id"], "reasons": result["reasons"]})
         else:
-            info = publish(catalog, isp["id"], pkgs, history)
+            info = publish(catalog, isp["id"], pkgs, history, keep_ids=keep)
             catalog = validate_catalog(json.load(open("data/catalog.json")))
             log.update(status="published", **info)
         run_log["isps"][isp["id"]] = log

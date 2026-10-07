@@ -147,6 +147,13 @@ def test_diff_flags_money_field_changes():
     assert any("device_rental_fee" in x for x in r["reasons"])
 
 
+def test_diff_keep_ids_excluded_from_drop():
+    old = [validate_package(good_raw(), ISP)[0]]
+    r = classify(old, [], keep={good_raw()["id"]})
+    assert r["needs_review"] is False
+    assert r["removed"] == []
+
+
 def test_history_appends_only_on_change():
     hist = {"biznet-x": [{"price": 250000, "tax_inclusive": False, "recorded_at": "t0"}]}
     last = hist["biznet-x"][-1]

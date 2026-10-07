@@ -10,8 +10,10 @@ MONEY_FIELDS = ("device_rental_fee", "install_fee",
                 "contract_months", "quota_mb", "validity_days")
 
 
-def classify(old: list[Package], new: list[Package]) -> dict:
-    old_by = {p.id: p for p in old}
+def classify(old: list[Package], new: list[Package], keep: set | None = None) -> dict:
+    keep = keep or set()
+    managed = [p for p in old if p.id not in keep]
+    old_by = {p.id: p for p in managed}
     new_by = {p.id: p for p in new}
     added = [i for i in new_by if i not in old_by]
     removed = [i for i in old_by if i not in new_by]
