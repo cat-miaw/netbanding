@@ -124,6 +124,20 @@ def test_telkomsel_parser_reads_cards():
     assert all(p["tax_inclusive"] is True for p in out["packages"])
 
 
+def test_xlultra_parser_reads_json_cards():
+    from scraper.xlultra import XlUltraExtractor
+    html = ('<script type="application/json">{"props":{"pageProps":{'
+            '"primeCardData":[{"tabName":"Flexmax","data":[{'
+            '"title":"Flexmax 65GB","Price":100000,"benefit":[{'
+            '"benefitType":"Kuota Utama & Roaming","benefitValue":"65 GB"},'
+            '{"benefitType":"Masa Aktif","benefitValue":"28 Hari"}]}]}]}}}</script>')
+    out = XlUltraExtractor().extract(html)
+    assert len(out["packages"]) == 1
+    p = out["packages"][0]
+    assert (p["id"], p["quota_mb"], p["validity_days"], p["base_price"]) == (
+        "xl-flexmax-65gb-28d", 66560, 28, 100000)
+
+
 def test_diff_flags_40pct_but_not_5pct():
     old = [validate_package(good_raw(250000), ISP)[0]]
     big = [validate_package(good_raw(350000), ISP)[0]]  # +40%

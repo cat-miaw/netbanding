@@ -489,8 +489,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "telkomsel-pasti-70k-8gb",
@@ -512,8 +512,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-5g-15gb",
@@ -535,8 +535,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-5g-6gb",
@@ -558,8 +558,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-bulanan-15gb",
@@ -765,8 +765,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "telkomsel-super-seru-promo-25gb",
@@ -787,6 +787,190 @@
         "JAVA_ALL"
       ],
       "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T11:19:08Z",
+      "updated_at": "2026-10-07T02:00:00Z"
+    },
+    {
+      "id": "xl-flexmax-100gb-28d",
+      "isp_id": "xl",
+      "name": "Flexmax 100GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 102400,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 125000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmax-150gb-28d",
+      "isp_id": "xl",
+      "name": "Flexmax 150GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 153600,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 150000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmax-400gb-400gb-5g-28d",
+      "isp_id": "xl",
+      "name": "Flexmax 400GB+400GB 5G",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 409600,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 200000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": "Termasuk bonus kuota 5G.",
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmax-600gb-600gb-5g-28d",
+      "isp_id": "xl",
+      "name": "Flexmax 600GB+600GB 5G",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 614400,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 300000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": "Termasuk bonus kuota 5G.",
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmax-65gb-28d",
+      "isp_id": "xl",
+      "name": "Flexmax 65GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 66560,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 100000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmini-150gb-14d",
+      "isp_id": "xl",
+      "name": "Flexmini 150GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 153600,
+      "validity_days": 14,
+      "contract_months": null,
+      "base_price": 100000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmini-75gb-14d",
+      "isp_id": "xl",
+      "name": "Flexmini 75GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 76800,
+      "validity_days": 14,
+      "contract_months": null,
+      "base_price": 75000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "xl-flexmini-75gb-7d",
+      "isp_id": "xl",
+      "name": "Flexmini 75GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 76800,
+      "validity_days": 7,
+      "contract_months": null,
+      "base_price": 50000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
       "last_verified_at": "2026-10-07T00:00:00Z",
       "updated_at": "2026-10-07T00:00:00Z"
