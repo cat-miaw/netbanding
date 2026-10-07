@@ -1,6 +1,8 @@
 package com.netbanding.app.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.dp
 
 /**
  * Single-select dropdown (sort, budget, speed). Compact replacement for a
@@ -41,7 +44,16 @@ fun SingleSelectDropdown(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text(label) },
+            // Opaque backing so the floating label cuts a clean notch instead
+            // of showing the page background through the outline.
+            label = {
+                Text(
+                    label,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .padding(horizontal = 4.dp),
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -97,7 +109,16 @@ fun MultiSelectDropdown(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text(label) },
+            // Opaque backing so the floating label cuts a clean notch instead
+            // of showing the page background through the outline.
+            label = {
+                Text(
+                    label,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .padding(horizontal = 4.dp),
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
