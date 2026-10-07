@@ -57,6 +57,11 @@ def main() -> int:
         if args.isp and isp["id"] != args.isp:
             continue
         log: dict = {"status": "ok", "pages": 0, "tokens": 0, "changed": []}
+        if isp.get("extract") == "manual":
+            # JS-walled or otherwise unscrapable: human-curated seed stays.
+            log["status"] = "manual_seed"
+            run_log["isps"][isp["id"]] = log
+            continue
         try:
             texts = []
             for page in isp["pages"]:
@@ -98,6 +103,7 @@ def main() -> int:
         pkgs, errs = [], []
         for i, raw in enumerate(out.get("packages", [])):
             raw = normalize_package(isp["id"], raw, i, isp["pages"][0]["url"], today)
+            raw["id"] = isp.get("aliases", {}).get(raw["id"], raw["id"])
             pkg, e = validate_package(raw, isp["id"])
             if pkg is None:
                 errs.append({"item": i, "errors": e})

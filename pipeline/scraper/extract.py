@@ -14,6 +14,12 @@ Return a JSON array only. Each item: {{"product": "<plan name as listed>",
 "fup_note": <string or null>, "promo_note": <string or null>}}.
 
 Rules: null for anything not explicitly stated. Never guess or infer.
+Plan cards sometimes repeat the same speed for every tier (placeholder).
+If all tiers show an identical speed, look for a comparison/spec table
+(a Bandwidth/Mbps row or per-plan detail sections) and use the per-tier
+values from there. Record quota/FUP figures into fup_note (e.g. "FUP 1500 GB").
+If a summary table contradicts detailed plan blocks on speed or price,
+prefer the detailed blocks.
 Indonesian cues: 'belum termasuk PPN'/'exclude PPN' -> tax_inclusive=false;
 'sudah termasuk PPN'/'include PPN' -> true; 'gratis instalasi'/'free pemasangan' -> install_fee=0;
 'biaya pemasangan Rp X' -> install_fee=X; 'sewa perangkat/modem/router' -> device_rental_fee.

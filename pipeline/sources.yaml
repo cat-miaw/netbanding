@@ -1,16 +1,26 @@
 isps:
   - id: biznet
-    note: "Ex-PPN prices; device rental 50rb/mo treated as final (verify vs PPN, blueprint Q2)."
+    note: "Ex-PPN prices; device rental 50rb/mo treated as final (verify vs PPN, blueprint Q2). Cards repeat 50 Mbps for all tiers; true speeds live in the comparison table."
     pages:
       - url: https://biznethome.net/product/packages
         mode: static
+    aliases:
+      biznet-home-0d-50: biznet-home-50
+      biznet-home-internet-0d-50: biznet-home-50
+      biznet-home-1d-150: biznet-home-150
+      biznet-home-internet-1d-150: biznet-home-150
+      biznet-home-2d-250: biznet-home-250
+      biznet-home-internet-2d-250: biznet-home-250
+      biznet-gamers-3d-300: biznet-gamers-300
+      biznet-home-gamers-3d-300: biznet-gamers-300
   - id: myrepublic
-    note: "Pricelist page lists PPN-inclusive prices; cross-check ex-PPN promo pages."
+    note: "Pricelist page is a JS shell (459 chars after cleaning); bot-safe extraction not possible with static fetch. Hand-curated seed until a manual refresh."
+    extract: manual
     pages:
       - url: https://www.myrepublic.co.id/pricelist
         mode: static
   - id: firstmedia
-    note: "CAUTION (Phase 4 review): seed data came from reseller promo site firstmediapromo.com; re-verify against official firstmedia.com before trusting."
+    note: "Reseller promo page; summary table is stale (Smart 100 vs detail 250 Mbps; Super User 299rb vs 300rb). Trust the numbered detail blocks (1A-3C), never the table. Jabodetabek only, NOT JAVA_ALL."
     pages:
       - url: https://www.firstmediapromo.com/promo-first-media/
         mode: static
