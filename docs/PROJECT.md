@@ -42,10 +42,11 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 1. **Manual DI, not Hilt** (blueprint D6 amended 2026-10-07): cold start <2s
    on 2 GB devices matters more than DI fashion. All deps `by lazy`.
 2. **No chart dependency**: custom Canvas step-line for price history.
-3. **MyRepublic + Telkomsel + XL = `manual` sources** (JS shells / heavy
-   pages): hand-curated seed, pipeline skips them. Biznet = DeepSeek LLM.
-   FirstMedia = deterministic regex parser (reseller page defeats the
-   generic prompt; summary table is stale — trust numbered blocks 1A-3C).
+3. **MyRepublic + XL = `manual` sources** (JS shells): hand-curated seed,
+   pipeline skips them. Biznet = DeepSeek LLM. FirstMedia + Telkomsel =
+   deterministic regex parsers (no LLM, $0). Telkomsel `keep`s its SERU packs
+   (different page, still curated); express-purchase is number-gated, out of scope.
+   FirstMedia summary table is stale — trust numbered blocks 1A-3C.
 4. **Evidence must be verbatim** (`verify_evidence`): LLM quotes are checked
    as substrings of page text. Fabricated evidence → validation failure →
    review PR. This caught real hallucinations (Biznet PPN/install quotes).
