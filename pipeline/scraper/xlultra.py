@@ -14,6 +14,20 @@ GB = re.compile(r"([\d\.,]+)\s*GB", re.IGNORECASE)
 DAYS = re.compile(r"(\d+)\s*Hari", re.IGNORECASE)
 PPN_LINE = "Harga Produk yang tertera sudah termasuk PPN"
 
+# Packs whose titles carry no identity (e.g. Akrab Mini "7 GB") get curated
+# ids/names keyed by (tab, title). Everything else slugs from the title.
+AKRAB_IDS = {
+    ("Reguler", "Akrab S"): ("xl-akrab-s", "Akrab S"),
+    ("Reguler", "Akrab SM"): ("xl-akrab-sm", "Akrab SM"),
+    ("Reguler", "Akrab M"): ("xl-akrab-m", "Akrab M"),
+    ("Reguler", "Akrab L"): ("xl-akrab-l", "Akrab L"),
+    ("Mini", "7 GB"): ("xl-akrab-mini-7gb", "Akrab Mini 7GB"),
+    ("Mini", "17 GB"): ("xl-akrab-mini-17gb", "Akrab Mini 17GB"),
+    ("Mini", "34 GB"): ("xl-akrab-mini-34gb", "Akrab Mini 34GB"),
+}
+
+QUOTA_KEYS = ("Utama", "Pribadi")
+
 wants_raw = True
 
 
@@ -21,9 +35,12 @@ def _gb(value: str) -> int:
     m = GB.search(value or "")
     if not m:
         raise ValueError(f"no GB in {value!r}")
-    s = m.group(1).replace(".", "")
-    gb = float(s.replace(",", ".")) if "," in s else int(s)
-    return round(gb * 1024)
+    num = m.group(1).strip()
+    if "," in num:
+        num = num.replace(".", "").replace(",", ".")  # Indonesian decimal
+    elif re.fullmatch(r"\d{1,3}(\.\d{3})+", num):
+        num = num.replace(".", "")  # thousands separator
+    return round(float(num) * 1024)
 
 
 def _days(value: str) -> int:
@@ -34,6 +51,9 @@ def _days(value: str) -> int:
 
 
 def _slug(title: str) -> str:
+    # A trailing "+" is a meaningful tier marker (M vs M+); mid-string "+"
+    # (400GB+400GB) is left alone so established ids never churn.
+    title = re.sub(r"\s*\+\s*$", "-plus", title)
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
 
@@ -49,17 +69,30 @@ class XlUltraExtractor:
         data = json.loads(m.group(1))
         pkgs, evidence = [], {}
         for tab in data["props"]["pageProps"].get("primeCardData", []):
+            tab_name = (tab.get("tabName") or "").strip()
             for card in tab.get("data", []) or []:
                 ben = {b.get("benefitType", ""): b.get("benefitValue", "")
                        for b in card.get("benefit", []) or []}
-                quota_raw = next((v for t, v in ben.items() if "Utama" in t), None)
+                quota_raw = next(
+                    (v for t, v in ben.items()
+                     if any(k in t for k in QUOTA_KEYS)), None)
                 valid_raw = next((v for t, v in ben.items() if "Aktif" in t), None)
                 if not quota_raw or not valid_raw:
                     continue
                 quota, validity = _gb(quota_raw), _days(valid_raw)
                 title = (card.get("title") or "").strip()
-                pid = f"xl-{_slug(title)}-{validity}d"
-                bonus = "Bonus kuota 5G." if "+" in title else None
+                if (tab_name, title) in AKRAB_IDS:
+                    pid, name = AKRAB_IDS[(tab_name, title)]
+                else:
+                    pid = f"xl-{_slug(title)}-{validity}d"
+                    name = title
+                shared = next((v for t, v in ben.items()
+                               if "Bersama" in t or "Anggota" in t), None)
+                total = next((v for t, v in ben.items() if "Total Kuota" in t), None)
+                if shared or total:
+                    bonus = f"Kuota bersama{f' ({shared})' if shared and 'orang' in shared else ''}."
+                else:
+                    bonus = "Bonus kuota 5G." if "+" in title else None
                 pkgs.append({
                     "id": pid,
                     "name": title,

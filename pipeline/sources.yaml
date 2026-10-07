@@ -37,8 +37,36 @@ isps:
       - url: https://www.telkomsel.com/simpati
         mode: static
   - id: xl
-    note: "XL ULTRA 5G+ family via embedded page JSON (primeCardData tabs). Older Flex/VIP packs curated (keep). Prices vary by location picker; national defaults recorded."
+    note: "Hub-discovered families (see quirks doc): ULTRA 5G+ JSON extractor runs per family page; unknown families trip review. Older Flex/VIP packs curated (keep). Prices vary by location picker; national defaults recorded."
     extractor: regex-xlultra
+    hub: https://www.xl.co.id/produk/paket-dan-addon
+    families:
+      - slug: xl-ultra-5g
+        url: https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g
+      - slug: xtra-combo-plus
+        url: https://www.xl.co.id/id/produk/paket-dan-addon/xtra-combo-plus
+      - slug: flexmax
+        url: https://www.xl.co.id/produk/paket-dan-addon/flexmax
+      - slug: flexmini
+        url: https://www.xl.co.id/produk/paket-dan-addon/flexmini
+      - slug: paket-akrab
+        url: https://www.xl.co.id/id/produk/paket-dan-addon/paket-akrab
+      - slug: bebas-puas
+        url: https://www.xl.co.id/bebas-puas
+      - slug: xtra-combo-mini
+        url: https://www.xl.co.id/id/produk/paket-dan-addon/xtra-combo-mini
+      - slug: xtra-combo-flex-mc
+        url: https://www.xl.co.id/id/produk/paket-dan-addon/xtra-combo-flex-mc
+    skip_families:
+      flexmax: "duplicates curated Xtra Combo Flex S/M/L/XL line"
+      flexmini: "duplicates curated line; same titles, no validity stated"
+      bebas-puas: "custom sachet structure, no primeCardData; deferred"
+      disneyplus: "streaming bundle, not a data pack"
+      disneyplus: "streaming bundle, not a data pack"
+    aliases:
+      xl-xtra-combo-vip-plus-20-gb-30d: xl-xtra-combo-vip-20gb
+      xl-xtra-combo-vip-plus-52-gb-30d: xl-xtra-combo-vip-52gb
+      xl-xtra-combo-flex-s-28d: xl-xtra-combo-flex-s
     keep: [xl-xtra-combo-flex-s, xl-xtra-combo-flex-m, xl-xtra-combo-flex-l,
       xl-xtra-combo-flex-xl, xl-xtra-combo-vip-20gb, xl-xtra-combo-vip-52gb,
       xl-xtra-kuota-2gb]
