@@ -811,8 +811,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-150gb-28d",
@@ -834,8 +834,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-400gb-400gb-5g-28d",
@@ -851,14 +851,14 @@
       "device_rental_fee": 0,
       "install_fee": null,
       "fup_note": null,
-      "promo_note": "Termasuk bonus kuota 5G.",
+      "promo_note": "Bonus kuota 5G.",
       "regions": [
         "JAVA_ALL"
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-600gb-600gb-5g-28d",
@@ -874,14 +874,14 @@
       "device_rental_fee": 0,
       "install_fee": null,
       "fup_note": null,
-      "promo_note": "Termasuk bonus kuota 5G.",
+      "promo_note": "Bonus kuota 5G.",
       "regions": [
         "JAVA_ALL"
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmax-65gb-28d",
@@ -903,8 +903,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-150gb-14d",
@@ -926,8 +926,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-14d",
@@ -949,8 +949,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-7d",
@@ -972,8 +972,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T00:00:00Z",
-      "updated_at": "2026-10-07T00:00:00Z"
+      "last_verified_at": "2026-10-07T11:40:15Z",
+      "updated_at": "2026-10-07T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-l",
