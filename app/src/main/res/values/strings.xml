@@ -77,5 +77,8 @@
     <string name="history_empty">Belum cukup data riwayat.</string>
     <string name="history_range">%1$s → %2$s</string>
     <string name="privacy_title">Kebijakan privasi</string>
+    <string name="drawer_home">Beranda</string>
+    <string name="drawer_tagline">Bandingkan harga internet</string>
+    <string name="open_menu">Buka menu</string>
     <string name="privacy_body">NetBanding tidak mengumpulkan, menyimpan, atau membagikan data pribadi apa pun. Tidak ada akun, iklan, analitik, atau pelacakan. Data paket internet diperbarui dari sumber publik dan disimpan hanya di perangkat Anda. Wilayah pilihan disimpan hanya di perangkat. Aplikasi dapat membuka situs provider di browser — kebijakan privasi situs tersebut berlaku di sana. Kontak: melalui halaman repositori aplikasi.</string>
 </resources>

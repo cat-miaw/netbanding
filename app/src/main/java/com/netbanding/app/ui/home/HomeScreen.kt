@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,8 +25,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.AppLogo
 import com.netbanding.app.ui.components.MultiSelectDropdown
 import com.netbanding.app.ui.components.PackageCard
 import com.netbanding.app.ui.components.SingleSelectDropdown
@@ -74,8 +75,7 @@ fun HomeScreen(
     onToggleFavorite: (Package) -> Unit,
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
     onRefresh: () -> Unit,
-    onOpenSettings: () -> Unit,
-    onOpenFavorites: () -> Unit,
+    onOpenDrawer: () -> Unit,
     onOpenCompare: () -> Unit,
     compareCount: Int,
     onToggleCompare: (Package) -> Unit,
@@ -104,22 +104,27 @@ fun HomeScreen(
         },
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AppLogo(size = 36)
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(
+                            Icons.Filled.Menu,
+                            contentDescription = stringResource(R.string.open_menu),
+                        )
+                    }
+                },
                 actions = {
                     if (compareCount > 0) TextButton(onClick = onOpenCompare) {
                         Text(stringResource(R.string.compare_open, compareCount))
-                    }
-                    IconButton(onClick = onOpenFavorites) {
-                        Icon(
-                            Icons.Filled.FavoriteBorder,
-                            contentDescription = stringResource(R.string.favorites_title),
-                        )
-                    }
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            contentDescription = stringResource(R.string.settings),
-                        )
                     }
                 },
             )
