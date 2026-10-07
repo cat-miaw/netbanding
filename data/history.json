@@ -229,5 +229,47 @@
       "tax_inclusive": true,
       "recorded_at": "2026-10-07T00:00:00Z"
     }
+  ],
+  "telkomsel-pasti-70k-8gb": [
+    {
+      "price": 70000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-pasti-100k-13gb": [
+    {
+      "price": 100000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-super-seru-13gb": [
+    {
+      "price": 30000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-super-seru-promo-25gb": [
+    {
+      "price": 70000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-5g-6gb": [
+    {
+      "price": 40000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "telkomsel-seru-5g-15gb": [
+    {
+      "price": 50000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
   ]
 }

@@ -27,10 +27,10 @@ isps:
       - url: https://www.firstmediapromo.com/promo-first-media/
         mode: static
   - id: telkomsel
-    note: "SERU packs, PPN-inclusive. Hand-curated seed; site is JS-heavy."
-    extract: manual
+    note: "Recommendation cards on /simpati via deterministic regex (name/quota/validity/price/Beli blocks). express-purchase needs a SIMPATI number (skeleton loaders) — out of scope."
+    extractor: regex-telkomsel
     pages:
-      - url: https://www.telkomsel.com/en/paket/seruinternet
+      - url: https://www.telkomsel.com/simpati
         mode: static
   - id: xl
     note: "Xtra Combo/Flex packs, PPN-inclusive per XL T&C. Hand-curated seed; promo prices (e.g. 2GB Rp5.600) change often, re-verify each cycle."

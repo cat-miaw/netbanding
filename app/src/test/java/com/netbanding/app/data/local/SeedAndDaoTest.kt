@@ -26,14 +26,14 @@ class SeedAndDaoTest {
     @Test fun seedImporter_loads18Packages() = runTest {
         val ok = SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         assertTrue(ok)
-        assertEquals(33, db.packageDao().activeCount())
+        assertEquals(39, db.packageDao().activeCount())
     }
 
     @Test fun sqlSort_cheapestFirst_andBudgetFilter() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val all = dao.observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
-        assertEquals(33, all.size)
+        assertEquals(39, all.size)
         val totals = all.map { it.monthly_total }
         assertEquals(totals.sorted(), totals)
         // Cheapest overall = XL Xtra Kuota 2GB: Rp5.600 incl. PPN.
@@ -48,7 +48,7 @@ class SeedAndDaoTest {
         val bb = dao.observePackages("JAVA_ALL", "broadband", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         val cell = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         assertEquals(18, bb.size)
-        assertEquals(15, cell.size)
+        assertEquals(21, cell.size)
         assertTrue(cell.all { it.monthly_total >= 5_000 })
     }
 
@@ -56,7 +56,7 @@ class SeedAndDaoTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "pergb").first()
-        assertEquals(15, rows.size)
+        assertEquals(21, rows.size)
         val ratios = rows.map { it.monthly_total.toDouble() / (it.quota_mb ?: 1) }
         assertEquals(ratios.sorted(), ratios)
     }

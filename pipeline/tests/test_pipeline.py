@@ -112,6 +112,18 @@ def test_firstmedia_parser_reads_detail_blocks():
     assert all(p["tax_inclusive"] is False for p in out["packages"])
 
 
+def test_telkomsel_parser_reads_cards():
+    from scraper.telkomsel import TelkomselExtractor
+    text = ("Pasti SIMPATI 70K - Rollover\n8 GB\nMasa aktif 30 Hari\n"
+            "Rp 70.000\nBeli\nSuper Seru Promo\n25 GB\nMasa aktif 28 hari\n"
+            "Rp 70.000\nBeli\n")
+    out = TelkomselExtractor().extract(text)
+    by_id = {p["id"]: p for p in out["packages"]}
+    assert by_id["telkomsel-pasti-70k-8gb"]["quota_mb"] == 8192
+    assert by_id["telkomsel-super-seru-promo-25gb"]["validity_days"] == 28
+    assert all(p["tax_inclusive"] is True for p in out["packages"])
+
+
 def test_diff_flags_40pct_but_not_5pct():
     old = [validate_package(good_raw(250000), ISP)[0]]
     big = [validate_package(good_raw(350000), ISP)[0]]  # +40%

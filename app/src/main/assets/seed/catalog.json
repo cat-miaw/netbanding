@@ -470,6 +470,98 @@
       "updated_at": "2026-10-07T00:00:00Z"
     },
     {
+      "id": "telkomsel-pasti-100k-13gb",
+      "isp_id": "telkomsel",
+      "name": "Pasti SIMPATI 100K",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 13312,
+      "validity_days": 30,
+      "contract_months": null,
+      "base_price": 100000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "telkomsel-pasti-70k-8gb",
+      "isp_id": "telkomsel",
+      "name": "Pasti SIMPATI 70K",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 8192,
+      "validity_days": 30,
+      "contract_months": null,
+      "base_price": 70000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "telkomsel-seru-5g-15gb",
+      "isp_id": "telkomsel",
+      "name": "Seru 5G 15GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 15360,
+      "validity_days": 30,
+      "contract_months": null,
+      "base_price": 50000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "telkomsel-seru-5g-6gb",
+      "isp_id": "telkomsel",
+      "name": "Seru 5G 6GB",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 6144,
+      "validity_days": 30,
+      "contract_months": null,
+      "base_price": 40000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
       "id": "telkomsel-seru-bulanan-15gb",
       "isp_id": "telkomsel",
       "name": "SERU Bulanan 15GB",
@@ -649,6 +741,52 @@
         "JAVA_ALL"
       ],
       "source_url": "https://www.telkomsel.com/en/paket/seruinternet",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "telkomsel-super-seru-13gb",
+      "isp_id": "telkomsel",
+      "name": "Super Seru Internet",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 13312,
+      "validity_days": 7,
+      "contract_months": null,
+      "base_price": 30000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
+      "is_active": true,
+      "last_verified_at": "2026-10-07T00:00:00Z",
+      "updated_at": "2026-10-07T00:00:00Z"
+    },
+    {
+      "id": "telkomsel-super-seru-promo-25gb",
+      "isp_id": "telkomsel",
+      "name": "Super Seru Promo",
+      "type": "cellular",
+      "speed_mbps": null,
+      "quota_mb": 25600,
+      "validity_days": 28,
+      "contract_months": null,
+      "base_price": 70000,
+      "tax_inclusive": true,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
       "last_verified_at": "2026-10-07T00:00:00Z",
       "updated_at": "2026-10-07T00:00:00Z"
