@@ -155,6 +155,10 @@ fun HomeScreen(
                     onValueChange = { text = it; onQuery(it) },
                     placeholder = { Text(stringResource(R.string.search_hint)) },
                     singleLine = true,
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 )
                 when {
