@@ -35,7 +35,7 @@
       "base_price": 700000,
       "tax_inclusive": false,
       "device_rental_fee": 50000,
-      "install_fee": 250000,
+      "install_fee": null,
       "fup_note": "FUP 10000 GB",
       "promo_note": null,
       "regions": [
@@ -58,7 +58,7 @@
       "base_price": 375000,
       "tax_inclusive": false,
       "device_rental_fee": 50000,
-      "install_fee": 250000,
+      "install_fee": null,
       "fup_note": "FUP 4000 GB",
       "promo_note": null,
       "regions": [
@@ -81,7 +81,7 @@
       "base_price": 575000,
       "tax_inclusive": false,
       "device_rental_fee": 50000,
-      "install_fee": 250000,
+      "install_fee": null,
       "fup_note": "FUP 8000 GB",
       "promo_note": null,
       "regions": [
@@ -104,7 +104,7 @@
       "base_price": 250000,
       "tax_inclusive": false,
       "device_rental_fee": 50000,
-      "install_fee": 250000,
+      "install_fee": null,
       "fup_note": "FUP 1500 GB",
       "promo_note": null,
       "regions": [
