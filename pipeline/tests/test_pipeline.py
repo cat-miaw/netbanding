@@ -67,6 +67,15 @@ def test_validate_rejects_null_tax_and_bad_price():
     assert any("base_price" in e for e in errs2)
 
 
+def test_evidence_must_be_verbatim():
+    from scraper.checks import verify_evidence
+    text = "Harga Rp 375.000/bulan, belum termasuk PPN 11%."
+    assert verify_evidence({"tax_inclusive": "belum termasuk PPN"}, text) == []
+    bad = verify_evidence({"tax_inclusive": "sudah termasuk PPN"}, text)
+    assert bad and "verbatim" in bad[0]
+    assert verify_evidence({}, text) == []
+
+
 def test_ids_deterministic():
     assert make_id("b", "Home Internet 1D 150 Mbps", 150) == make_id("b", "Home Internet 1D 150 Mbps!", 150)
 
@@ -116,6 +125,14 @@ def test_diff_flags_tax_flip_and_count_drop():
     flipped = [validate_package(good_raw(250000, tax=True), ISP)[0]]
     assert classify(old, flipped)["needs_review"] is True
     assert classify(old, [])["needs_review"] is True
+
+
+def test_diff_flags_money_field_changes():
+    old = [validate_package(good_raw(), ISP)[0]]
+    changed = [validate_package({**good_raw(), "device_rental_fee": 0}, ISP)[0]]
+    r = classify(old, changed)
+    assert r["needs_review"] is True
+    assert any("device_rental_fee" in x for x in r["reasons"])
 
 
 def test_history_appends_only_on_change():

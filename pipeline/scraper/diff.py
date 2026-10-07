@@ -4,6 +4,10 @@ from scraper.schema import Package
 PRICE_REVIEW_PCT = 30.0
 COUNT_DROP_REVIEW_PCT = 30.0
 
+# Money and contract terms: any change here needs eyes, no matter how small.
+MONEY_FIELDS = ("base_price", "device_rental_fee", "install_fee",
+                "contract_months", "quota_mb", "validity_days")
+
 
 def classify(old: list[Package], new: list[Package]) -> dict:
     old_by = {p.id: p for p in old}
@@ -28,6 +32,13 @@ def classify(old: list[Package], new: list[Package]) -> dict:
         if op.speed_mbps != np.speed_mbps:
             flags.append(f"speed {op.speed_mbps}->{np.speed_mbps}")
             reasons.append(f"{pid}: speed changed")
+        for field in MONEY_FIELDS:
+            if getattr(op, field) != getattr(np, field):
+                flags.append(f"{field} {getattr(op, field)}->{getattr(np, field)}")
+                reasons.append(f"{pid}: {field} changed")
+        if set(op.regions) != set(np.regions):
+            flags.append("regions changed")
+            reasons.append(f"{pid}: regions changed")
         if flags:
             changed[pid] = flags
     if old_by:

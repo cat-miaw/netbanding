@@ -1,9 +1,30 @@
 """Pydantic + sanity rules. tax_inclusive is required; ambiguous fields fail."""
+import re
 from scraper.schema import Catalog, Package
 
 PRICE_RANGE = (100_000, 2_000_000)
 SPEED_RANGE = (5, 2000)
 INSTALL_RANGE = (0, 2_000_000)
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"\s+", " ", s).strip().lower()
+
+
+def verify_evidence(evidence: dict, text: str) -> list[str]:
+    """Every evidence quote must appear verbatim in the page text.
+
+    LLMs paraphrase or invent quotes; an unverifiable quote means the
+    field is a guess, and guesses never auto-publish (blueprint rule 7).
+    """
+    errors: list[str] = []
+    hay = _norm(text)
+    for key, quote in (evidence or {}).items():
+        if not quote or not isinstance(quote, str):
+            errors.append(f"evidence missing for {key}")
+        elif _norm(quote) not in hay:
+            errors.append(f"evidence not verbatim for {key}: {quote[:60]!r}")
+    return errors
 
 
 def validate_package(raw: dict, isp_id: str) -> tuple[Package | None, list[str]]:

@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 import yaml
 
-from scraper.checks import validate_catalog, validate_package
+from scraper.checks import validate_catalog, validate_package, verify_evidence
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
 from scraper.extract import DeepSeekExtractor, normalize_package
@@ -86,7 +86,8 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         hashes[isp["id"]] = h
-        if args.fetch_only or not os.environ.get("DEEPSEEK_API_KEY"):
+        needs_key = isinstance(extractor, DeepSeekExtractor)
+        if args.fetch_only or (needs_key and not os.environ.get("DEEPSEEK_API_KEY")):
             log["status"] = "baseline_no_llm" if args.fetch_only else "skipped_no_key"
             run_log["isps"][isp["id"]] = log
             continue
@@ -114,7 +115,8 @@ def main() -> int:
             )
             raw["id"] = isp.get("aliases", {}).get(raw["id"], raw["id"])
             pkg, e = validate_package(raw, isp["id"])
-            if pkg is None:
+            e += verify_evidence(out.get("evidence", {}).get(str(i), {}), text)
+            if pkg is None or e:
                 errs.append({"item": i, "errors": e})
             else:
                 pkgs.append(pkg)

@@ -32,6 +32,7 @@ def publish(
         if d["id"] in kept_ids:
             raise ValueError(f"duplicate id across ISPs: {d['id']}")
         old_pkgs.append(type(pkg)(**d))
+    old_pkgs.sort(key=lambda p: (p.isp_id, p.id))
     catalog = Catalog(isps=old_catalog.isps, packages=old_pkgs)
 
     for pkg in new_packages:
@@ -42,6 +43,9 @@ def publish(
     manifest = json.load(open(f"{DATA_DIR}/manifest.json"))
     manifest["data_version"] += 1
     manifest["generated_at"] = now
+    # Canonical bytes: Pydantic model_dump_json(indent=2) verbatim. The app
+    # verifies sha256 against these exact bytes (see .gitattributes), so any
+    # reformatting (key sorting, compact separators) breaks sync.
     cat_bytes = catalog.model_dump_json(indent=2).encode()
     hist_bytes = json.dumps(history, indent=2).encode()
     manifest["files"] = {
