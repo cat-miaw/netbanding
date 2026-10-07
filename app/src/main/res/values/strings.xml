@@ -29,6 +29,8 @@
     <string name="open_provider">Buka situs provider</string>
     <string name="favorite">Simpan favorit</string>
     <string name="unfavorite">Hapus favorit</string>
+    <string name="favorites_title">Favorit</string>
+    <string name="favorites_empty">Belum ada paket favorit. Ketuk ikon hati pada paket untuk menyimpannya.</string>
     <string name="sync_failed">Gagal memperbarui, menampilkan data terakhir.</string>
     <string name="stale_banner">Data mungkin sudah usang (lebih dari 14 hari).</string>
     <string name="update_app_banner">Data baru tersedia — perbarui aplikasi untuk melihatnya.</string>

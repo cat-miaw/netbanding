@@ -48,4 +48,14 @@ class SeedAndDaoTest {
         assertEquals(1, pts.size)
         assertEquals(375000, pts.single().price)
     }
+
+    @Test fun favorites_addRemoveReflectedInFlow() = runTest {
+        SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
+        val dao = db.packageDao()
+        assertTrue(dao.observeFavorites().first().isEmpty())
+        dao.addFavorite(FavoriteEntity("biznet-home-150", "2026-10-07T00:00:00Z"))
+        assertEquals(listOf("biznet-home-150"), dao.observeFavorites().first().map { it.id })
+        dao.removeFavorite("biznet-home-150")
+        assertTrue(dao.observeFavorites().first().isEmpty())
+    }
 }

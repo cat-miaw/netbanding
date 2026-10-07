@@ -88,6 +88,20 @@ interface PackageDao {
     @Query("SELECT * FROM price_history WHERE package_id = :id ORDER BY recorded_at")
     fun observeHistory(id: String): Flow<List<PriceHistoryEntity>>
 
+    @Query(
+        """
+        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.speed_mbps, p.base_price,
+               p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
+               p.source_url, p.last_verified_at, 1 AS is_favorite
+        FROM packages p
+        JOIN isps i ON i.id = p.isp_id
+        JOIN favorites f ON f.package_id = p.id
+        WHERE p.is_active = 1
+        ORDER BY p.monthly_total ASC
+        """,
+    )
+    fun observeFavorites(): Flow<List<PackageWithIsp>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addFavorite(fav: FavoriteEntity)
     @Query("DELETE FROM favorites WHERE package_id = :id")

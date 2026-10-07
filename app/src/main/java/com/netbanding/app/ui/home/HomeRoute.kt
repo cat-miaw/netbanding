@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 fun HomeRoute(
     viewModel: HomeViewModel,
     onOpenSettings: () -> Unit,
+    onOpenFavorites: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -23,6 +24,7 @@ fun HomeRoute(
         onHistory = viewModel::history,
         onRefresh = viewModel::refresh,
         onOpenSettings = onOpenSettings,
+        onOpenFavorites = onOpenFavorites,
         modifier = modifier,
     )
 }

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.PackageCard
 import com.netbanding.app.ui.detail.PackageDetailSheet
 import java.text.NumberFormat
 import java.util.Locale
@@ -64,6 +65,7 @@ fun HomeScreen(
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
     onRefresh: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenFavorites: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<Package?>(null) }
@@ -75,7 +77,10 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
-                actions = { TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings)) } },
+                actions = {
+                    TextButton(onClick = onOpenFavorites) { Text(stringResource(R.string.favorites_title)) }
+                    TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings)) }
+                },
             )
         },
     ) { padding ->
@@ -202,40 +207,6 @@ fun HomeScreen(
                     onToggleFavorite(pkg)
                     scope.launch { sheetState.hide(); selected = null }
                 },
-            )
-        }
-    }
-}
-
-@Composable
-private fun PackageCard(pkg: Package, onClick: () -> Unit, onFavorite: () -> Unit, modifier: Modifier = Modifier) {
-    Card(onClick = onClick, modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(pkg.ispName, style = MaterialTheme.typography.labelMedium)
-                    Text(pkg.name, style = MaterialTheme.typography.titleMedium)
-                }
-                IconButton(onClick = onFavorite) {
-                    Icon(
-                        if (pkg.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = stringResource(
-                            if (pkg.isFavorite) R.string.unfavorite else R.string.favorite,
-                        ),
-                    )
-                }
-            }
-            Text(
-                buildString {
-                    append(formatIdr(pkg.monthlyTotal))
-                    append("/bln")
-                    pkg.speedMbps?.let { append(" • $it Mbps") }
-                },
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                if (pkg.taxInclusive) "Sudah termasuk PPN" else "Belum termasuk PPN",
-                style = MaterialTheme.typography.bodySmall,
             )
         }
     }

@@ -16,6 +16,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.netbanding.app.di.AppContainer
+import com.netbanding.app.ui.favorites.FavoritesRoute
+import com.netbanding.app.ui.favorites.FavoritesViewModel
 import com.netbanding.app.ui.home.HomeRoute
 import com.netbanding.app.ui.home.HomeViewModel
 import com.netbanding.app.ui.onboarding.OnboardingScreen
@@ -28,6 +30,7 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val PRIVACY = "privacy"
+    const val FAVORITES = "favorites"
 }
 
 @Composable
@@ -57,6 +60,19 @@ fun TemplateNavHost(
                     },
                 ),
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onOpenFavorites = { navController.navigate(Routes.FAVORITES) },
+            )
+        }
+        composable(Routes.FAVORITES) {
+            FavoritesRoute(
+                viewModel = viewModel<FavoritesViewModel>(
+                    factory = object : ViewModelProvider.Factory {
+                        @Suppress("UNCHECKED_CAST")
+                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+                            FavoritesViewModel(container.packageRepository) as T
+                    },
+                ),
+                onBack = { navController.popBackStack() },
             )
         }
         composable(Routes.ONBOARDING) {
