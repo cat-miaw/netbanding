@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, onToggleCompare: (Package) -> Unit, modifier: Modifier = Modifier) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<Package?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -78,6 +78,10 @@ fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, modifier: 
                 history = history,
                 onFavorite = {
                     viewModel.toggleFavorite(pkg)
+                    scope.launch { sheetState.hide(); selected = null }
+                },
+                onCompare = {
+                    onToggleCompare(pkg)
                     scope.launch { sheetState.hide(); selected = null }
                 },
             )

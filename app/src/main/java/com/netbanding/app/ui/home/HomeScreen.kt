@@ -66,6 +66,9 @@ fun HomeScreen(
     onRefresh: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenFavorites: () -> Unit,
+    onOpenCompare: () -> Unit,
+    compareCount: Int,
+    onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<Package?>(null) }
@@ -78,6 +81,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
+                    if (compareCount > 0) TextButton(onClick = onOpenCompare) {
+                        Text(stringResource(R.string.compare_open, compareCount))
+                    }
                     TextButton(onClick = onOpenFavorites) { Text(stringResource(R.string.favorites_title)) }
                     TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings)) }
                 },
@@ -205,6 +211,10 @@ fun HomeScreen(
                 history = history,
                 onFavorite = {
                     onToggleFavorite(pkg)
+                    scope.launch { sheetState.hide(); selected = null }
+                },
+                onCompare = {
+                    onToggleCompare(pkg)
                     scope.launch { sheetState.hide(); selected = null }
                 },
             )

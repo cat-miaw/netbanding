@@ -102,6 +102,20 @@ interface PackageDao {
     )
     fun observeFavorites(): Flow<List<PackageWithIsp>>
 
+    @Query(
+        """
+        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.speed_mbps, p.base_price,
+               p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
+               p.source_url, p.last_verified_at,
+               (f.package_id IS NOT NULL) AS is_favorite
+        FROM packages p
+        JOIN isps i ON i.id = p.isp_id
+        LEFT JOIN favorites f ON f.package_id = p.id
+        WHERE p.id IN (:ids)
+        """,
+    )
+    fun observeByIds(ids: List<String>): Flow<List<PackageWithIsp>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addFavorite(fav: FavoriteEntity)
     @Query("DELETE FROM favorites WHERE package_id = :id")

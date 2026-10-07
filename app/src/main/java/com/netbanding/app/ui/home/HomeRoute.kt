@@ -4,12 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
+import com.netbanding.app.domain.model.Package
 
 @Composable
 fun HomeRoute(
     viewModel: HomeViewModel,
+    compareCount: Int,
     onOpenSettings: () -> Unit,
     onOpenFavorites: () -> Unit,
+    onOpenCompare: () -> Unit,
+    onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -25,6 +29,9 @@ fun HomeRoute(
         onRefresh = viewModel::refresh,
         onOpenSettings = onOpenSettings,
         onOpenFavorites = onOpenFavorites,
+        onOpenCompare = onOpenCompare,
+        compareCount = compareCount,
+        onToggleCompare = onToggleCompare,
         modifier = modifier,
     )
 }

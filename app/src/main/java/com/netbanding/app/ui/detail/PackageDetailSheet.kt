@@ -29,6 +29,7 @@ fun PackageDetailSheet(
     pkg: Package,
     history: List<PricePoint>,
     onFavorite: () -> Unit,
+    onCompare: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uri = LocalUriHandler.current
@@ -69,6 +70,12 @@ fun PackageDetailSheet(
             Text(
                 stringResource(if (pkg.isFavorite) R.string.unfavorite else R.string.favorite),
             )
+        }
+        OutlinedButton(
+            onClick = onCompare,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.compare_add))
         }
     }
 }

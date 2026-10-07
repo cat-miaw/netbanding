@@ -48,6 +48,10 @@ class PackageRepository(
     fun observeFavorites(): Flow<List<Package>> =
         db.packageDao().observeFavorites().map { rows -> rows.map { it.toDomain() } }
 
+    fun observeByIds(ids: Set<String>): Flow<List<Package>> =
+        if (ids.isEmpty()) kotlinx.coroutines.flow.flowOf(emptyList())
+        else db.packageDao().observeByIds(ids.toList()).map { rows -> rows.map { it.toDomain() } }
+
     suspend fun toggleFavorite(id: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         if (isFavorite) db.packageDao().removeFavorite(id)
         else db.packageDao().addFavorite(FavoriteEntity(id, Instant.now().toString()))
