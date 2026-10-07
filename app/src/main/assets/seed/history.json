@@ -271,5 +271,61 @@
       "tax_inclusive": true,
       "recorded_at": "2026-10-07T00:00:00Z"
     }
+  ],
+  "xl-flexmax-65gb-28d": [
+    {
+      "price": 100000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmax-100gb-28d": [
+    {
+      "price": 125000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmax-150gb-28d": [
+    {
+      "price": 150000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmax-400gb-400gb-5g-28d": [
+    {
+      "price": 200000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmax-600gb-600gb-5g-28d": [
+    {
+      "price": 300000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmini-75gb-7d": [
+    {
+      "price": 50000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmini-75gb-14d": [
+    {
+      "price": 75000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
+  ],
+  "xl-flexmini-150gb-14d": [
+    {
+      "price": 100000,
+      "tax_inclusive": true,
+      "recorded_at": "2026-10-07T00:00:00Z"
+    }
   ]
 }

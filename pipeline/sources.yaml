@@ -37,10 +37,13 @@ isps:
       - url: https://www.telkomsel.com/simpati
         mode: static
   - id: xl
-    note: "Xtra Combo/Flex packs, PPN-inclusive per XL T&C. Hand-curated seed; promo prices (e.g. 2GB Rp5.600) change often, re-verify each cycle."
-    extract: manual
+    note: "XL ULTRA 5G+ family via embedded page JSON (primeCardData tabs). Older Flex/VIP packs curated (keep). Prices vary by location picker; national defaults recorded."
+    extractor: regex-xlultra
+    keep: [xl-xtra-combo-flex-s, xl-xtra-combo-flex-m, xl-xtra-combo-flex-l,
+      xl-xtra-combo-flex-xl, xl-xtra-combo-vip-20gb, xl-xtra-combo-vip-52gb,
+      xl-xtra-kuota-2gb]
     pages:
-      - url: https://www.xl.co.id/produk/paket-dan-addon/xtra-combo-flex
+      - url: https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g
         mode: static
 settings:
   ppn_rate: 0.11

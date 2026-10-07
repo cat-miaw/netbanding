@@ -17,6 +17,7 @@ from scraper.diff import classify
 from scraper.extract import DeepSeekExtractor, normalize_package
 from scraper.firstmedia import FirstMediaExtractor
 from scraper.telkomsel import TelkomselExtractor
+from scraper.xlultra import XlUltraExtractor
 from scraper.fetch import fetch
 from scraper.publish import publish
 from scraper.schema import Catalog
@@ -30,6 +31,7 @@ EXTRACTORS = {
     "deepseek": DeepSeekExtractor,
     "regex-firstmedia": FirstMediaExtractor,
     "regex-telkomsel": TelkomselExtractor,
+    "regex-xlultra": XlUltraExtractor,
 }
 
 
@@ -80,6 +82,7 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         text = clean("\n".join(texts))
+        raw_html = "\n".join(texts)
         h = content_hash(text)
         os.makedirs(f"{RUNS_DIR}/texts", exist_ok=True)
         open(f"{RUNS_DIR}/texts/{isp['id']}.txt", "w", encoding="utf-8", newline="").write(text)
@@ -94,7 +97,8 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         try:
-            out = extractor.extract(text)
+            payload = raw_html if getattr(extractor, "wants_raw", False) else text
+            out = extractor.extract(payload)
         except Exception as e:  # noqa: BLE001 - keep previous data
             log.update(status="extract_failed", error=str(e))
             run_log["isps"][isp["id"]] = log
