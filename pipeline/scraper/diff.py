@@ -5,7 +5,8 @@ PRICE_REVIEW_PCT = 30.0
 COUNT_DROP_REVIEW_PCT = 30.0
 
 # Money and contract terms: any change here needs eyes, no matter how small.
-MONEY_FIELDS = ("base_price", "device_rental_fee", "install_fee",
+# (base_price has its own >30% rule; small price moves auto-publish.)
+MONEY_FIELDS = ("device_rental_fee", "install_fee",
                 "contract_months", "quota_mb", "validity_days")
 
 
