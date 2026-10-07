@@ -7,7 +7,7 @@ sys.path.insert(0, "pipeline")
 from scraper.checks import validate_package
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
-from scraper.extract import make_id
+from scraper.extract import make_id, normalize_package
 from scraper.schema import Package
 
 ISP = "biznet"
@@ -59,6 +59,19 @@ def test_validate_rejects_null_tax_and_bad_price():
 
 def test_ids_deterministic():
     assert make_id("b", "Home Internet 1D 150 Mbps", 150) == make_id("b", "Home Internet 1D 150 Mbps!", 150)
+
+
+def test_normalize_maps_product_to_name_and_id():
+    raw = normalize_package(
+        "biznet",
+        {"product": "Home Internet 1D 150 Mbps", "speed_mbps": 150, "base_price": 375000,
+         "tax_inclusive": False, "device_rental_fee": 0},
+        0, "https://x", "2026-10-07",
+    )
+    assert raw["name"] == "Home Internet 1D 150 Mbps"
+    assert raw["id"] == "biznet-home-internet-1d-150-mbps-150"
+    pkg, errs = validate_package(raw, "biznet")
+    assert errs == [] and isinstance(pkg, Package)
 
 
 def test_diff_flags_40pct_but_not_5pct():

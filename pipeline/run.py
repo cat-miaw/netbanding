@@ -14,7 +14,7 @@ import yaml
 from scraper.checks import validate_catalog, validate_package
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
-from scraper.extract import DeepSeekExtractor, make_id
+from scraper.extract import DeepSeekExtractor, normalize_package
 from scraper.fetch import fetch
 from scraper.publish import publish
 from scraper.schema import Catalog
@@ -85,14 +85,17 @@ def main() -> int:
             continue
         log["tokens"] = out.get("tokens", 0)
         log["evidence"] = out.get("evidence", {})
+        log["chars"] = len(text)
+        if not out.get("packages"):
+            # Empty extraction keeps previous data and touches nothing
+            # (blueprint 6.3); the stored hash avoids weekly LLM cost until
+            # the page actually changes.
+            log.update(status="extract_empty")
+            run_log["isps"][isp["id"]] = log
+            continue
         pkgs, errs = [], []
         for i, raw in enumerate(out.get("packages", [])):
-            raw = dict(raw)
-            raw["id"] = make_id(isp["id"], raw.pop("product", f"plan-{i}"), raw.get("speed_mbps"))
-            raw.setdefault("regions", ["JAVA_ALL"])
-            raw.setdefault("source_url", isp["pages"][0]["url"])
-            raw.setdefault("last_verified_at", f"{today}T02:00:00Z")
-            raw.setdefault("updated_at", f"{today}T02:00:00Z")
+            raw = normalize_package(isp["id"], raw, i, isp["pages"][0]["url"], today)
             pkg, e = validate_package(raw, isp["id"])
             if pkg is None:
                 errs.append({"item": i, "errors": e})
