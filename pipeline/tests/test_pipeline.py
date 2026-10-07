@@ -43,6 +43,16 @@ def test_clean_hash_stable():
     assert "sudah termasuk PPN" in a
 
 
+def test_clean_keeps_nextjs_json_data():
+    html = ('<html><body><nav>menu</nav><p>shell</p>'
+            '<script id="__NEXT_DATA__" type="application/json">'
+            '{"props":{"plans":[{"name":"Velo 150 Mbps","price":277500}]}}'
+            "</script></body></html>")
+    text = clean(html)
+    assert "Velo 150 Mbps" in text and "277500" in text
+    assert "menu" not in text
+
+
 def test_validate_accepts_good_package():
     pkg, errs = validate_package(good_raw(), ISP)
     assert errs == [] and isinstance(pkg, Package)

@@ -68,6 +68,8 @@ def main() -> int:
             continue
         text = clean("\n".join(texts))
         h = content_hash(text)
+        os.makedirs(f"{RUNS_DIR}/texts", exist_ok=True)
+        open(f"{RUNS_DIR}/texts/{isp['id']}.txt", "w", encoding="utf-8", newline="").write(text)
         if hashes.get(isp["id"]) == h:
             log["status"] = "unchanged_skip"
             run_log["isps"][isp["id"]] = log
@@ -120,6 +122,7 @@ def main() -> int:
                 misses.pop(p.id, None)
         result = classify(old_isp, pkgs)
         log["changed"] = result["changed"]
+        log["extracted"] = sorted(p.id for p in pkgs)
         if result["needs_review"]:
             log.update(status="needs_review", reasons=result["reasons"])
             review["needs_review"] = True
