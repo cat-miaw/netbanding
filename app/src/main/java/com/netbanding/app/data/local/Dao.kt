@@ -11,6 +11,7 @@ data class PackageWithIsp(
     val id: String,
     val isp_id: String,
     val isp_name: String,
+    val isp_website: String,
     val name: String,
     val type: String,
     val speed_mbps: Int?,
@@ -31,7 +32,7 @@ interface PackageDao {
     /** Filtering/sorting in SQL per blueprint rule 6. Region join handles JAVA_ALL. */
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+        SELECT p.id, p.isp_id, i.name AS isp_name, i.website_url AS isp_website, p.name, p.type, p.speed_mbps,
                p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at,
@@ -104,7 +105,7 @@ interface PackageDao {
 
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+        SELECT p.id, p.isp_id, i.name AS isp_name, i.website_url AS isp_website, p.name, p.type, p.speed_mbps,
                p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at, 1 AS is_favorite
@@ -119,7 +120,7 @@ interface PackageDao {
 
     @Query(
         """
-        SELECT p.id, p.isp_id, i.name AS isp_name, p.name, p.type, p.speed_mbps,
+        SELECT p.id, p.isp_id, i.name AS isp_name, i.website_url AS isp_website, p.name, p.type, p.speed_mbps,
                p.quota_mb, p.validity_days, p.base_price,
                p.tax_inclusive, p.device_rental_fee, p.install_fee, p.monthly_total,
                p.source_url, p.last_verified_at,
