@@ -84,6 +84,25 @@ def test_normalize_maps_product_to_name_and_id():
     assert errs == [] and isinstance(pkg, Package)
 
 
+def test_firstmedia_parser_reads_detail_blocks():
+    from scraper.firstmedia import FirstMediaExtractor
+    text = ("1a.Internet only Starter\nHarga sebelum PPN : Rp.185.000\n"
+            "Biaya Pemasangan Rp. 111.000 ( sudah termasuk Ppn 11% )\n"
+            "Internet Speed Up to 20 Mbps\n"
+            "1B. Internet only\nPaket Smart\nHarga sebelum PPN : Rp.229.000\n"
+            "Internet Speed Up to 250 Mbps\nFREE BIAYA PASANG\n"
+            "2A.PAKET COMBO JOY VALUE\nHarga sebelum PPN : Rp.350.000\n"
+            "Internet Speed Up to 100 Mbps\nFree Instalasi+ Kabel Free 40 Meter\n"
+            "Paket Ini Ada Kontrak Berlangganan Selama 12 Bulan\n")
+    out = FirstMediaExtractor().extract(text)
+    by_id = {p["id"]: p for p in out["packages"]}
+    assert by_id["firstmedia-starter-20"]["install_fee"] == 111000
+    assert by_id["firstmedia-smart-250"]["speed_mbps"] == 250
+    assert by_id["firstmedia-joy-value-100"]["contract_months"] == 12
+    assert by_id["firstmedia-joy-value-100"]["install_fee"] == 0
+    assert all(p["tax_inclusive"] is False for p in out["packages"])
+
+
 def test_diff_flags_40pct_but_not_5pct():
     old = [validate_package(good_raw(250000), ISP)[0]]
     big = [validate_package(good_raw(350000), ISP)[0]]  # +40%

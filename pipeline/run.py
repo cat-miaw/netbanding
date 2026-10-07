@@ -15,6 +15,7 @@ from scraper.checks import validate_catalog, validate_package
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
 from scraper.extract import DeepSeekExtractor, normalize_package
+from scraper.firstmedia import FirstMediaExtractor
 from scraper.fetch import fetch
 from scraper.publish import publish
 from scraper.schema import Catalog
@@ -23,6 +24,11 @@ STATE_DIR = "pipeline/state"
 RUNS_DIR = "pipeline/runs"
 REVIEW_FILE = "pipeline/review.json"
 DEACTIVATE_AFTER_MISSES = 3
+
+EXTRACTORS = {
+    "deepseek": DeepSeekExtractor,
+    "regex-firstmedia": FirstMediaExtractor,
+}
 
 
 def _load(path: str, default):
@@ -51,7 +57,6 @@ def main() -> int:
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     run_log: dict = {"date": today, "fetch_only": args.fetch_only, "isps": {}}
     review: dict = {"needs_review": False, "items": []}
-    extractor = DeepSeekExtractor()
 
     for isp in sources["isps"]:
         if args.isp and isp["id"] != args.isp:
@@ -62,6 +67,7 @@ def main() -> int:
             log["status"] = "manual_seed"
             run_log["isps"][isp["id"]] = log
             continue
+        extractor = EXTRACTORS.get(isp.get("extractor", "deepseek"), DeepSeekExtractor)()
         try:
             texts = []
             for page in isp["pages"]:
@@ -102,7 +108,10 @@ def main() -> int:
             continue
         pkgs, errs = [], []
         for i, raw in enumerate(out.get("packages", [])):
-            raw = normalize_package(isp["id"], raw, i, isp["pages"][0]["url"], today)
+            raw = normalize_package(
+                isp["id"], raw, i, isp["pages"][0]["url"], today,
+                regions=isp.get("default_regions"),
+            )
             raw["id"] = isp.get("aliases", {}).get(raw["id"], raw["id"])
             pkg, e = validate_package(raw, isp["id"])
             if pkg is None:

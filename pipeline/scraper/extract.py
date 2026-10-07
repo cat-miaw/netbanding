@@ -37,14 +37,16 @@ def make_id(isp_id: str, product: str, speed_mbps: int | None) -> str:
 
 
 def normalize_package(
-    isp_id: str, item: dict, index: int, source_url: str, today: str
+    isp_id: str, item: dict, index: int, source_url: str, today: str,
+    regions: list | None = None,
 ) -> dict:
     """Map one LLM item to catalog shape. Deterministic id; LLM never invents it."""
     raw = dict(item)
-    product = raw.pop("product", f"plan-{index}")
-    raw["id"] = make_id(isp_id, product, raw.get("speed_mbps"))
-    raw["name"] = product
-    raw.setdefault("regions", ["JAVA_ALL"])
+    if "id" not in raw:
+        product = raw.pop("product", f"plan-{index}")
+        raw["id"] = make_id(isp_id, product, raw.get("speed_mbps"))
+        raw["name"] = product
+    raw["regions"] = raw.get("regions") or regions or ["JAVA_ALL"]
     raw.setdefault("source_url", source_url)
     raw.setdefault("last_verified_at", f"{today}T02:00:00Z")
     raw.setdefault("updated_at", f"{today}T02:00:00Z")
