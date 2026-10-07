@@ -12,15 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -77,6 +71,13 @@ fun HomeScreen(
     var selected by remember { mutableStateOf<Package?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val isCellular = state.type == Types.CELLULAR
+    val tabIsps = remember(state.isps, state.type) {
+        state.isps.filter {
+            (isCellular && it.category == "cellular") ||
+                (!isCellular && it.category != "cellular")
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -98,138 +99,142 @@ fun HomeScreen(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
+            // Tabs stay pinned; search + filters scroll away with the list so
+            // first paint shows packages, not chrome.
             Column(modifier = Modifier.fillMaxSize()) {
-            TabRow(selectedTabIndex = if (state.type == Types.CELLULAR) 1 else 0) {
-                Tab(
-                    selected = state.type == Types.BROADBAND,
-                    onClick = { onType(Types.BROADBAND) },
-                    text = { Text(stringResource(R.string.tab_broadband)) },
-                )
-                Tab(
-                    selected = state.type == Types.CELLULAR,
-                    onClick = { onType(Types.CELLULAR) },
-                    text = { Text(stringResource(R.string.tab_cellular)) },
-                )
-            }
-            OutlinedTextField(
-                value = state.query,
-                onValueChange = onQuery,
-                placeholder = { Text(stringResource(R.string.search_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            )
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FilterChip(
-                    selected = state.maxMonthly == 300_000L, onClick = {
-                        onBudget(if (state.maxMonthly == 300_000L) null else 300_000L)
-                    }, label = { Text(stringResource(R.string.budget_300)) },
-                )
-                FilterChip(
-                    selected = state.maxMonthly == 500_000L, onClick = {
-                        onBudget(if (state.maxMonthly == 500_000L) null else 500_000L)
-                    }, label = { Text(stringResource(R.string.budget_500)) },
-                )
-                if (state.type == Types.BROADBAND) {
-                    FilterChip(
-                        selected = state.minSpeed == 50, onClick = {
-                            onSpeed(if (state.minSpeed == 50) null else 50)
-                        }, label = { Text(stringResource(R.string.speed_50)) },
+                TabRow(selectedTabIndex = if (isCellular) 1 else 0) {
+                    Tab(
+                        selected = !isCellular,
+                        onClick = { onType(Types.BROADBAND) },
+                        text = { Text(stringResource(R.string.tab_broadband)) },
                     )
-                    FilterChip(
-                        selected = state.minSpeed == 100, onClick = {
-                            onSpeed(if (state.minSpeed == 100) null else 100)
-                        }, label = { Text(stringResource(R.string.speed_100)) },
+                    Tab(
+                        selected = isCellular,
+                        onClick = { onType(Types.CELLULAR) },
+                        text = { Text(stringResource(R.string.tab_cellular)) },
                     )
                 }
-                FilterChip(
-                    selected = state.sort == Sorts.CHEAPEST, onClick = { onSort(Sorts.CHEAPEST) },
-                    label = { Text(stringResource(R.string.sort_cheapest)) },
-                )
-                if (state.type == Types.BROADBAND) {
-                    FilterChip(
-                        selected = state.sort == Sorts.VALUE, onClick = { onSort(Sorts.VALUE) },
-                        label = { Text(stringResource(R.string.sort_value)) },
-                    )
-                }
-                if (state.type == Types.CELLULAR) {
-                    FilterChip(
-                        selected = state.sort == Sorts.PERGB, onClick = { onSort(Sorts.PERGB) },
-                        label = { Text(stringResource(R.string.sort_pergb)) },
-                    )
-                }
-                FilterChip(
-                    selected = state.sort == Sorts.FASTEST, onClick = { onSort(Sorts.FASTEST) },
-                    label = { Text(stringResource(R.string.sort_fastest)) },
-                )
-            }
-            val tabIsps = remember(state.isps, state.type) {
-                state.isps.filter {
-                    (state.type == Types.CELLULAR && it.category == "cellular") ||
-                        (state.type != Types.CELLULAR && it.category != "cellular")
-                }
-            }
-            if (tabIsps.isNotEmpty()) {
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    tabIsps.forEach { isp ->
-                        FilterChip(
-                            selected = isp.id in state.ispIds, onClick = { onToggleIsp(isp.id) },
-                            label = { Text(isp.name) },
-                        )
+                when {
+                    state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                    state.items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.empty_result))
+                    }
+                    else -> LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        item(key = "search", contentType = "header") {
+                            OutlinedTextField(
+                                value = state.query,
+                                onValueChange = onQuery,
+                                placeholder = { Text(stringResource(R.string.search_hint)) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        item(key = "filters", contentType = "header") {
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState())
+                                    .padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                if (!isCellular) {
+                                    FilterChip(
+                                        selected = state.maxMonthly == 300_000L, onClick = {
+                                            onBudget(if (state.maxMonthly == 300_000L) null else 300_000L)
+                                        }, label = { Text(stringResource(R.string.budget_300)) },
+                                    )
+                                    FilterChip(
+                                        selected = state.maxMonthly == 500_000L, onClick = {
+                                            onBudget(if (state.maxMonthly == 500_000L) null else 500_000L)
+                                        }, label = { Text(stringResource(R.string.budget_500)) },
+                                    )
+                                    FilterChip(
+                                        selected = state.minSpeed == 50, onClick = {
+                                            onSpeed(if (state.minSpeed == 50) null else 50)
+                                        }, label = { Text(stringResource(R.string.speed_50)) },
+                                    )
+                                    FilterChip(
+                                        selected = state.minSpeed == 100, onClick = {
+                                            onSpeed(if (state.minSpeed == 100) null else 100)
+                                        }, label = { Text(stringResource(R.string.speed_100)) },
+                                    )
+                                }
+                                FilterChip(
+                                    selected = state.sort == Sorts.CHEAPEST, onClick = { onSort(Sorts.CHEAPEST) },
+                                    label = { Text(stringResource(R.string.sort_cheapest)) },
+                                )
+                                if (!isCellular) {
+                                    FilterChip(
+                                        selected = state.sort == Sorts.VALUE, onClick = { onSort(Sorts.VALUE) },
+                                        label = { Text(stringResource(R.string.sort_value)) },
+                                    )
+                                    FilterChip(
+                                        selected = state.sort == Sorts.FASTEST, onClick = { onSort(Sorts.FASTEST) },
+                                        label = { Text(stringResource(R.string.sort_fastest)) },
+                                    )
+                                } else {
+                                    FilterChip(
+                                        selected = state.sort == Sorts.PERGB, onClick = { onSort(Sorts.PERGB) },
+                                        label = { Text(stringResource(R.string.sort_pergb)) },
+                                    )
+                                }
+                            }
+                        }
+                        if (tabIsps.isNotEmpty()) {
+                            item(key = "isps", contentType = "header") {
+                                Row(
+                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    tabIsps.forEach { isp ->
+                                        FilterChip(
+                                            selected = isp.id in state.ispIds, onClick = { onToggleIsp(isp.id) },
+                                            label = { Text(isp.name) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        if (state.showUpdateApp || state.showStale || state.syncStatus == SyncStatus.FAILED) {
+                            item(key = "banners", contentType = "header") {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    if (state.showUpdateApp) Text(
+                                        stringResource(R.string.update_app_banner),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    if (state.showStale) Text(
+                                        stringResource(R.string.stale_banner),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                    if (state.syncStatus == SyncStatus.FAILED) Text(
+                                        stringResource(R.string.sync_failed),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        }
+                        items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
+                            PackageCard(
+                                pkg = pkg,
+                                onClick = { selected = pkg },
+                                onFavorite = { onToggleFavorite(pkg) },
+                            )
+                        }
+                        item(key = "footer", contentType = "footer") {
+                            Text(
+                                state.lastUpdated?.let { stringResource(R.string.last_updated, it.take(10)) }
+                                    ?: stringResource(R.string.offline_seed_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
                     }
                 }
             }
-            if (state.showUpdateApp || state.showStale || state.syncStatus == SyncStatus.FAILED) {
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    if (state.showUpdateApp) Text(
-                        stringResource(R.string.update_app_banner),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    if (state.showStale) Text(
-                        stringResource(R.string.stale_banner),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    if (state.syncStatus == SyncStatus.FAILED) Text(
-                        stringResource(R.string.sync_failed),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-            when {
-                state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-                state.items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.empty_result))
-                }
-                else -> LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
-                        PackageCard(
-                            pkg = pkg,
-                            onClick = { selected = pkg },
-                            onFavorite = { onToggleFavorite(pkg) },
-                        )
-                    }
-                    item {
-                        Text(
-                            state.lastUpdated?.let { stringResource(R.string.last_updated, it.take(10)) }
-                                ?: stringResource(R.string.offline_seed_note),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
-                }
-            }
-        }
         }
     }
 

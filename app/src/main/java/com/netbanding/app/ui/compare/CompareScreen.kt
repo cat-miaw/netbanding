@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.formatPricePeriode
 import com.netbanding.app.ui.components.formatQuota
 import com.netbanding.app.ui.home.formatIdr
 
@@ -84,7 +85,8 @@ fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modi
                 }
                 item {
                     CompareRow(stringResource(R.string.compare_monthly), items,
-                        { formatIdr(it.monthlyTotal) }, { it.monthlyTotal == cheapest })
+                        { formatPricePeriode(it.monthlyTotal, it.validityDays) },
+                        { it.monthlyTotal == cheapest })
                 }
                 item {
                     CompareRow(stringResource(R.string.compare_speed), items,

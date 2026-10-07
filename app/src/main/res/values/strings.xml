@@ -38,7 +38,7 @@
     <string name="compare_remove">Hapus</string>
     <string name="compare_add">Bandingkan</string>
     <string name="compare_open">Banding (%1$d)</string>
-    <string name="compare_monthly">Total bulanan</string>
+    <string name="compare_monthly">Total</string>
     <string name="compare_speed">Kecepatan</string>
     <string name="compare_per_mbps">Per Mbps</string>
     <string name="compare_install">Biaya pasang</string>
@@ -50,11 +50,12 @@
     <string name="tab_broadband">Broadband</string>
     <string name="tab_cellular">Seluler</string>
     <string name="quota_line">Kuota: %1$s</string>
-    <string name="validity_line">Masa aktif: %1$d hari</string>
+    <string name="validity_line">Masa aktif: %1$s</string>
+    <string name="total_line">Total: %1$s/%2$s</string>
     <string name="alert_channel_name">Penurunan harga</string>
     <string name="alert_channel_desc">Notifikasi saat harga paket favorit turun.</string>
     <string name="alert_title">Harga paket turun</string>
-    <string name="alert_text_one">%1$s: %2$s → %3$s/bln</string>
+    <string name="alert_text_one">%1$s: %2$s → %3$s/%4$s</string>
     <string name="alert_text_many">%1$d paket favorit turun harga, termasuk %2$s.</string>
     <string name="sync_failed">Gagal memperbarui, menampilkan data terakhir.</string>
     <string name="stale_banner">Data mungkin sudah usang (lebih dari 14 hari).</string>

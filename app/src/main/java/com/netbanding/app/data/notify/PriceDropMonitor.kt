@@ -11,6 +11,7 @@ import com.netbanding.app.MainActivity
 import com.netbanding.app.R
 import com.netbanding.app.data.local.NetbandingDb
 import com.netbanding.app.data.prefs.UserPrefs
+import com.netbanding.app.ui.components.periodeFor
 import com.netbanding.app.ui.home.formatIdr
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -19,7 +20,7 @@ import kotlinx.coroutines.withContext
 const val DROP_CHANNEL_ID = "price_drops"
 private const val DROP_NOTIFICATION_ID = 1001
 
-data class PriceDrop(val name: String, val oldTotal: Long, val newTotal: Long)
+data class PriceDrop(val name: String, val oldTotal: Long, val newTotal: Long, val validityDays: Int?)
 
 /**
  * v1.1 local price-drop alerts. Computed on-device after each successful
@@ -34,15 +35,15 @@ class PriceDropMonitor(
 ) {
     suspend fun checkAndNotify(): List<PriceDrop> = withContext(Dispatchers.IO) {
         val current = db.packageDao().observeFavorites().first()
-            .associate { it.id to (it.name to it.monthly_total) }
+            .associate { it.id to Triple(it.name, it.monthly_total, it.validity_days) }
         val baseline = prefs.priceBaseline.first()
         if (baseline.isEmpty()) {
             prefs.setPriceBaseline(current.mapValues { it.value.second })
             return@withContext emptyList()
         }
-        val drops = current.mapNotNull { (id, pair) ->
+        val drops = current.mapNotNull { (id, triple) ->
             val old = baseline[id] ?: return@mapNotNull null
-            if (pair.second < old) PriceDrop(pair.first, old, pair.second) else null
+            if (triple.second < old) PriceDrop(triple.first, old, triple.second, triple.third) else null
         }
         prefs.setPriceBaseline(current.mapValues { it.value.second })
         if (drops.isNotEmpty()) notifier(drops)
@@ -69,6 +70,7 @@ class PriceDropMonitor(
                 context.getString(
                     R.string.alert_text_one,
                     first.name, formatIdr(first.oldTotal), formatIdr(first.newTotal),
+                    periodeFor(first.validityDays),
                 )
             } else {
                 context.getString(R.string.alert_text_many, drops.size, first.name)

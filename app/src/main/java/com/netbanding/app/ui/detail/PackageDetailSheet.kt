@@ -22,6 +22,8 @@ import com.netbanding.app.domain.model.Package
 import com.netbanding.app.domain.model.PricePoint
 import com.netbanding.app.domain.usecase.CalculateTrueCost
 import com.netbanding.app.ui.components.formatQuota
+import com.netbanding.app.ui.components.formatValidity
+import com.netbanding.app.ui.components.periodeFor
 import com.netbanding.app.ui.home.Types
 import com.netbanding.app.ui.home.formatIdr
 
@@ -51,11 +53,15 @@ fun PackageDetailSheet(
         if (!pkg.taxInclusive) Text(stringResource(R.string.ppn_line, formatIdr(cost.taxedBase - pkg.basePrice)))
         if (pkg.deviceRentalFee > 0) Text(stringResource(R.string.rental_line, formatIdr(pkg.deviceRentalFee)))
         Text(
-            stringResource(R.string.monthly_total, formatIdr(cost.monthlyTotal)),
+            stringResource(
+                R.string.total_line,
+                formatIdr(cost.monthlyTotal),
+                periodeFor(pkg.validityDays),
+            ),
             style = MaterialTheme.typography.titleLarge,
         )
         pkg.quotaMb?.let { Text(stringResource(R.string.quota_line, formatQuota(it))) }
-        pkg.validityDays?.let { Text(stringResource(R.string.validity_line, it)) }
+        pkg.validityDays?.let { Text(stringResource(R.string.validity_line, formatValidity(it))) }
         if (pkg.type == Types.BROADBAND) {
             Text(
                 if (pkg.installFee == null) stringResource(R.string.install_unknown)

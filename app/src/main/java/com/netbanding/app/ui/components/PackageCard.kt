@@ -33,6 +33,21 @@ fun formatQuota(quotaMb: Int): String {
     return "$s GB"
 }
 
+/**
+ * Billing period from package validity: monthly above 21 days, weekly
+ * 7-21 days, daily below. Broadband (null validity) bills monthly.
+ * A 7-day pack is never "per bulan" — that misleads users.
+ */
+fun periodeFor(validityDays: Int?): String = when {
+    validityDays == null || validityDays > 21 -> "bln"
+    validityDays >= 7 -> "mgg"
+    else -> "hr"
+}
+
+fun formatPricePeriode(amount: Long, validityDays: Int?): String =
+    "${formatIdr(amount)}/${periodeFor(validityDays)}"
+
+fun formatValidity(days: Int): String = "$days hari"
 @Composable
 fun PackageCard(
     pkg: Package,
@@ -58,11 +73,10 @@ fun PackageCard(
             }
             Text(
                 buildString {
-                    append(formatIdr(pkg.monthlyTotal))
-                    append("/bln")
+                    append(formatPricePeriode(pkg.monthlyTotal, pkg.validityDays))
                     if (pkg.type == Types.CELLULAR) {
                         pkg.quotaMb?.let { append(" • ${formatQuota(it)}") }
-                        pkg.validityDays?.let { append(" • $it hr") }
+                        pkg.validityDays?.let { append(" • ${formatValidity(it)}") }
                     } else {
                         pkg.speedMbps?.let { append(" • $it Mbps") }
                     }
