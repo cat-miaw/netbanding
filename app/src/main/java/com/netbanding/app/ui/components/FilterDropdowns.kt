@@ -3,6 +3,7 @@ package com.netbanding.app.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +45,7 @@ fun SingleSelectDropdown(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
+            shape = RoundedCornerShape(14.dp),
             // Opaque backing so the floating label cuts a clean notch instead
             // of showing the page background through the outline.
             label = {
@@ -61,7 +63,12 @@ fun SingleSelectDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(14.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
             options.forEach { (id, name) ->
                 DropdownMenuItem(
                     text = { Text(name) },
@@ -82,8 +89,7 @@ fun SingleSelectDropdown(
  * Multi-select dropdown with tri-state "Semua" (provider, period).
  * Tapping Semua selects everything (or clears); tapping an item toggles it,
  * which implicitly unticks Semua. Menu stays open while toggling.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+ */@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MultiSelectDropdown(
     label: String,
@@ -109,6 +115,7 @@ fun MultiSelectDropdown(
             onValueChange = {},
             readOnly = true,
             singleLine = true,
+            shape = RoundedCornerShape(14.dp),
             // Opaque backing so the floating label cuts a clean notch instead
             // of showing the page background through the outline.
             label = {
@@ -126,7 +133,12 @@ fun MultiSelectDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(14.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
             DropdownMenuItem(
                 text = { Text(allLabel) },
                 trailingIcon = {

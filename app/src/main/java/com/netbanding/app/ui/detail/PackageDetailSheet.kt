@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -130,17 +131,23 @@ fun PackageDetailSheet(
             color = cs.onSurfaceVariant,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val btnPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
             Button(
                 onClick = onCompare,
                 colors = ButtonDefaults.buttonColors(containerColor = cs.primary),
                 shape = RoundedCornerShape(14.dp),
+                contentPadding = btnPadding,
                 modifier = Modifier.weight(1f),
             ) {
-                Text(if (isCompared) "✓ ${stringResource(R.string.compare_added)}" else "+ ${stringResource(R.string.compare_add)}")
+                Text(
+                    if (isCompared) "✓ ${stringResource(R.string.compare_added)}" else "+ ${stringResource(R.string.compare_add)}",
+                    maxLines = 1,
+                )
             }
             OutlinedButton(
                 onClick = onFavorite,
                 shape = RoundedCornerShape(14.dp),
+                contentPadding = btnPadding,
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(
@@ -148,7 +155,7 @@ fun PackageDetailSheet(
                     contentDescription = null,
                     modifier = Modifier.padding(end = 6.dp),
                 )
-                Text(stringResource(R.string.save))
+                Text(stringResource(R.string.save), maxLines = 1)
             }
         }
         val context = LocalContext.current

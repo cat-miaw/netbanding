@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,8 +58,10 @@ fun MenuDrawerContent(
     Column(
         modifier = modifier.fillMaxSize()
             .background(cs.surface)
+            .statusBarsPadding()
+            .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -87,6 +92,10 @@ fun MenuDrawerContent(
         SectionLabel(stringResource(R.string.menu_mine))
         MenuRow(icon = Icons.Filled.FavoriteBorder, title = stringResource(R.string.favorites_title), onClick = onFavorites)
         MenuRow(icon = Icons.AutoMirrored.Filled.CompareArrows, title = stringResource(R.string.compare_title), onClick = onCompare)
+        HorizontalDivider(
+            color = cs.outlineVariant,
+            modifier = Modifier.padding(horizontal = 12.dp),
+        )
         Spacer(Modifier.weight(1f))
         MenuRow(icon = Icons.Filled.Settings, title = stringResource(R.string.settings), onClick = onSettings)
         MenuRow(icon = Icons.Filled.PrivacyTip, title = stringResource(R.string.privacy_title), onClick = onPrivacy)

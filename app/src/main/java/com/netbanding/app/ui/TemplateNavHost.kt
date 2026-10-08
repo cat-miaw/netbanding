@@ -2,6 +2,11 @@ package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -40,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -235,31 +239,19 @@ fun TemplateNavHost(
                 val tab = pagerState.currentPage
                 // Two-phase chrome visibility: AnimatedVisibility snaps the
                 // slot size at exit START, so the list jumped underneath the
-                // still-fading bars. Instead alpha animates with the space
-                // held, and the slot only collapses once fully transparent
-                // (expands before appearing).
-                val chromeAlpha = remember { Animatable(1f) }
-                var chromeLaidOut by rememberSaveable { mutableStateOf(true) }
-                LaunchedEffect(homeNavVisible, tab) {
-                    if (tab != 0 || homeNavVisible) {
-                        chromeLaidOut = true
-                        chromeAlpha.animateTo(1f, tween(150))
-                    } else {
-                        chromeAlpha.animateTo(0f, tween(150))
-                        chromeLaidOut = false
-                    }
-                }
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
                     // Flap-proof show/hide (see homeNavVisible): quick to hide,
                     // deliberate to show, so flings never restart it mid-flight.
+                    // Size animates continuously (no snap).
                     topBar = {
-                        if (chromeLaidOut) {
-                            Box(
-                                Modifier.graphicsLayer {
-                                    alpha = chromeAlpha.value
-                                },
-                            ) {
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = fadeIn(tween(150)) +
+                                expandVertically(tween(200), expandFrom = Alignment.Top),
+                            exit = fadeOut(tween(150)) +
+                                shrinkVertically(tween(200), shrinkTowards = Alignment.Top),
+                        ) {
                             when (tab) {
                             1 -> NetTopBar(
                                 title = stringResource(R.string.favorites_title),
@@ -286,28 +278,27 @@ fun TemplateNavHost(
                                 filtersVisible = filtersVisible,
                             )
                             }
-                            }
                         }
                     },
                     bottomBar = {
-                        if (chromeLaidOut) {
-                            Box(
-                                Modifier.graphicsLayer {
-                                    alpha = chromeAlpha.value
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = fadeIn(tween(150)) +
+                                expandVertically(tween(200), expandFrom = Alignment.Bottom),
+                            exit = fadeOut(tween(150)) +
+                                shrinkVertically(tween(200), shrinkTowards = Alignment.Bottom),
+                        ) {
+                            NetBottomBar(
+                                onHome = { goTab(0) },
+                                onFavorites = { goTab(1) },
+                                onCompare = { goTab(2) },
+                                selected = when (tab) {
+                                    1 -> "favorites"
+                                    2 -> "compare"
+                                    else -> "home"
                                 },
-                            ) {
-                                NetBottomBar(
-                                    onHome = { goTab(0) },
-                                    onFavorites = { goTab(1) },
-                                    onCompare = { goTab(2) },
-                                    selected = when (tab) {
-                                        1 -> "favorites"
-                                        2 -> "compare"
-                                        else -> "home"
-                                    },
-                                    compareCount = compareCount,
-                                )
-                            }
+                                compareCount = compareCount,
+                            )
                         }
                     },
                 ) { padding ->
@@ -316,7 +307,6 @@ fun TemplateNavHost(
                         beyondViewportPageCount = 1,
                         modifier = Modifier.fillMaxSize()
                             .padding(padding)
-                            .background(MaterialTheme.colorScheme.background)
                             // Rightward drag on Beranda opens the drawer. Passive
                             // detectors always lose the slop race to the pager,
                             // so this consumes the slop-crossing event itself
@@ -337,6 +327,9 @@ fun TemplateNavHost(
                                     }
                                     var accX = 0f
                                     var accY = 0f
+                                    var vel = 0f
+                                    var lastX = down.position.x
+                                    var lastT = down.uptimeMillis
                                     var steal = false
                                     var tracking = true
                                     while (tracking) {
@@ -345,6 +338,13 @@ fun TemplateNavHost(
                                             .firstOrNull { it.id == down.id }
                                             ?: break
                                         if (!c.pressed) break
+                                        val dt = (c.uptimeMillis - lastT).toFloat()
+                                        if (dt > 0) {
+                                            vel = 0.75f * vel + 0.25f *
+                                                ((c.position.x - lastX) / dt * 1000f)
+                                        }
+                                        lastX = c.position.x
+                                        lastT = c.uptimeMillis
                                         val dx = c.position.x - c.previousPosition.x
                                         val dy = c.position.y - c.previousPosition.y
                                         if (!steal) {
@@ -368,7 +368,9 @@ fun TemplateNavHost(
                                     if (steal) {
                                         scope.launch {
                                             drawerPx.animateTo(
-                                                if (drawerPx.value > drawerWidthPx / 2f) {
+                                                if (drawerPx.value > drawerWidthPx * 0.35f ||
+                                                    vel > 700f
+                                                ) {
                                                     drawerWidthPx
                                                 } else {
                                                     0f
@@ -392,6 +394,7 @@ fun TemplateNavHost(
                                 viewModel = favoritesVm,
                                 compareIds = compareIds,
                                 onToggleCompare = compareVm::toggle,
+                                onBrowse = { goTab(0) },
                             )
                             else -> CompareRoute(
                                 viewModel = compareVm,
@@ -457,6 +460,9 @@ fun TemplateNavHost(
                         val down = awaitFirstDown(requireUnconsumed = false)
                         var accX = 0f
                         var accY = 0f
+                        var vel = 0f
+                        var lastX = down.position.x
+                        var lastT = down.uptimeMillis
                         var steal = false
                         var tracking = true
                         while (tracking) {
@@ -465,6 +471,13 @@ fun TemplateNavHost(
                                 .firstOrNull { it.id == down.id }
                                 ?: break
                             if (!c.pressed) break
+                            val dt = (c.uptimeMillis - lastT).toFloat()
+                            if (dt > 0) {
+                                vel = 0.75f * vel + 0.25f *
+                                    ((c.position.x - lastX) / dt * 1000f)
+                            }
+                            lastX = c.position.x
+                            lastT = c.uptimeMillis
                             val dx = c.position.x - c.previousPosition.x
                             val dy = c.position.y - c.previousPosition.y
                             if (!steal) {
@@ -488,7 +501,9 @@ fun TemplateNavHost(
                         if (steal) {
                             scope.launch {
                                 drawerPx.animateTo(
-                                    if (drawerPx.value < drawerWidthPx / 2f) {
+                                    if (drawerPx.value < drawerWidthPx * 0.65f ||
+                                        vel < -700f
+                                    ) {
                                         0f
                                     } else {
                                         drawerWidthPx
