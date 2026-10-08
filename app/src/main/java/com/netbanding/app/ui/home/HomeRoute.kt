@@ -1,24 +1,28 @@
 package com.netbanding.app.ui.home
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.domain.model.Package
 
 @Composable
 fun HomeRoute(
     viewModel: HomeViewModel,
-    compareCount: Int,
-    onOpenMenu: () -> Unit,
-    onOpenFavorites: () -> Unit,
-    onOpenCompare: () -> Unit,
+    listState: LazyListState,
+    focusRequester: FocusRequester,
+    filtersVisible: Boolean,
     onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    HomeScreen(
+    HomeTabContent(
         state = state,
+        listState = listState,
+        focusRequester = focusRequester,
+        filtersVisible = filtersVisible,
         onQuery = viewModel::setQuery,
         onBudget = viewModel::setBudget,
         onSpeed = viewModel::setMinSpeed,
@@ -31,10 +35,6 @@ fun HomeRoute(
         onType = viewModel::setType,
         onHistory = viewModel::history,
         onRefresh = viewModel::refresh,
-        onOpenMenu = onOpenMenu,
-        onOpenFavorites = onOpenFavorites,
-        onOpenCompare = onOpenCompare,
-        compareCount = compareCount,
         onToggleCompare = onToggleCompare,
         modifier = modifier,
     )

@@ -109,6 +109,14 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 - Emulator top-strip gotcha (2026-10-08): taps at y<~130px never reach
   the app (SystemUI touch zone). NetTopBar carries 28dp extra top padding
   so the hamburger sits clear. Verify top-bar taps via uiautomator dump.
+- Tabs v2 (2026-10-08, committed): Beranda/Favorit/Bandingkan are ONE
+  HorizontalPager under a SINGLE Scaffold — bars never slide, only the
+  highlight moves; `beyondViewportPageCount=1` + solid pager background
+  kills the tap-blink. Menu is a ModalNavigationDrawer over the current
+  tab (explicit BackHandler closes it; M3 doesn't by default). Empty
+  search keeps the search bar + "Hapus pencarian" reset (never strand
+  the user: the field lives inside the list, not in a branch that
+  vanishes on empty results).
 
 ## Scraping playbook & per-ISP quirks
 

@@ -1,7 +1,6 @@
 package com.netbanding.app.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,41 +8,36 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
 import com.netbanding.app.ui.components.DisclaimerLine
 import com.netbanding.app.ui.components.MultiSelectDropdown
-import com.netbanding.app.ui.components.NetBottomBar
 import com.netbanding.app.ui.components.NetSearch
-import com.netbanding.app.ui.components.NetTopBar
 import com.netbanding.app.ui.components.PackageCard
 import com.netbanding.app.ui.components.PageHeadline
 import com.netbanding.app.ui.components.SectionLabel
@@ -57,10 +51,20 @@ import kotlinx.coroutines.launch
 fun formatIdr(amount: Long): String =
     "Rp" + NumberFormat.getNumberInstance(Locale("id", "ID")).format(amount)
 
+/**
+ * Home tab content (no Scaffold: the pager-level chrome in MainTabs owns the
+ * top/bottom bars so they stay put while swiping). The header (headline,
+ * type switch, search) scrolls away with the list; the search field is
+ * always part of the list so an empty result can never strand the user
+ * without a way to edit/clear the query.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun HomeTabContent(
     state: HomeUiState,
+    listState: LazyListState,
+    focusRequester: FocusRequester,
+    filtersVisible: Boolean,
     onQuery: (String) -> Unit,
     onBudget: (Long?) -> Unit,
     onSpeed: (Int?) -> Unit,
@@ -73,10 +77,6 @@ fun HomeScreen(
     onToggleFavorite: (Package) -> Unit,
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
     onRefresh: () -> Unit,
-    onOpenMenu: () -> Unit,
-    onOpenFavorites: () -> Unit,
-    onOpenCompare: () -> Unit,
-    compareCount: Int,
     onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -84,13 +84,9 @@ fun HomeScreen(
     // Local text buffer: the field must never be driven by the DB round-trip
     // (per-keystroke re-query desyncs cursor/composition).
     var text by remember { mutableStateOf(state.query) }
-    var filtersVisible by rememberSaveable { mutableStateOf(true) }
     val focusManager = LocalFocusManager.current
-    val keyboard = LocalSoftwareKeyboardController.current
-    val focusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
     val isCellular = state.type == Types.CELLULAR
     val tabIsps = remember(state.isps, state.type) {
         state.isps.filter {
@@ -98,201 +94,182 @@ fun HomeScreen(
                 (!isCellular && it.category != "cellular")
         }
     }
-    // Search bar scrolls away with the list; a top-bar search icon takes
-    // over once the user scrolls past the header.
-    val atTop by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex == 0 &&
-                listState.firstVisibleItemScrollOffset < 120
-        }
-    }
 
-    fun revealSearch() {
-        scope.launch {
-            runCatching { listState.animateScrollToItem(0) }
-            focusRequester.requestFocus()
-            keyboard?.show()
-        }
-    }
-
-    Scaffold(
+    PullToRefreshBox(
+        isRefreshing = state.syncStatus == SyncStatus.SYNCING,
+        onRefresh = onRefresh,
         modifier = modifier.fillMaxSize().pointerInput(Unit) {
             detectTapGestures(onTap = { focusManager.clearFocus() })
         },
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            NetTopBar(
-                onMenu = onOpenMenu,
-                onSearch = if (!atTop) ::revealSearch else null,
-                onToggleFilters = { filtersVisible = !filtersVisible },
-                filtersVisible = filtersVisible,
-            )
-        },
-        bottomBar = {
-            NetBottomBar(
-                onHome = {},
-                onFavorites = onOpenFavorites,
-                onCompare = onOpenCompare,
-                selected = "home",
-                compareCount = compareCount,
-            )
-        },
-    ) { padding ->
-        PullToRefreshBox(
-            isRefreshing = state.syncStatus == SyncStatus.SYNCING,
-            onRefresh = onRefresh,
-            modifier = Modifier.fillMaxSize().padding(padding),
-        ) {
-            when {
-                state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-                state.items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.empty_result))
-                }
-                else -> LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    item(key = "header", contentType = "header") {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            PageHeadline(
-                                title = stringResource(
-                                    if (isCellular) R.string.home_title_cellular else R.string.home_title_broadband,
-                                ),
-                                sub = stringResource(R.string.home_sub),
-                            )
-                            TypeSegment(selected = state.type, onSelect = onType)
-                            NetSearch(
-                                value = text,
-                                onValue = { text = it; onQuery(it) },
-                                focusRequester = focusRequester,
-                            )
-                        }
+    ) {
+        when {
+            state.isLoading -> androidx.compose.foundation.layout.Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
+            else -> LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item(key = "header", contentType = "header") {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        PageHeadline(
+                            title = stringResource(
+                                if (isCellular) R.string.home_title_cellular else R.string.home_title_broadband,
+                            ),
+                            sub = stringResource(R.string.home_sub),
+                        )
+                        TypeSegment(selected = state.type, onSelect = onType)
+                        NetSearch(
+                            value = text,
+                            onValue = { text = it; onQuery(it) },
+                            focusRequester = focusRequester,
+                        )
                     }
-                    if (filtersVisible) {
-                        item(key = "filters", contentType = "header") {
-                            val sortOptions = if (isCellular) listOf(
-                                Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
-                                Sorts.PERGB to stringResource(R.string.sort_pergb),
-                            ) else listOf(
-                                Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
-                                Sorts.VALUE to stringResource(R.string.sort_value),
-                                Sorts.FASTEST to stringResource(R.string.sort_fastest),
-                            )
-                            val allLabel = stringResource(R.string.filter_all)
-                            val periodOptions = listOf(
-                                Periods.DAILY to stringResource(R.string.period_daily),
-                                Periods.WEEKLY to stringResource(R.string.period_weekly),
-                                Periods.MONTHLY to stringResource(R.string.period_monthly),
-                            )
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    SingleSelectDropdown(
-                                        label = stringResource(R.string.filter_sort),
-                                        options = sortOptions,
-                                        selected = state.sort,
-                                        onSelect = { it?.let(onSort) },
+                }
+                if (filtersVisible) {
+                    item(key = "filters", contentType = "header") {
+                        val sortOptions = if (isCellular) listOf(
+                            Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
+                            Sorts.PERGB to stringResource(R.string.sort_pergb),
+                        ) else listOf(
+                            Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
+                            Sorts.VALUE to stringResource(R.string.sort_value),
+                            Sorts.FASTEST to stringResource(R.string.sort_fastest),
+                        )
+                        val allLabel = stringResource(R.string.filter_all)
+                        val periodOptions = listOf(
+                            Periods.DAILY to stringResource(R.string.period_daily),
+                            Periods.WEEKLY to stringResource(R.string.period_weekly),
+                            Periods.MONTHLY to stringResource(R.string.period_monthly),
+                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                SingleSelectDropdown(
+                                    label = stringResource(R.string.filter_sort),
+                                    options = sortOptions,
+                                    selected = state.sort,
+                                    onSelect = { it?.let(onSort) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                if (isCellular) {
+                                    MultiSelectDropdown(
+                                        label = stringResource(R.string.filter_period),
+                                        allLabel = allLabel,
+                                        options = periodOptions,
+                                        selected = state.periods,
+                                        onToggle = onTogglePeriod,
+                                        onSelectAll = {
+                                            onSetPeriods(setOf(Periods.DAILY, Periods.WEEKLY, Periods.MONTHLY))
+                                        },
+                                        onClear = { onSetPeriods(emptySet()) },
                                         modifier = Modifier.weight(1f),
                                     )
-                                    if (isCellular) {
-                                        MultiSelectDropdown(
-                                            label = stringResource(R.string.filter_period),
-                                            allLabel = allLabel,
-                                            options = periodOptions,
-                                            selected = state.periods,
-                                            onToggle = onTogglePeriod,
-                                            onSelectAll = {
-                                                onSetPeriods(setOf(Periods.DAILY, Periods.WEEKLY, Periods.MONTHLY))
-                                            },
-                                            onClear = { onSetPeriods(emptySet()) },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                    } else {
-                                        SingleSelectDropdown(
-                                            label = stringResource(R.string.filter_budget),
-                                            options = listOf(
-                                                "all" to allLabel,
-                                                "300" to stringResource(R.string.budget_300),
-                                                "500" to stringResource(R.string.budget_500),
-                                            ),
-                                            selected = when (state.maxMonthly) {
-                                                300_000L -> "300"
-                                                500_000L -> "500"
-                                                else -> "all"
-                                            },
-                                            onSelect = {
-                                                onBudget(when (it) {
-                                                    "300" -> 300_000L
-                                                    "500" -> 500_000L
-                                                    else -> null
-                                                })
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                    }
+                                } else {
+                                    SingleSelectDropdown(
+                                        label = stringResource(R.string.filter_budget),
+                                        options = listOf(
+                                            "all" to allLabel,
+                                            "300" to stringResource(R.string.budget_300),
+                                            "500" to stringResource(R.string.budget_500),
+                                        ),
+                                        selected = when (state.maxMonthly) {
+                                            300_000L -> "300"
+                                            500_000L -> "500"
+                                            else -> "all"
+                                        },
+                                        onSelect = {
+                                            onBudget(when (it) {
+                                                "300" -> 300_000L
+                                                "500" -> 500_000L
+                                                else -> null
+                                            })
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                    )
                                 }
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    if (tabIsps.isNotEmpty()) {
-                                        MultiSelectDropdown(
-                                            label = stringResource(R.string.filter_provider),
-                                            allLabel = allLabel,
-                                            options = tabIsps.map { it.id to it.name },
-                                            selected = state.ispIds,
-                                            onToggle = onToggleIsp,
-                                            onSelectAll = { onSetIsps(tabIsps.map { it.id }.toSet()) },
-                                            onClear = { onSetIsps(emptySet()) },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                    }
-                                    if (!isCellular) {
-                                        SingleSelectDropdown(
-                                            label = stringResource(R.string.filter_speed),
-                                            options = listOf(
-                                                "all" to allLabel,
-                                                "50" to stringResource(R.string.speed_50),
-                                                "100" to stringResource(R.string.speed_100),
-                                            ),
-                                            selected = when (state.minSpeed) {
-                                                50 -> "50"
-                                                100 -> "100"
-                                                else -> "all"
-                                            },
-                                            onSelect = {
-                                                onSpeed(when (it) {
-                                                    "50" -> 50
-                                                    "100" -> 100
-                                                    else -> null
-                                                })
-                                            },
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                    }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (tabIsps.isNotEmpty()) {
+                                    MultiSelectDropdown(
+                                        label = stringResource(R.string.filter_provider),
+                                        allLabel = allLabel,
+                                        options = tabIsps.map { it.id to it.name },
+                                        selected = state.ispIds,
+                                        onToggle = onToggleIsp,
+                                        onSelectAll = { onSetIsps(tabIsps.map { it.id }.toSet()) },
+                                        onClear = { onSetIsps(emptySet()) },
+                                        modifier = Modifier.weight(1f),
+                                    )
                                 }
-                                SectionLabel(stringResource(R.string.section_packages))
+                                if (!isCellular) {
+                                    SingleSelectDropdown(
+                                        label = stringResource(R.string.filter_speed),
+                                        options = listOf(
+                                            "all" to allLabel,
+                                            "50" to stringResource(R.string.speed_50),
+                                            "100" to stringResource(R.string.speed_100),
+                                        ),
+                                        selected = when (state.minSpeed) {
+                                            50 -> "50"
+                                            100 -> "100"
+                                            else -> "all"
+                                        },
+                                        onSelect = {
+                                            onSpeed(when (it) {
+                                                "50" -> 50
+                                                "100" -> 100
+                                                else -> null
+                                            })
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                            }
+                            SectionLabel(stringResource(R.string.section_packages))
+                        }
+                    }
+                }
+                if (state.showUpdateApp || state.showStale || state.syncStatus == SyncStatus.FAILED) {
+                    item(key = "banners", contentType = "header") {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (state.showUpdateApp) Text(
+                                stringResource(R.string.update_app_banner),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            if (state.showStale) Text(
+                                stringResource(R.string.stale_banner),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            if (state.syncStatus == SyncStatus.FAILED) Text(
+                                stringResource(R.string.sync_failed),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
+                if (state.items.isEmpty()) {
+                    item(key = "empty", contentType = "empty") {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Text(
+                                stringResource(R.string.empty_result),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                            )
+                            OutlinedButton(onClick = { text = ""; onQuery("") }) {
+                                Text(stringResource(R.string.clear_search))
                             }
                         }
                     }
-                    if (state.showUpdateApp || state.showStale || state.syncStatus == SyncStatus.FAILED) {
-                        item(key = "banners", contentType = "header") {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                if (state.showUpdateApp) Text(
-                                    stringResource(R.string.update_app_banner),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                                if (state.showStale) Text(
-                                    stringResource(R.string.stale_banner),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                                if (state.syncStatus == SyncStatus.FAILED) Text(
-                                    stringResource(R.string.sync_failed),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        }
-                    }
+                } else {
                     items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
                         PackageCard(
                             pkg = pkg,
@@ -301,9 +278,9 @@ fun HomeScreen(
                             onCompare = { onToggleCompare(pkg) },
                         )
                     }
-                    item(key = "footer", contentType = "footer") {
-                        DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
-                    }
+                }
+                item(key = "footer", contentType = "footer") {
+                    DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
                 }
             }
         }
