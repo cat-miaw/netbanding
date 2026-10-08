@@ -2,7 +2,13 @@ package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -160,21 +166,36 @@ fun TemplateNavHost(
     val homeFocus = remember { FocusRequester() }
     var filtersVisible by rememberSaveable { mutableStateOf(true) }
     // Social-media standard: bottom bar hides on scroll down, returns on
-    // scroll up (home list only; always visible near the top).
+    // scroll up (home list only; always visible near the top). Asymmetric
+    // thresholds — hide fast, show only on deliberate upward travel — so a
+    // fling's micro direction flips can't flap the animation mid-flight.
     var homeNavVisible by rememberSaveable { mutableStateOf(true) }
     LaunchedEffect(homeListState) {
         var prev = 0 to 0
+        var acc = 0
         snapshotFlow {
             homeListState.firstVisibleItemIndex to homeListState.firstVisibleItemScrollOffset
         }.collect { (index, offset) ->
             val (prevIndex, prevOffset) = prev
-            if (index != prevIndex) {
-                homeNavVisible = index < prevIndex
-            } else if (abs(offset - prevOffset) > 8) {
-                homeNavVisible = offset < prevOffset
+            val dy = if (index == prevIndex) {
+                offset - prevOffset
+            } else {
+                (index - prevIndex) * 10_000
             }
-            if (index == 0 && offset < 120) homeNavVisible = true
             prev = index to offset
+            if (index == 0 && offset < 120) {
+                homeNavVisible = true
+                acc = 0
+                return@collect
+            }
+            acc = if (acc == 0 || dy == 0 || (acc > 0) == (dy > 0)) acc + dy else dy
+            if (!homeNavVisible && acc < -160) {
+                homeNavVisible = true
+                acc = 0
+            } else if (homeNavVisible && acc > 48) {
+                homeNavVisible = false
+                acc = 0
+            }
         }
     }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -218,10 +239,16 @@ fun TemplateNavHost(
                 val tab = pagerState.currentPage
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
-                    // Instant toggle (no slide/fade): bar animations relayout
-                    // the list every frame and jank on low-end GPUs.
+                    // Flap-proof show/hide (see homeNavVisible): quick to hide,
+                    // deliberate to show, so flings never restart it mid-flight.
+                    // 150ms: short enough to finish even on weak GPUs instead
+                    // of lingering half-slid over the content.
                     topBar = {
-                        if (tab != 0 || homeNavVisible) {
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = slideInVertically(tween(150)) { -it } + fadeIn(tween(150)),
+                            exit = slideOutVertically(tween(150)) { -it } + fadeOut(tween(150)),
+                        ) {
                             when (tab) {
                             1 -> NetTopBar(
                                 title = stringResource(R.string.favorites_title),
@@ -251,7 +278,11 @@ fun TemplateNavHost(
                         }
                     },
                     bottomBar = {
-                        if (tab != 0 || homeNavVisible) {
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = slideInVertically(tween(150)) { it } + fadeIn(tween(150)),
+                            exit = slideOutVertically(tween(150)) { it } + fadeOut(tween(150)),
+                        ) {
                             NetBottomBar(
                                 onHome = { goTab(0) },
                                 onFavorites = { goTab(1) },
