@@ -67,6 +67,7 @@ fun PackageCard(
     onClick: () -> Unit,
     onFavorite: () -> Unit,
     onCompare: () -> Unit,
+    isCompared: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val cs = MaterialTheme.colorScheme
@@ -143,7 +144,12 @@ fun PackageCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(onClick = onCompare) {
-                    Text("+ ${stringResource(R.string.compare_add)}", color = cs.primary, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (isCompared) "✓ ${stringResource(R.string.compare_added)}"
+                        else "+ ${stringResource(R.string.compare_add)}",
+                        color = cs.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
                 Text(
                     "${stringResource(R.string.detail_pkg)}  ›",

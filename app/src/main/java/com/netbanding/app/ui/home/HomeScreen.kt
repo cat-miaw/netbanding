@@ -39,6 +39,7 @@ import com.netbanding.app.ui.components.DisclaimerLine
 import com.netbanding.app.ui.components.MultiSelectDropdown
 import com.netbanding.app.ui.components.NetSearch
 import com.netbanding.app.ui.components.PackageCard
+import com.netbanding.app.ui.components.PageControls
 import com.netbanding.app.ui.components.PageHeadline
 import com.netbanding.app.ui.components.SectionLabel
 import com.netbanding.app.ui.components.SingleSelectDropdown
@@ -78,6 +79,8 @@ fun HomeTabContent(
     onHistory: (String) -> kotlinx.coroutines.flow.Flow<List<com.netbanding.app.domain.model.PricePoint>>,
     onRefresh: () -> Unit,
     onToggleCompare: (Package) -> Unit,
+    compareIds: Set<String>,
+    onPage: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<Package?>(null) }
@@ -87,6 +90,10 @@ fun HomeTabContent(
     val focusManager = LocalFocusManager.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    // Page switch = fresh result window: jump back to the top.
+    androidx.compose.runtime.LaunchedEffect(state.page) {
+        runCatching { listState.scrollToItem(0) }
+    }
     val isCellular = state.type == Types.CELLULAR
     val tabIsps = remember(state.isps, state.type) {
         state.isps.filter {
@@ -276,6 +283,16 @@ fun HomeTabContent(
                             onClick = { selected = pkg },
                             onFavorite = { onToggleFavorite(pkg) },
                             onCompare = { onToggleCompare(pkg) },
+                            isCompared = pkg.id in compareIds,
+                        )
+                    }
+                }
+                if (state.pageCount > 1) {
+                    item(key = "pages", contentType = "pages") {
+                        PageControls(
+                            page = state.page,
+                            pageCount = state.pageCount,
+                            onPage = onPage,
                         )
                     }
                 }
@@ -293,6 +310,7 @@ fun HomeTabContent(
             PackageDetailSheet(
                 pkg = pkg,
                 history = history,
+                isCompared = pkg.id in compareIds,
                 onFavorite = {
                     onToggleFavorite(pkg)
                     scope.launch { sheetState.hide(); selected = null }

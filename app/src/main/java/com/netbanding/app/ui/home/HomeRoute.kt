@@ -14,6 +14,7 @@ fun HomeRoute(
     listState: LazyListState,
     focusRequester: FocusRequester,
     filtersVisible: Boolean,
+    compareIds: Set<String>,
     onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -36,6 +37,8 @@ fun HomeRoute(
         onHistory = viewModel::history,
         onRefresh = viewModel::refresh,
         onToggleCompare = onToggleCompare,
+        compareIds = compareIds,
+        onPage = viewModel::setPage,
         modifier = modifier,
     )
 }

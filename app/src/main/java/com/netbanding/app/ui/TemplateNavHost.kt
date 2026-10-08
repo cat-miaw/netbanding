@@ -3,6 +3,8 @@ package com.netbanding.app.ui
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -60,6 +63,7 @@ import com.netbanding.app.ui.onboarding.OnboardingScreen
 import com.netbanding.app.ui.settings.PrivacyScreen
 import com.netbanding.app.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 private object Routes {
     const val MAIN = "main"
@@ -129,6 +133,7 @@ fun TemplateNavHost(
     }
     val compareCount by compareVm.count.collectAsState(initial = 0)
     val compareState by compareVm.uiState.collectAsStateWithLifecycle()
+    val compareIds by compareVm.selectedIds.collectAsStateWithLifecycle()
 
     // One pager + one chrome for the three tabs: swipes and taps only
     // change the page, never the bars around it.
@@ -169,6 +174,8 @@ fun TemplateNavHost(
     if (drawerState.isOpen || drawerState.isAnimationRunning) {
         BackHandler { scope.launch { drawerState.close() } }
     }
+    // Rightward drag on Beranda opens the drawer (see pager modifier).
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -245,7 +252,58 @@ fun TemplateNavHost(
                         beyondViewportPageCount = 1,
                         modifier = Modifier.fillMaxSize()
                             .padding(padding)
-                            .background(MaterialTheme.colorScheme.background),
+                            .background(MaterialTheme.colorScheme.background)
+                            // Rightward drag on Beranda opens the drawer. Passive
+                            // detectors always lose the slop race to the pager,
+                            // so this consumes the slop-crossing event itself
+                            // (parent-first) before the pager ever sees movement.
+                            // Leftward/vertical drags are never touched, and
+                            // touches starting at the system edge are left alone
+                            // so the back gesture keeps working.
+                            .pointerInput(Unit) {
+                                val slop = viewConfiguration.touchSlop
+                                val edge = 24.dp.toPx()
+                                awaitEachGesture {
+                                    // Cards eat the press for ripple, so accept
+                                    // already-consumed downs (drag detectors do).
+                                    val down = awaitFirstDown(requireUnconsumed = false)
+                                    if (down.position.x < edge) return@awaitEachGesture
+                                    var accX = 0f
+                                    var accY = 0f
+                                    var swept = 0f
+                                    var steal = false
+                                    var tracking = true
+                                    while (tracking) {
+                                        val event = awaitPointerEvent()
+                                        val c = event.changes
+                                            .firstOrNull { it.id == down.id }
+                                            ?: break
+                                        if (!c.pressed) break
+                                        val dx = c.position.x - c.previousPosition.x
+                                        val dy = c.position.y - c.previousPosition.y
+                                        if (!steal) {
+                                            accX += dx
+                                            accY += dy
+                                            when {
+                                                pagerState.currentPage == 0 &&
+                                                    accX > slop &&
+                                                    abs(accX) > abs(accY) -> steal = true
+                                                abs(accX) > slop || abs(accY) > slop ->
+                                                    tracking = false
+                                            }
+                                        }
+                                        if (steal) {
+                                            swept += dx
+                                            c.consume()
+                                        }
+                                    }
+                                    if (steal && swept > 120f &&
+                                        pagerState.currentPage == 0
+                                    ) {
+                                        openDrawer()
+                                    }
+                                }
+                            },
                     ) { page ->
                         when (page) {
                             0 -> HomeRoute(
@@ -253,13 +311,18 @@ fun TemplateNavHost(
                                 listState = homeListState,
                                 focusRequester = homeFocus,
                                 filtersVisible = filtersVisible,
+                                compareIds = compareIds,
                                 onToggleCompare = compareVm::toggle,
                             )
                             1 -> FavoritesRoute(
                                 viewModel = favoritesVm,
+                                compareIds = compareIds,
                                 onToggleCompare = compareVm::toggle,
                             )
-                            else -> CompareRoute(viewModel = compareVm)
+                            else -> CompareRoute(
+                                viewModel = compareVm,
+                                onBrowse = { goTab(0) },
+                            )
                         }
                     }
                 }

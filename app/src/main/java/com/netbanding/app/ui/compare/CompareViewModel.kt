@@ -40,6 +40,10 @@ class CompareViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
+    /** Membership set so cards can show ✓ state without per-card flows. */
+    val selectedIds: StateFlow<Set<String>> = ids
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     fun toggle(pkg: Package) {
         val cur = ids.value
         val next = if (pkg.id in cur) cur - pkg.id else {
