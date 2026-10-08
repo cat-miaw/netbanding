@@ -151,6 +151,13 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   (`app/build/outputs/apk/release/app-release.apk`, debug-signed),
   verified on emulator incl. onboarding + seed. Debug builds will
   always animate worse than this on weak hardware (no R8, JIT cold).
+- Phone feedback round (2026-10-08, committed): drawer settle needs
+  only 35% travel + 700px/s fling (was half-width); chrome uses
+  expand/shrink+fade with no layout snap; cards keep 1dp borders;
+  drawer content respects status/nav bars; menu rows + top bar get
+  inset hairline dividers; dropdown popups are white + 14dp rounded
+  like search; favorites empty matches compare empty (icon + browse);
+  detail buttons single-line. Lint clean, release AAB 4.25 MB.
 
 ## Scraping playbook & per-ISP quirks
 
