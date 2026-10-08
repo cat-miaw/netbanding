@@ -2,9 +2,6 @@ package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -43,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -235,18 +233,33 @@ fun TemplateNavHost(
         NavHost(navController = navController, startDestination = Routes.MAIN) {
             composable(Routes.MAIN) {
                 val tab = pagerState.currentPage
+                // Two-phase chrome visibility: AnimatedVisibility snaps the
+                // slot size at exit START, so the list jumped underneath the
+                // still-fading bars. Instead alpha animates with the space
+                // held, and the slot only collapses once fully transparent
+                // (expands before appearing).
+                val chromeAlpha = remember { Animatable(1f) }
+                var chromeLaidOut by rememberSaveable { mutableStateOf(true) }
+                LaunchedEffect(homeNavVisible, tab) {
+                    if (tab != 0 || homeNavVisible) {
+                        chromeLaidOut = true
+                        chromeAlpha.animateTo(1f, tween(150))
+                    } else {
+                        chromeAlpha.animateTo(0f, tween(150))
+                        chromeLaidOut = false
+                    }
+                }
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
                     // Flap-proof show/hide (see homeNavVisible): quick to hide,
                     // deliberate to show, so flings never restart it mid-flight.
-                    // 150ms: short enough to finish even on weak GPUs instead
-                    // of lingering half-slid over the content.
                     topBar = {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)),
-                            exit = fadeOut(tween(150)),
-                        ) {
+                        if (chromeLaidOut) {
+                            Box(
+                                Modifier.graphicsLayer {
+                                    alpha = chromeAlpha.value
+                                },
+                            ) {
                             when (tab) {
                             1 -> NetTopBar(
                                 title = stringResource(R.string.favorites_title),
@@ -273,25 +286,28 @@ fun TemplateNavHost(
                                 filtersVisible = filtersVisible,
                             )
                             }
+                            }
                         }
                     },
                     bottomBar = {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)),
-                            exit = fadeOut(tween(150)),
-                        ) {
-                            NetBottomBar(
-                                onHome = { goTab(0) },
-                                onFavorites = { goTab(1) },
-                                onCompare = { goTab(2) },
-                                selected = when (tab) {
-                                    1 -> "favorites"
-                                    2 -> "compare"
-                                    else -> "home"
+                        if (chromeLaidOut) {
+                            Box(
+                                Modifier.graphicsLayer {
+                                    alpha = chromeAlpha.value
                                 },
-                                compareCount = compareCount,
-                            )
+                            ) {
+                                NetBottomBar(
+                                    onHome = { goTab(0) },
+                                    onFavorites = { goTab(1) },
+                                    onCompare = { goTab(2) },
+                                    selected = when (tab) {
+                                        1 -> "favorites"
+                                        2 -> "compare"
+                                        else -> "home"
+                                    },
+                                    compareCount = compareCount,
+                                )
+                            }
                         }
                     },
                 ) { padding ->

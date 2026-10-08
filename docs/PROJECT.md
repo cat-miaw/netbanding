@@ -147,6 +147,10 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   statusBarsPadding (notch-aware) instead of the 28dp hack; JAVA_ALL
   label is "Pulau Jawa"; menu rows are clean text rows (only the active
   Seluler keeps its tint), matching the mockup.
+- Phone trial (2026-10-08): release APK 1.86 MB
+  (`app/build/outputs/apk/release/app-release.apk`, debug-signed),
+  verified on emulator incl. onboarding + seed. Debug builds will
+  always animate worse than this on weak hardware (no R8, JIT cold).
 
 ## Scraping playbook & per-ISP quirks
 
