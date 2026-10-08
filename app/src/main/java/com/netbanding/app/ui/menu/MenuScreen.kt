@@ -114,17 +114,21 @@ private fun MenuRow(
     Row(
         modifier = Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (highlighted) cs.primaryContainer else cs.surfaceVariant)
+            .background(if (highlighted) cs.primaryContainer else MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(icon, null, tint = if (highlighted) cs.primary else cs.onSurfaceVariant)
+        Icon(
+            icon, null,
+            tint = if (highlighted) cs.primary else cs.onSurfaceVariant,
+            modifier = Modifier.size(22.dp),
+        )
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(
                 title,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = if (highlighted) cs.primary else cs.onSurface,
                 ),
             )

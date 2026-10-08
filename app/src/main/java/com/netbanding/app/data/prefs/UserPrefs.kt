@@ -29,7 +29,7 @@ object PrefKeys {
 
 /** Provinces per blueprint 4.4. JAVA_ALL = all six. */
 val REGIONS = listOf(
-    "JAVA_ALL" to "Semua Jawa",
+    "JAVA_ALL" to "Pulau Jawa",
     "ID-JK" to "DKI Jakarta",
     "ID-BT" to "Banten",
     "ID-JB" to "Jawa Barat",

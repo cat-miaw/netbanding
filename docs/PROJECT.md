@@ -132,6 +132,18 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   cards already consumed for ripple → `requireUnconsumed = false`;
   (2) touches starting at the system edge are skipped so back-gesture
   keeps working.
+- Custom follow-finger drawer (2026-10-08, committed): stock
+  ModalNavigationDrawer can't be driven mid-gesture (and this BOM's
+  AnchoredDraggable API differs), so the drawer is a 320dp Surface over
+  an `Animatable` offset: open-drag forwards deltas, close-drag on the
+  panel, half-width settle both ways. Scrim tap + BackHandler close.
+- Chrome auto-hide (2026-10-08): top + bottom bars hide on scroll down,
+  return on scroll up (home list drives it, instant toggle — the slide
+  animation relaid out the list every frame and lagged on weak GPUs).
+- Polish: cards get 1dp outlineVariant borders; NetTopBar uses
+  statusBarsPadding (notch-aware) instead of the 28dp hack; JAVA_ALL
+  label is "Pulau Jawa"; menu rows are clean text rows (only the active
+  Seluler keeps its tint), matching the mockup.
 
 ## Scraping playbook & per-ISP quirks
 

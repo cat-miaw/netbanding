@@ -2,24 +2,27 @@ package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,14 +33,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
@@ -64,6 +71,7 @@ import com.netbanding.app.ui.settings.PrivacyScreen
 import com.netbanding.app.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private object Routes {
     const val MAIN = "main"
@@ -138,10 +146,37 @@ fun TemplateNavHost(
     // One pager + one chrome for the three tabs: swipes and taps only
     // change the page, never the bars around it.
     val pagerState = rememberPagerState(pageCount = { 3 })
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
+
+    // Custom drawer (follows the finger both ways). The stock
+    // ModalNavigationDrawer can't be driven mid-gesture, and it always
+    // loses the gesture race to the pager — so the open-drag is detected
+    // on the pager (see modifier below) and applied straight to this
+    // offset, with velocity settle on release. 0 = closed, width = open.
+    val density = LocalDensity.current
+    val drawerWidthPx = remember(density) { with(density) { 320.dp.toPx() } }
+    val drawerPx = remember { Animatable(0f) }
+    val drawerShown = drawerPx.value > 0f
     val homeListState = rememberLazyListState()
     val homeFocus = remember { FocusRequester() }
     var filtersVisible by rememberSaveable { mutableStateOf(true) }
+    // Social-media standard: bottom bar hides on scroll down, returns on
+    // scroll up (home list only; always visible near the top).
+    var homeNavVisible by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(homeListState) {
+        var prev = 0 to 0
+        snapshotFlow {
+            homeListState.firstVisibleItemIndex to homeListState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) ->
+            val (prevIndex, prevOffset) = prev
+            if (index != prevIndex) {
+                homeNavVisible = index < prevIndex
+            } else if (abs(offset - prevOffset) > 8) {
+                homeNavVisible = offset < prevOffset
+            }
+            if (index == 0 && offset < 120) homeNavVisible = true
+            prev = index to offset
+        }
+    }
     val keyboard = LocalSoftwareKeyboardController.current
     val atTop by remember {
         derivedStateOf {
@@ -161,52 +196,33 @@ fun TemplateNavHost(
         }
     }
     fun openDrawer() {
-        scope.launch { drawerState.open() }
+        scope.launch { drawerPx.animateTo(drawerWidthPx) }
+    }
+    fun closeDrawer() {
+        scope.launch { drawerPx.animateTo(0f) }
     }
     fun drawerGo(page: Int) {
-        scope.launch {
-            drawerState.close()
-            runCatching { pagerState.animateScrollToPage(page) }
-        }
+        closeDrawer()
+        goTab(page)
     }
 
     // Back closes the drawer first, never the app from under it.
-    if (drawerState.isOpen || drawerState.isAnimationRunning) {
-        BackHandler { scope.launch { drawerState.close() } }
+    if (drawerShown) {
+        BackHandler { closeDrawer() }
     }
     // Rightward drag on Beranda opens the drawer (see pager modifier).
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                MenuDrawerContent(
-                    dataVersion = syncState?.dataVersion ?: 0,
-                    lastUpdated = syncState?.generatedAt,
-                    onClose = { scope.launch { drawerState.close() } },
-                    onCellular = { homeVm.setType(Types.CELLULAR); drawerGo(0) },
-                    onBroadband = { homeVm.setType(Types.BROADBAND); drawerGo(0) },
-                    onFavorites = { drawerGo(1) },
-                    onCompare = { drawerGo(2) },
-                    onSettings = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(Routes.SETTINGS)
-                    },
-                    onPrivacy = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(Routes.PRIVACY)
-                    },
-                )
-            }
-        },
-    ) {
+    Box(Modifier.fillMaxSize()) {
         NavHost(navController = navController, startDestination = Routes.MAIN) {
             composable(Routes.MAIN) {
                 val tab = pagerState.currentPage
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
+                    // Instant toggle (no slide/fade): bar animations relayout
+                    // the list every frame and jank on low-end GPUs.
                     topBar = {
-                        when (tab) {
+                        if (tab != 0 || homeNavVisible) {
+                            when (tab) {
                             1 -> NetTopBar(
                                 title = stringResource(R.string.favorites_title),
                                 onMenu = ::openDrawer,
@@ -231,20 +247,23 @@ fun TemplateNavHost(
                                 onToggleFilters = { filtersVisible = !filtersVisible },
                                 filtersVisible = filtersVisible,
                             )
+                            }
                         }
                     },
                     bottomBar = {
-                        NetBottomBar(
-                            onHome = { goTab(0) },
-                            onFavorites = { goTab(1) },
-                            onCompare = { goTab(2) },
-                            selected = when (tab) {
-                                1 -> "favorites"
-                                2 -> "compare"
-                                else -> "home"
-                            },
-                            compareCount = compareCount,
-                        )
+                        if (tab != 0 || homeNavVisible) {
+                            NetBottomBar(
+                                onHome = { goTab(0) },
+                                onFavorites = { goTab(1) },
+                                onCompare = { goTab(2) },
+                                selected = when (tab) {
+                                    1 -> "favorites"
+                                    2 -> "compare"
+                                    else -> "home"
+                                },
+                                compareCount = compareCount,
+                            )
+                        }
                     },
                 ) { padding ->
                     HorizontalPager(
@@ -268,9 +287,11 @@ fun TemplateNavHost(
                                     // already-consumed downs (drag detectors do).
                                     val down = awaitFirstDown(requireUnconsumed = false)
                                     if (down.position.x < edge) return@awaitEachGesture
+                                    if (drawerPx.value > 0f) {
+                                        return@awaitEachGesture
+                                    }
                                     var accX = 0f
                                     var accY = 0f
-                                    var swept = 0f
                                     var steal = false
                                     var tracking = true
                                     while (tracking) {
@@ -293,14 +314,22 @@ fun TemplateNavHost(
                                             }
                                         }
                                         if (steal) {
-                                            swept += dx
+                                            val target = (drawerPx.value + dx)
+                                                .coerceIn(0f, drawerWidthPx)
+                                            scope.launch { drawerPx.snapTo(target) }
                                             c.consume()
                                         }
                                     }
-                                    if (steal && swept > 120f &&
-                                        pagerState.currentPage == 0
-                                    ) {
-                                        openDrawer()
+                                    if (steal) {
+                                        scope.launch {
+                                            drawerPx.animateTo(
+                                                if (drawerPx.value > drawerWidthPx / 2f) {
+                                                    drawerWidthPx
+                                                } else {
+                                                    0f
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             },
@@ -359,6 +388,89 @@ fun TemplateNavHost(
             composable(Routes.PRIVACY) {
                 PrivacyScreen(onBack = { navController.popBackStack() })
             }
+        }
+        // Scrim + panel ride above the content. The panel tracks drawerPx,
+        // which both the open-drag (pager modifier) and this close-drag
+        // drive directly, so it follows the finger both ways.
+        if (drawerShown) {
+            Box(
+                Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = (drawerPx.value / drawerWidthPx).coerceIn(0f, 1f) * 0.32f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) { closeDrawer() },
+            )
+        }
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp),
+            modifier = Modifier.fillMaxHeight().width(320.dp)
+                .offset { IntOffset((drawerPx.value - drawerWidthPx).roundToInt(), 0) }
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        var accX = 0f
+                        var accY = 0f
+                        var steal = false
+                        var tracking = true
+                        while (tracking) {
+                            val event = awaitPointerEvent()
+                            val c = event.changes
+                                .firstOrNull { it.id == down.id }
+                                ?: break
+                            if (!c.pressed) break
+                            val dx = c.position.x - c.previousPosition.x
+                            val dy = c.position.y - c.previousPosition.y
+                            if (!steal) {
+                                accX += dx
+                                accY += dy
+                                when {
+                                    accX < -viewConfiguration.touchSlop &&
+                                        abs(accX) > abs(accY) -> steal = true
+                                    abs(accX) > viewConfiguration.touchSlop ||
+                                        abs(accY) > viewConfiguration.touchSlop ->
+                                        tracking = false
+                                }
+                            }
+                            if (steal) {
+                                val target = (drawerPx.value + dx)
+                                    .coerceIn(0f, drawerWidthPx)
+                                scope.launch { drawerPx.snapTo(target) }
+                                c.consume()
+                            }
+                        }
+                        if (steal) {
+                            scope.launch {
+                                drawerPx.animateTo(
+                                    if (drawerPx.value < drawerWidthPx / 2f) {
+                                        0f
+                                    } else {
+                                        drawerWidthPx
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
+        ) {
+            MenuDrawerContent(
+                dataVersion = syncState?.dataVersion ?: 0,
+                lastUpdated = syncState?.generatedAt,
+                onClose = { closeDrawer() },
+                onCellular = { homeVm.setType(Types.CELLULAR); drawerGo(0) },
+                onBroadband = { homeVm.setType(Types.BROADBAND); drawerGo(0) },
+                onFavorites = { drawerGo(1) },
+                onCompare = { drawerGo(2) },
+                onSettings = {
+                    closeDrawer()
+                    navController.navigate(Routes.SETTINGS)
+                },
+                onPrivacy = {
+                    closeDrawer()
+                    navController.navigate(Routes.PRIVACY)
+                },
+            )
         }
     }
 
