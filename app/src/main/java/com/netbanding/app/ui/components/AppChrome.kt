@@ -24,9 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -60,7 +57,7 @@ fun NetTopBar(
         Row(
             modifier = Modifier.fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
         if (onBack != null) {
@@ -70,8 +67,8 @@ fun NetTopBar(
         }
         Text(
             title,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
         )
         if (onSearch != null) {
             IconBox(image = Icons.Filled.Search, desc = stringResource(R.string.action_search), onClick = onSearch)
@@ -103,7 +100,7 @@ fun IconBox(
     modifier: Modifier = Modifier,
     active: Boolean = false,
 ) {
-    IconButton(onClick = onClick, modifier = modifier.size(44.dp)) {
+    IconButton(onClick = onClick, modifier = modifier.size(40.dp)) {
         Icon(
             image,
             contentDescription = desc,
@@ -213,39 +210,63 @@ fun NetBottomBar(
     selected: String = "home",
     compareCount: Int = 0,
 ) {
-    val colors = NavigationBarItemDefaults.colors(
-        selectedIconColor = MaterialTheme.colorScheme.primary,
-        selectedTextColor = MaterialTheme.colorScheme.primary,
-        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        indicatorColor = MaterialTheme.colorScheme.surface,
-    )
-    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-        NavigationBarItem(
-            selected = selected == "home",
-            onClick = onHome,
-            icon = { Icon(Icons.Filled.Home, null) },
-            label = { Text(stringResource(R.string.nav_home)) },
-            colors = colors,
+    // Custom compact bar (~58dp) instead of M3 NavigationBar (~80dp):
+    // same look, much less vertical bulk.
+    Column(Modifier.background(MaterialTheme.colorScheme.surface)) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 8.dp),
+        ) {
+            NavItem(
+                active = selected == "home",
+                icon = Icons.Filled.Home,
+                label = stringResource(R.string.nav_home),
+                onClick = onHome,
+            )
+            NavItem(
+                active = selected == "favorites",
+                icon = Icons.Filled.FavoriteBorder,
+                label = stringResource(R.string.favorites_title),
+                onClick = onFavorites,
+            )
+            NavItem(
+                active = selected == "compare",
+                icon = Icons.AutoMirrored.Filled.CompareArrows,
+                label = if (compareCount > 0) stringResource(R.string.compare_open, compareCount)
+                else stringResource(R.string.compare_title),
+                onClick = onCompare,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.NavItem(
+    active: Boolean,
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier.weight(1f)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Icon(
+            icon, contentDescription = null,
+            tint = if (active) cs.primary else cs.onSurfaceVariant,
+            modifier = Modifier.size(22.dp),
         )
-        NavigationBarItem(
-            selected = selected == "favorites",
-            onClick = onFavorites,
-            icon = { Icon(Icons.Filled.FavoriteBorder, null) },
-            label = { Text(stringResource(R.string.favorites_title)) },
-            colors = colors,
-        )
-        NavigationBarItem(
-            selected = selected == "compare",
-            onClick = onCompare,
-            icon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, null) },
-            label = {
-                Text(
-                    if (compareCount > 0) stringResource(R.string.compare_open, compareCount)
-                    else stringResource(R.string.compare_title),
-                )
-            },
-            colors = colors,
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = if (active) cs.primary else cs.onSurfaceVariant,
+                fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal,
+            ),
         )
     }
 }
