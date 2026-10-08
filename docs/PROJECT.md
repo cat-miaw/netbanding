@@ -158,6 +158,11 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   inset hairline dividers; dropdown popups are white + 14dp rounded
   like search; favorites empty matches compare empty (icon + browse);
   detail buttons single-line. Lint clean, release AAB 4.25 MB.
+- Follow-ups (2026-10-08, committed): top-bar icons go box-less (clean
+  rows + hairline only); footer shows "Menampilkan A–B dari N paket" so
+  paging state is always legible (1 page = strip hidden by design);
+  region dropdown popup white. Gotcha: Scaffold topBar stacks multiple
+  children at the origin — NetTopBar wraps Row+Divider in a Column.
 
 ## Scraping playbook & per-ISP quirks
 
