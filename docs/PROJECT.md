@@ -118,19 +118,28 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   wrapped in a `Column` — Scaffold's topBar slot overlays multiple
   children at the origin (a stray full-width strip at y0 taught us).
   Uses `statusBarsPadding()` (notch-aware; the old 28dp hack died).
+  Compact (2026-10-08): row `12x4dp` padding, `titleMedium`, 40dp icons.
 - **Bottom nav** (`NetBottomBar`): Beranda/Favorit/Bandingkan(+count via
   `compare_open`). Type switch lives ONLY in the top segmented control.
+  Compact: 22dp icons, `labelSmall`, 32dp horizontal inset (icons grouped
+  tighter); outer `Column` carries the surface background edge-to-edge so
+  list cards never show through the inset sides. Full-width hairline
+  divider above.
 - **Overlay chrome, X-style**: NEITHER bar lives in a Scaffold slot.
   Both float over the full-bleed pager (`Box` overlays, top/bottom
-  aligned) and animate with pure draw-phase motion (slide+fade inside a
-  fixed-size box). NOTHING EVER RESIZES — this is the entire fix for the
-  scroll-jump saga below. Lists carry constant insets measured once via
+  aligned) and ride the finger 1:1 via `graphicsLayer.translationY`
+  driven by list scroll `dy` (`topHide`/`bottomHide` Animatables, fixed
+  travel 200/120dp — live height measurement proved unreliable across
+  inset frames). Settle 250ms after scroll stops to nearer end (60dp
+  threshold, 220ms tween). NO fade/snap (the old AnimatedVisibility pop
+  died per feedback). Lists carry constant insets measured once via
   `onGloballyPositioned` (`listTopPad`/`listBottomPad` passed down to all
   three tabs); hiding bars reveals already-laid-out content, zero snap.
 - **Chrome auto-hide**: home list drives it via `snapshotFlow` on
-  (index, offset) with directional accumulation (`acc` resets on
-  direction flip): hide after 48px down-travel, show after 160px up
-  (flings can't flap it), always shown near top and on tabs 1–2.
+  (index, offset): down-travel pushes both bars out pixel-for-pixel,
+  up-travel pulls them back (single collector + 250ms-debounce settle;
+  the old split `isScrollInProgress` settle never fired reliably).
+  Always shown near top and on tabs 1–2.
 - **Search**: lives INSIDE the list (header item) so empty results can
   never strand the user; empty state has "Hapus pencarian" reset.
   Header scrolls away; a top-bar search icon appears past 120px and
@@ -146,6 +155,8 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   requireUnconsumed=false)` because cards eat presses for ripple;
   touches starting <24dp from the left edge are ignored (system back).
   Drawer content (`MenuDrawerContent`) highlights the live tab+type.
+  Compact (2026-10-08): `titleMedium` header, compact headline
+  (`titleLarge`/`bodySmall`), 10dp rows, 20dp icons, 8dp spacing.
 - **Paging**: SQL `LIMIT/OFFSET` + `COUNT` (same WHERE), 15/page
   (`PAGE_SIZE`), `« 1 … n »` strip (`pageWindow`, unit-tested), page
   resets on any filter change, list jumps to top, footer always shows

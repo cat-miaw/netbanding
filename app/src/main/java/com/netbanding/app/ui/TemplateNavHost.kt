@@ -2,13 +2,6 @@ package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -36,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +40,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -170,36 +165,78 @@ fun TemplateNavHost(
     val homeListState = rememberLazyListState()
     val homeFocus = remember { FocusRequester() }
     var filtersVisible by rememberSaveable { mutableStateOf(true) }
-    // Social-media standard: bottom bar hides on scroll down, returns on
-    // scroll up (home list only; always visible near the top). Asymmetric
-    // thresholds — hide fast, show only on deliberate upward travel — so a
-    // fling's micro direction flips can't flap the animation mid-flight.
-    var homeNavVisible by rememberSaveable { mutableStateOf(true) }
+    // Scroll-linked chrome (YouTube-style): both bars ride 1:1 with the
+    // finger — down-travel pushes them out pixel-for-pixel, up-travel
+    // pulls them back. No snap, no fade pop. On release they gently
+    // settle to the nearer end. Home list only; tabs 1-2 pin at 0.
+    val topHide = remember { Animatable(0f) }
+    val bottomHide = remember { Animatable(0f) }
+    // Quantized mirrors (4px steps) drive the list insets so the LazyColumn
+    // remeasures ~4x less often; bars keep raw values for 1:1 smoothness.
+    var topHideQpx by remember { mutableFloatStateOf(0f) }
+    var bottomHideQpx by remember { mutableFloatStateOf(0f) }
+    fun pushQuantized() {
+        val tq = (topHide.value / 4f).roundToInt() * 4f
+        if (tq != topHideQpx) topHideQpx = tq
+        val bq = (bottomHide.value / 4f).roundToInt() * 4f
+        if (bq != bottomHideQpx) bottomHideQpx = bq
+    }
+    var topBarHpx by remember { mutableIntStateOf(0) }
+    var navBarHpx by remember { mutableIntStateOf(0) }
+    // Chrome travel: fixed generous distances (measured bar height proved
+    // unreliable across inset frames). Both bars fully exit; settle snaps
+    // to the nearer end past a 60dp threshold. 1:1 with the finger.
+    fun topMax(): Float = with(density) { 200.dp.toPx() }
+    fun bottomMax(): Float = with(density) { 120.dp.toPx() }
     LaunchedEffect(homeListState) {
         var prev = 0 to 0
-        var acc = 0
+        var settleJob: kotlinx.coroutines.Job? = null
         snapshotFlow {
             homeListState.firstVisibleItemIndex to homeListState.firstVisibleItemScrollOffset
         }.collect { (index, offset) ->
             val (prevIndex, prevOffset) = prev
             val dy = if (index == prevIndex) {
-                offset - prevOffset
+                (offset - prevOffset).toFloat()
             } else {
-                (index - prevIndex) * 10_000
+                (index - prevIndex) * 10_000f
             }
             prev = index to offset
             if (index == 0 && offset < 120) {
-                homeNavVisible = true
-                acc = 0
+                settleJob?.cancel()
+                if (topHide.value != 0f) topHide.snapTo(0f)
+                if (bottomHide.value != 0f) bottomHide.snapTo(0f)
+                pushQuantized()
                 return@collect
             }
-            acc = if (acc == 0 || dy == 0 || (acc > 0) == (dy > 0)) acc + dy else dy
-            if (!homeNavVisible && acc < -160) {
-                homeNavVisible = true
-                acc = 0
-            } else if (homeNavVisible && acc > 48) {
-                homeNavVisible = false
-                acc = 0
+            if (dy != 0f) {
+                settleJob?.cancel()
+                runCatching { topHide.snapTo((topHide.value + dy).coerceIn(0f, topMax())) }
+                runCatching { bottomHide.snapTo((bottomHide.value + dy).coerceIn(0f, bottomMax())) }
+                pushQuantized()
+                // Settle after the finger/fling stops: nearer end wins.
+                settleJob = launch {
+                    kotlinx.coroutines.delay(250)
+                    val tm = topMax()
+                    val bm = bottomMax()
+                    val settleAt = with(density) { 60.dp.toPx() }
+                    val topTarget = if (topHide.value > settleAt) tm else 0f
+                    val bottomTarget = if (bottomHide.value > settleAt) bm else 0f
+                    // Track the 220ms animation so insets follow (220ms only).
+                    val track = launch {
+                        snapshotFlow { topHide.value to bottomHide.value }.collect { pushQuantized() }
+                    }
+                    try {
+                        if (topHide.value != topTarget) {
+                            runCatching { topHide.animateTo(topTarget, tween(220)) }
+                        }
+                        if (bottomHide.value != bottomTarget) {
+                            runCatching { bottomHide.animateTo(bottomTarget, tween(220)) }
+                        }
+                    } finally {
+                        track.cancel()
+                    }
+                    pushQuantized()
+                }
             }
         }
     }
@@ -242,20 +279,22 @@ fun TemplateNavHost(
         NavHost(navController = navController, startDestination = Routes.MAIN) {
             composable(Routes.MAIN) {
                 val tab = pagerState.currentPage
-                // Two-phase chrome visibility: AnimatedVisibility snaps the
-                // slot size at exit START, so the list jumped underneath the
-                // X-style chrome: both bars float OVER the full-bleed list.
-                // Nothing ever resizes, so there is no layout snap and no
-                // remeasure storm — show/hide is pure draw-phase motion.
-                // The top bar stays fixed-height; hiding it leaves calm
-                // background space instead of janking the list.
-                var navBarH by remember { mutableIntStateOf(0) }
-                var topBarH by remember { mutableIntStateOf(0) }
-                val listBottomPad = remember(navBarH, density) {
-                    with(density) { navBarH.toDp() } + 16.dp
+                // Overlay chrome: both bars float OVER the full-bleed list.
+                // Show/hide is pure draw-phase translation driven 1:1 by
+                // scroll (see topHide/bottomHide). The list insets collapse
+                // with the bars so content fills the vacated space instead
+                // of leaving a blank band — same dy drives both, so no snap.
+                val topHideDp = with(density) { topHideQpx.toDp() }
+                val bottomHideDp = with(density) { bottomHideQpx.toDp() }
+                // Tabs 1-2 pin their bars visible, so they always keep full
+                // insets; only tab 0 collapses with the scroll-linked chrome.
+                val effTopHide = if (tab == 0) topHideDp else 0.dp
+                val effBottomHide = if (tab == 0) bottomHideDp else 0.dp
+                val listBottomPad = remember(navBarHpx, effBottomHide) {
+                    ((with(density) { navBarHpx.toDp() } + 16.dp - effBottomHide).coerceAtLeast(0.dp))
                 }
-                val listTopPad = remember(topBarH, density) {
-                    with(density) { topBarH.toDp() } + 16.dp
+                val listTopPad = remember(topBarHpx, effTopHide) {
+                    ((with(density) { topBarHpx.toDp() } + 16.dp - effTopHide).coerceAtLeast(0.dp))
                 }
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -368,58 +407,53 @@ fun TemplateNavHost(
                             )
                         }
                     }
-                    // Bottom nav floats over the full-bleed pager. The overlay
-                    // box never changes size, so show/hide is pure draw-phase
-                    // motion: zero remeasure, zero snap, zero dropped frames.
+                    // Bottom nav floats over the full-bleed pager, riding the
+                    // finger 1:1 (translationY only, no fade). Tabs 1-2 pin
+                    // at 0; tab 0 follows bottomHide.
                     Box(
                         Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)) +
-                                slideInVertically(tween(200)) { it },
-                            exit = fadeOut(tween(150)) +
-                                slideOutVertically(tween(200)) { it },
-                        ) {
-                            Box(
-                                Modifier.onGloballyPositioned {
-                                    navBarH = it.size.height
-                                },
-                            ) {
-                                NetBottomBar(
-                                    onHome = { goTab(0) },
-                                    onFavorites = { goTab(1) },
-                                    onCompare = { goTab(2) },
-                                    selected = when (tab) {
-                                        1 -> "favorites"
-                                        2 -> "compare"
-                                        else -> "home"
-                                    },
-                                    compareCount = compareCount,
-                                )
+                        val bottomOff = if (tab == 0) bottomHide.value else 0f
+                        Box(
+                            Modifier.onGloballyPositioned {
+                                navBarHpx = it.size.height
                             }
+                                .graphicsLayer {
+                                    translationY = bottomOff
+                                    clip = true
+                                },
+                        ) {
+                            NetBottomBar(
+                                onHome = { goTab(0) },
+                                onFavorites = { goTab(1) },
+                                onCompare = { goTab(2) },
+                                selected = when (tab) {
+                                    1 -> "favorites"
+                                    2 -> "compare"
+                                    else -> "home"
+                                },
+                                compareCount = compareCount,
+                            )
                         }
                     }
-                    // Top bar floats too: same visibility, slides up and out.
+                    // Top bar floats too: same 1:1 linkage, slides up and out.
                     Box(
                         Modifier.fillMaxSize(),
                         contentAlignment = Alignment.TopCenter,
                     ) {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)) +
-                                slideInVertically(tween(200)) { -it },
-                            exit = fadeOut(tween(150)) +
-                                slideOutVertically(tween(200)) { -it },
+                        val topOff = if (tab == 0) topHide.value else 0f
+                        Box(
+                            Modifier.onGloballyPositioned {
+                                topBarHpx = it.size.height
+                            }
+                                .background(MaterialTheme.colorScheme.background)
+                                .graphicsLayer {
+                                    translationY = -topOff
+                                    clip = true
+                                },
                         ) {
-                            Box(
-                                Modifier.onGloballyPositioned {
-                                    topBarH = it.size.height
-                                }
-                                    .background(MaterialTheme.colorScheme.background),
-                            ) {
-                                when (tab) {
+                            when (tab) {
                                 1 -> NetTopBar(
                                     title = stringResource(R.string.favorites_title),
                                     onMenu = ::openDrawer,
@@ -446,7 +480,6 @@ fun TemplateNavHost(
                                 )
                                 }
                             }
-                        }
                     }
                 }
             }

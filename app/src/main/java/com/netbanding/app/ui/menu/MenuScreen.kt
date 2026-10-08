@@ -37,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.netbanding.app.R
-import com.netbanding.app.ui.components.PageHeadline
 import com.netbanding.app.ui.components.SectionLabel
 
 /** Drawer content: same menu as before, now sliding over the current tab. */
@@ -63,20 +62,20 @@ fun MenuDrawerContent(
             .statusBarsPadding()
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 stringResource(R.string.app_name),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = onClose) {
+            IconButton(onClick = onClose, modifier = Modifier.size(40.dp)) {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
             }
         }
-        PageHeadline(title = stringResource(R.string.menu_title), sub = stringResource(R.string.menu_sub))
+        CompactHeadline(title = stringResource(R.string.menu_title), sub = stringResource(R.string.menu_sub))
         SectionLabel(stringResource(R.string.menu_explore))
         MenuRow(
             icon = Icons.Filled.SignalCellularAlt,
@@ -125,6 +124,14 @@ fun MenuDrawerContent(
 }
 
 @Composable
+private fun CompactHeadline(title: String, sub: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold))
+        Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
 private fun MenuRow(
     icon: ImageVector,
     title: String,
@@ -135,27 +142,27 @@ private fun MenuRow(
     val cs = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(if (highlighted) cs.primaryContainer else MaterialTheme.colorScheme.surface)
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 14.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             icon, null,
             tint = if (highlighted) cs.primary else cs.onSurfaceVariant,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(20.dp),
         )
-        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+        Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
             Text(
                 title,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
                     color = if (highlighted) cs.primary else cs.onSurface,
                 ),
             )
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
         }
-        Text("›", style = MaterialTheme.typography.titleLarge, color = cs.onSurfaceVariant)
+        Text("›", style = MaterialTheme.typography.titleMedium, color = cs.onSurfaceVariant)
     }
 }
