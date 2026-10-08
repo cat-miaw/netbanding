@@ -129,17 +129,18 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   Both float over the full-bleed pager (`Box` overlays, top/bottom
   aligned) and ride the finger 1:1 via `graphicsLayer.translationY`
   driven by list scroll `dy` (`topHide`/`bottomHide` Animatables, fixed
-  travel 200/120dp — live height measurement proved unreliable across
-  inset frames). Settle 250ms after scroll stops to nearer end (60dp
-  threshold, 220ms tween). NO fade/snap (the old AnimatedVisibility pop
-  died per feedback). Lists carry constant insets measured once via
-  `onGloballyPositioned` (`listTopPad`/`listBottomPad` passed down to all
-  three tabs); hiding bars reveals already-laid-out content, zero snap.
+  travel 200/120dp, 250ms-debounce settle to nearer end past 60dp).
+  NO fade/snap (the old AnimatedVisibility pop died per feedback).
+  Lists carry CONSTANT insets measured once via `onGloballyPositioned`
+  (`listTopPad`/`listBottomPad` passed down to all three tabs); hiding
+  bars reveals already-laid-out content, zero snap. (2026-10-08 lesson:
+  collapsing insets with the bars reintroduced the scroll jump via the
+  near-top snap teleport + per-frame remeasure — reverted same day.)
 - **Chrome auto-hide**: home list drives it via `snapshotFlow` on
   (index, offset): down-travel pushes both bars out pixel-for-pixel,
   up-travel pulls them back (single collector + 250ms-debounce settle;
   the old split `isScrollInProgress` settle never fired reliably).
-  Always shown near top and on tabs 1–2.
+  Always shown near top and on tabs 1–2. Bars only — insets constant.
 - **Search**: lives INSIDE the list (header item) so empty results can
   never strand the user; empty state has "Hapus pencarian" reset.
   Header scrolls away; a top-bar search icon appears past 120px and

@@ -29,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -169,18 +168,11 @@ fun TemplateNavHost(
     // finger — down-travel pushes them out pixel-for-pixel, up-travel
     // pulls them back. No snap, no fade pop. On release they gently
     // settle to the nearer end. Home list only; tabs 1-2 pin at 0.
+    // Lists keep CONSTANT insets (measured once) — insets never resize
+    // mid-scroll, so hiding bars reveals calm space with zero layout snap
+    // (the scroll-jump saga rule). Bars-only motion, draw-phase only.
     val topHide = remember { Animatable(0f) }
     val bottomHide = remember { Animatable(0f) }
-    // Quantized mirrors (4px steps) drive the list insets so the LazyColumn
-    // remeasures ~4x less often; bars keep raw values for 1:1 smoothness.
-    var topHideQpx by remember { mutableFloatStateOf(0f) }
-    var bottomHideQpx by remember { mutableFloatStateOf(0f) }
-    fun pushQuantized() {
-        val tq = (topHide.value / 4f).roundToInt() * 4f
-        if (tq != topHideQpx) topHideQpx = tq
-        val bq = (bottomHide.value / 4f).roundToInt() * 4f
-        if (bq != bottomHideQpx) bottomHideQpx = bq
-    }
     var topBarHpx by remember { mutableIntStateOf(0) }
     var navBarHpx by remember { mutableIntStateOf(0) }
     // Chrome travel: fixed generous distances (measured bar height proved
@@ -205,14 +197,12 @@ fun TemplateNavHost(
                 settleJob?.cancel()
                 if (topHide.value != 0f) topHide.snapTo(0f)
                 if (bottomHide.value != 0f) bottomHide.snapTo(0f)
-                pushQuantized()
                 return@collect
             }
             if (dy != 0f) {
                 settleJob?.cancel()
                 runCatching { topHide.snapTo((topHide.value + dy).coerceIn(0f, topMax())) }
                 runCatching { bottomHide.snapTo((bottomHide.value + dy).coerceIn(0f, bottomMax())) }
-                pushQuantized()
                 // Settle after the finger/fling stops: nearer end wins.
                 settleJob = launch {
                     kotlinx.coroutines.delay(250)
@@ -221,21 +211,12 @@ fun TemplateNavHost(
                     val settleAt = with(density) { 60.dp.toPx() }
                     val topTarget = if (topHide.value > settleAt) tm else 0f
                     val bottomTarget = if (bottomHide.value > settleAt) bm else 0f
-                    // Track the 220ms animation so insets follow (220ms only).
-                    val track = launch {
-                        snapshotFlow { topHide.value to bottomHide.value }.collect { pushQuantized() }
+                    if (topHide.value != topTarget) {
+                        runCatching { topHide.animateTo(topTarget, tween(220)) }
                     }
-                    try {
-                        if (topHide.value != topTarget) {
-                            runCatching { topHide.animateTo(topTarget, tween(220)) }
-                        }
-                        if (bottomHide.value != bottomTarget) {
-                            runCatching { bottomHide.animateTo(bottomTarget, tween(220)) }
-                        }
-                    } finally {
-                        track.cancel()
+                    if (bottomHide.value != bottomTarget) {
+                        runCatching { bottomHide.animateTo(bottomTarget, tween(220)) }
                     }
-                    pushQuantized()
                 }
             }
         }
@@ -281,20 +262,15 @@ fun TemplateNavHost(
                 val tab = pagerState.currentPage
                 // Overlay chrome: both bars float OVER the full-bleed list.
                 // Show/hide is pure draw-phase translation driven 1:1 by
-                // scroll (see topHide/bottomHide). The list insets collapse
-                // with the bars so content fills the vacated space instead
-                // of leaving a blank band — same dy drives both, so no snap.
-                val topHideDp = with(density) { topHideQpx.toDp() }
-                val bottomHideDp = with(density) { bottomHideQpx.toDp() }
-                // Tabs 1-2 pin their bars visible, so they always keep full
-                // insets; only tab 0 collapses with the scroll-linked chrome.
-                val effTopHide = if (tab == 0) topHideDp else 0.dp
-                val effBottomHide = if (tab == 0) bottomHideDp else 0.dp
-                val listBottomPad = remember(navBarHpx, effBottomHide) {
-                    ((with(density) { navBarHpx.toDp() } + 16.dp - effBottomHide).coerceAtLeast(0.dp))
+                // scroll (see topHide/bottomHide). Lists keep CONSTANT
+                // insets measured once — hiding bars leaves calm space
+                // instead of resizing the list (the scroll-jump saga rule:
+                // nothing ever resizes, zero remeasure, zero snap).
+                val listBottomPad = remember(navBarHpx, density) {
+                    with(density) { navBarHpx.toDp() } + 16.dp
                 }
-                val listTopPad = remember(topBarHpx, effTopHide) {
-                    ((with(density) { topBarHpx.toDp() } + 16.dp - effTopHide).coerceAtLeast(0.dp))
+                val listTopPad = remember(topBarHpx, density) {
+                    with(density) { topBarHpx.toDp() } + 16.dp
                 }
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
