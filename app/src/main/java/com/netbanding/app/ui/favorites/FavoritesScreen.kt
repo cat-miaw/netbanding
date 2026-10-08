@@ -12,8 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,13 +26,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.NetBottomBar
+import com.netbanding.app.ui.components.NetTopBar
 import com.netbanding.app.ui.components.PackageCard
 import com.netbanding.app.ui.detail.PackageDetailSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, onToggleCompare: (Package) -> Unit, modifier: Modifier = Modifier) {
+fun FavoritesRoute(
+    viewModel: FavoritesViewModel,
+    onOpenMenu: () -> Unit,
+    onHome: () -> Unit,
+    onOpenCompare: () -> Unit,
+    compareCount: Int,
+    onToggleCompare: (Package) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<Package?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -44,9 +52,15 @@ fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, onToggleCo
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.favorites_title)) },
-                navigationIcon = { TextButton(onClick = onBack) { Text("‹") } },
+            NetTopBar(title = stringResource(R.string.favorites_title), onMenu = onOpenMenu)
+        },
+        bottomBar = {
+            NetBottomBar(
+                onHome = onHome,
+                onFavorites = {},
+                onCompare = onOpenCompare,
+                selected = "favorites",
+                compareCount = compareCount,
             )
         },
     ) { padding ->

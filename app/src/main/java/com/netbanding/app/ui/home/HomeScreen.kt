@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -21,15 +21,19 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -77,15 +81,37 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     var selected by remember { mutableStateOf<Package?>(null) }
+    // Local text buffer: the field must never be driven by the DB round-trip
+    // (per-keystroke re-query desyncs cursor/composition).
     var text by remember { mutableStateOf(state.query) }
+    var filtersVisible by rememberSaveable { mutableStateOf(true) }
     val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
     val isCellular = state.type == Types.CELLULAR
     val tabIsps = remember(state.isps, state.type) {
         state.isps.filter {
             (isCellular && it.category == "cellular") ||
                 (!isCellular && it.category != "cellular")
+        }
+    }
+    // Search bar scrolls away with the list; a top-bar search icon takes
+    // over once the user scrolls past the header.
+    val atTop by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                listState.firstVisibleItemScrollOffset < 120
+        }
+    }
+
+    fun revealSearch() {
+        scope.launch {
+            runCatching { listState.animateScrollToItem(0) }
+            focusRequester.requestFocus()
+            keyboard?.show()
         }
     }
 
@@ -94,7 +120,14 @@ fun HomeScreen(
             detectTapGestures(onTap = { focusManager.clearFocus() })
         },
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { NetTopBar(onMenu = onOpenMenu) },
+        topBar = {
+            NetTopBar(
+                onMenu = onOpenMenu,
+                onSearch = if (!atTop) ::revealSearch else null,
+                onToggleFilters = { filtersVisible = !filtersVisible },
+                filtersVisible = filtersVisible,
+            )
+        },
         bottomBar = {
             NetBottomBar(
                 onHome = {},
@@ -110,32 +143,36 @@ fun HomeScreen(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+                state.items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.empty_result))
+                }
+                else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    PageHeadline(
-                        title = stringResource(
-                            if (isCellular) R.string.home_title_cellular else R.string.home_title_broadband,
-                        ),
-                        sub = stringResource(R.string.home_sub),
-                    )
-                    TypeSegment(selected = state.type, onSelect = onType)
-                    NetSearch(value = text, onValue = { text = it; onQuery(it) })
-                }
-                when {
-                    state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    item(key = "header", contentType = "header") {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            PageHeadline(
+                                title = stringResource(
+                                    if (isCellular) R.string.home_title_cellular else R.string.home_title_broadband,
+                                ),
+                                sub = stringResource(R.string.home_sub),
+                            )
+                            TypeSegment(selected = state.type, onSelect = onType)
+                            NetSearch(
+                                value = text,
+                                onValue = { text = it; onQuery(it) },
+                                focusRequester = focusRequester,
+                            )
+                        }
                     }
-                    state.items.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.empty_result))
-                    }
-                    else -> LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
+                    if (filtersVisible) {
                         item(key = "filters", contentType = "header") {
                             val sortOptions = if (isCellular) listOf(
                                 Sorts.CHEAPEST to stringResource(R.string.sort_cheapest),
@@ -237,17 +274,35 @@ fun HomeScreen(
                                 SectionLabel(stringResource(R.string.section_packages))
                             }
                         }
-                        items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
-                            PackageCard(
-                                pkg = pkg,
-                                onClick = { selected = pkg },
-                                onFavorite = { onToggleFavorite(pkg) },
-                                onCompare = { onToggleCompare(pkg) },
-                            )
+                    }
+                    if (state.showUpdateApp || state.showStale || state.syncStatus == SyncStatus.FAILED) {
+                        item(key = "banners", contentType = "header") {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                if (state.showUpdateApp) Text(
+                                    stringResource(R.string.update_app_banner),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                                if (state.showStale) Text(
+                                    stringResource(R.string.stale_banner),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                                if (state.syncStatus == SyncStatus.FAILED) Text(
+                                    stringResource(R.string.sync_failed),
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                         }
-                        item(key = "footer", contentType = "footer") {
-                            DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
-                        }
+                    }
+                    items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
+                        PackageCard(
+                            pkg = pkg,
+                            onClick = { selected = pkg },
+                            onFavorite = { onToggleFavorite(pkg) },
+                            onCompare = { onToggleCompare(pkg) },
+                        )
+                    }
+                    item(key = "footer", contentType = "footer") {
+                        DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
                     }
                 }
             }

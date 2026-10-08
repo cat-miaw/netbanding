@@ -3,7 +3,10 @@ package com.netbanding.app.ui
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +30,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.netbanding.app.R
 import com.netbanding.app.di.AppContainer
 import com.netbanding.app.ui.compare.CompareRoute
 import com.netbanding.app.ui.compare.CompareViewModel
@@ -36,6 +37,7 @@ import com.netbanding.app.ui.favorites.FavoritesRoute
 import com.netbanding.app.ui.favorites.FavoritesViewModel
 import com.netbanding.app.ui.home.HomeRoute
 import com.netbanding.app.ui.home.HomeViewModel
+import com.netbanding.app.ui.home.Types
 import com.netbanding.app.ui.menu.MenuScreen
 import com.netbanding.app.ui.onboarding.OnboardingScreen
 import com.netbanding.app.ui.settings.PrivacyScreen
@@ -43,12 +45,10 @@ import com.netbanding.app.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
 
 private object Routes {
-    const val HOME = "home"
+    const val MAIN = "main"
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val PRIVACY = "privacy"
-    const val FAVORITES = "favorites"
-    const val COMPARE = "compare"
     const val MENU = "menu"
 }
 
@@ -79,77 +79,89 @@ fun TemplateNavHost(
     val syncState by container.userPrefs.syncState.collectAsState(initial = null)
     val scope = rememberCoroutineScope()
     var pendingRegion by remember { mutableStateOf("JAVA_ALL") }
+    val activity = LocalContext.current as ComponentActivity
+    @Composable
+    fun <T : androidx.lifecycle.ViewModel> activityVm(
+        modelClass: Class<T>,
+        create: () -> T,
+    ): T = viewModel(
+        viewModelStoreOwner = activity,
+        modelClass = modelClass,
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+                create() as T
+        },
+    )
 
-    fun go(route: String) {
-        navController.navigate(route) {
-            popUpTo(Routes.HOME)
+    // Activity-scoped so tab state survives swipes, menu jumps and rotation.
+    val homeVm = activityVm(HomeViewModel::class.java) {
+        HomeViewModel(
+            container.packageRepository,
+            container.userPrefs,
+            container.syncRepository,
+            container.priceDropMonitor,
+            container::scheduleSync,
+            SavedStateHandle(),
+        )
+    }
+    val favoritesVm = activityVm(FavoritesViewModel::class.java) {
+        FavoritesViewModel(container.packageRepository)
+    }
+    val compareVm = activityVm(CompareViewModel::class.java) {
+        CompareViewModel(container.packageRepository, SavedStateHandle())
+    }
+    val compareCount by compareVm.count.collectAsState(initial = 0)
+
+    // One pager for the three tabs: bottom taps and swipes stay in sync.
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    fun goTab(page: Int) {
+        scope.launch { runCatching { pagerState.animateScrollToPage(page) } }
+        navController.navigate(Routes.MAIN) {
+            popUpTo(Routes.MAIN)
             launchSingleTop = true
         }
     }
 
-    // Activity-scoped so Home, Favorites and Compare share one selection set.
-    val compareVm = viewModel<CompareViewModel>(
-        viewModelStoreOwner = LocalContext.current as ComponentActivity,
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-                CompareViewModel(container.packageRepository, SavedStateHandle()) as T
-        },
-    )
-    val compareCount by compareVm.count.collectAsState(initial = 0)
-
-    NavHost(navController = navController, startDestination = Routes.HOME) {
-        composable(Routes.HOME) {
-            HomeRoute(
-                viewModel = viewModel<HomeViewModel>(
-                    factory = object : ViewModelProvider.Factory {
-                        @Suppress("UNCHECKED_CAST")
-                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-                            HomeViewModel(
-                                container.packageRepository,
-                                container.userPrefs,
-                                container.syncRepository,
-                                container.priceDropMonitor,
-                                container::scheduleSync,
-                                SavedStateHandle(),
-                            ) as T
-                    },
-                ),
-                compareCount = compareCount,
-                onOpenMenu = { navController.navigate(Routes.MENU) },
-                onOpenFavorites = { go(Routes.FAVORITES) },
-                onOpenCompare = { go(Routes.COMPARE) },
-                onToggleCompare = compareVm::toggle,
-            )
-        }
-        composable(Routes.FAVORITES) {
-            FavoritesRoute(
-                viewModel = viewModel<FavoritesViewModel>(
-                    factory = object : ViewModelProvider.Factory {
-                        @Suppress("UNCHECKED_CAST")
-                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-                            FavoritesViewModel(container.packageRepository) as T
-                    },
-                ),
-                onBack = { navController.popBackStack() },
-                onToggleCompare = compareVm::toggle,
-            )
-        }
-        composable(Routes.COMPARE) {
-            CompareRoute(
-                viewModel = compareVm,
-                onBack = { navController.popBackStack() },
-            )
+    NavHost(navController = navController, startDestination = Routes.MAIN) {
+        composable(Routes.MAIN) {
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                when (page) {
+                    0 -> HomeRoute(
+                        viewModel = homeVm,
+                        compareCount = compareCount,
+                        onOpenMenu = { navController.navigate(Routes.MENU) },
+                        onOpenFavorites = { goTab(1) },
+                        onOpenCompare = { goTab(2) },
+                        onToggleCompare = compareVm::toggle,
+                    )
+                    1 -> FavoritesRoute(
+                        viewModel = favoritesVm,
+                        onOpenMenu = { navController.navigate(Routes.MENU) },
+                        onHome = { goTab(0) },
+                        onOpenCompare = { goTab(2) },
+                        compareCount = compareCount,
+                        onToggleCompare = compareVm::toggle,
+                    )
+                    else -> CompareRoute(
+                        viewModel = compareVm,
+                        onOpenMenu = { navController.navigate(Routes.MENU) },
+                        onHome = { goTab(0) },
+                        onOpenFavorites = { goTab(1) },
+                        compareCount = compareCount,
+                    )
+                }
+            }
         }
         composable(Routes.MENU) {
             MenuScreen(
                 dataVersion = syncState?.dataVersion ?: 0,
                 lastUpdated = syncState?.generatedAt,
                 onClose = { navController.popBackStack() },
-                onCellular = { go(Routes.HOME) },
-                onBroadband = { go(Routes.HOME) },
-                onFavorites = { go(Routes.FAVORITES) },
-                onCompare = { go(Routes.COMPARE) },
+                onCellular = { homeVm.setType(Types.CELLULAR); goTab(0) },
+                onBroadband = { homeVm.setType(Types.BROADBAND); goTab(0) },
+                onFavorites = { goTab(1) },
+                onCompare = { goTab(2) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
                 onPrivacy = { navController.navigate(Routes.PRIVACY) },
             )
@@ -162,13 +174,13 @@ fun TemplateNavHost(
                     scope.launch {
                         container.userPrefs.setRegion(pendingRegion)
                         container.userPrefs.setOnboardingDone()
-                        navController.popBackStack(Routes.HOME, inclusive = false)
+                        navController.popBackStack(Routes.MAIN, inclusive = false)
                     }
                 },
                 onSkip = {
                     scope.launch {
                         container.userPrefs.setOnboardingDone()
-                        navController.popBackStack(Routes.HOME, inclusive = false)
+                        navController.popBackStack(Routes.MAIN, inclusive = false)
                     }
                 },
             )

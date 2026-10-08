@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
@@ -28,22 +29,30 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.netbanding.app.R
 
-/** Top bar from the mockup: menu/back icon box + title. */
+/** Top bar from the mockup: menu/back icon box + title + optional actions. */
 @Composable
 fun NetTopBar(
     title: String = "NetBanding",
     onMenu: (() -> Unit)? = null,
     onBack: (() -> Unit)? = null,
+    onSearch: (() -> Unit)? = null,
+    onToggleFilters: (() -> Unit)? = null,
+    filtersVisible: Boolean = true,
+    actionText: String? = null,
+    onAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -62,18 +71,43 @@ fun NetTopBar(
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
         )
+        if (onSearch != null) {
+            IconBox(image = Icons.Filled.Search, desc = stringResource(R.string.action_search), onClick = onSearch)
+        }
+        if (onToggleFilters != null) {
+            IconBox(
+                image = Icons.Filled.Tune,
+                desc = stringResource(R.string.action_filter),
+                onClick = onToggleFilters,
+                active = filtersVisible,
+            )
+        }
+        if (actionText != null && onAction != null) {
+            TextButton(onClick = onAction) { Text(actionText) }
+        }
     }
 }
 
 @Composable
-fun IconBox(image: ImageVector, desc: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun IconBox(
+    image: ImageVector,
+    desc: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+) {
     IconButton(
         onClick = onClick,
         modifier = modifier.size(44.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surface),
     ) {
-        Icon(image, contentDescription = desc, tint = MaterialTheme.colorScheme.onSurface)
+        Icon(
+            image,
+            contentDescription = desc,
+            tint = if (active) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -82,6 +116,7 @@ fun NetSearch(
     value: String,
     onValue: (String) -> Unit,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -96,7 +131,9 @@ fun NetSearch(
             focusedBorderColor = MaterialTheme.colorScheme.outline,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         ),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().then(
+            if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier,
+        ),
     )
 }
 
