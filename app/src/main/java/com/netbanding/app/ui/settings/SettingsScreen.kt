@@ -84,7 +84,12 @@ fun SettingsScreen(
                     ),
                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                 )
-                ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
                     REGIONS.forEach { (code, label) ->
                         DropdownMenuItem(
                             text = { Text(label) },

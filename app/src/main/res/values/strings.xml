@@ -110,6 +110,7 @@
     <string name="compare_mixed_note">Masa aktif berbeda — total tidak sebanding langsung.</string>
     <string name="validity_monthly">Bulanan</string>
     <string name="browse_packages">Lihat paket</string>
+    <string name="results_count">Menampilkan %1$d–%2$d dari %3$d paket</string>
     <string name="quota_title">Kuota</string>
     <string name="active_title">Masa aktif</string>
     <string name="speed_title">Kecepatan</string>

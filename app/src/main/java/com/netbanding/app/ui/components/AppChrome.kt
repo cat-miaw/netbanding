@@ -56,12 +56,13 @@ fun NetTopBar(
     onAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
         if (onBack != null) {
             IconBox(image = Icons.AutoMirrored.Filled.ArrowBack, desc = "back", onClick = onBack)
         } else if (onMenu != null) {
@@ -86,11 +87,12 @@ fun NetTopBar(
         if (actionText != null && onAction != null) {
             TextButton(onClick = onAction) { Text(actionText) }
         }
+        }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
     }
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant,
-        modifier = Modifier.padding(horizontal = 16.dp),
-    )
 }
 
 @Composable
@@ -101,12 +103,7 @@ fun IconBox(
     modifier: Modifier = Modifier,
     active: Boolean = false,
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier.size(44.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface),
-    ) {
+    IconButton(onClick = onClick, modifier = modifier.size(44.dp)) {
         Icon(
             image,
             contentDescription = desc,

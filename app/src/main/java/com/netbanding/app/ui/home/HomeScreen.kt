@@ -297,7 +297,21 @@ fun HomeTabContent(
                     }
                 }
                 item(key = "footer", contentType = "footer") {
-                    DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (state.totalCount > 0) {
+                            val from = state.page * PAGE_SIZE + 1
+                            val to = minOf(
+                                state.page * PAGE_SIZE + state.items.size,
+                                state.totalCount,
+                            )
+                            Text(
+                                stringResource(R.string.results_count, from, to, state.totalCount),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        DisclaimerLine(modifier = Modifier.padding(top = 4.dp))
+                    }
                 }
             }
         }
