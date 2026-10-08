@@ -99,6 +99,16 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   (needs physical device). Play Console not yet created.
 - OPEN: Biznet modem rental Rp 50rb (unverifiable on site); FirstMedia
   seed is reseller data (re-verify vs official site); more islands.
+- UI redesign (2026-10-08, uncommitted): mockup-driven facelift — bottom
+  nav is Beranda/Favorit/Bandingkan (type switch lives ONLY in the top
+  segmented control, no dupe), new PackageCard (quota/speed info box,
+  + Bandingkan / Detail paket row), detail sheet (Kuota+Masa aktif boxes,
+  Bandingkan/Simpan buttons), full-screen Menu ("Mau cari apa?") replaces
+  the drawer, grouped Settings ("Sesuai kebutuhanmu"). Provider filter
+  kept (row 2, full width; + speed filter on broadband). Background Paper.
+- Emulator top-strip gotcha (2026-10-08): taps at y<~130px never reach
+  the app (SystemUI touch zone). NetTopBar carries 28dp extra top padding
+  so the hamburger sits clear. Verify top-bar taps via uiautomator dump.
 
 ## Scraping playbook & per-ISP quirks
 

@@ -36,6 +36,7 @@ fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modi
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.compare_title)) },
