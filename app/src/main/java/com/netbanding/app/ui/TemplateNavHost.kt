@@ -1,44 +1,61 @@
 package com.netbanding.app.ui
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.netbanding.app.R
 import com.netbanding.app.di.AppContainer
 import com.netbanding.app.ui.compare.CompareRoute
 import com.netbanding.app.ui.compare.CompareViewModel
+import com.netbanding.app.ui.components.NetBottomBar
+import com.netbanding.app.ui.components.NetTopBar
 import com.netbanding.app.ui.favorites.FavoritesRoute
 import com.netbanding.app.ui.favorites.FavoritesViewModel
 import com.netbanding.app.ui.home.HomeRoute
 import com.netbanding.app.ui.home.HomeViewModel
 import com.netbanding.app.ui.home.Types
-import com.netbanding.app.ui.menu.MenuScreen
+import com.netbanding.app.ui.menu.MenuDrawerContent
 import com.netbanding.app.ui.onboarding.OnboardingScreen
 import com.netbanding.app.ui.settings.PrivacyScreen
 import com.netbanding.app.ui.settings.SettingsScreen
@@ -49,7 +66,6 @@ private object Routes {
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
     const val PRIVACY = "privacy"
-    const val MENU = "menu"
 }
 
 /** Placeholder logo until a real brand mark exists. */
@@ -94,7 +110,7 @@ fun TemplateNavHost(
         },
     )
 
-    // Activity-scoped so tab state survives swipes, menu jumps and rotation.
+    // Activity-scoped so tab state survives swipes, drawer jumps and rotation.
     val homeVm = activityVm(HomeViewModel::class.java) {
         HomeViewModel(
             container.packageRepository,
@@ -112,91 +128,174 @@ fun TemplateNavHost(
         CompareViewModel(container.packageRepository, SavedStateHandle())
     }
     val compareCount by compareVm.count.collectAsState(initial = 0)
+    val compareState by compareVm.uiState.collectAsStateWithLifecycle()
 
-    // One pager for the three tabs: bottom taps and swipes stay in sync.
+    // One pager + one chrome for the three tabs: swipes and taps only
+    // change the page, never the bars around it.
     val pagerState = rememberPagerState(pageCount = { 3 })
-    fun goTab(page: Int) {
-        scope.launch { runCatching { pagerState.animateScrollToPage(page) } }
-        navController.navigate(Routes.MAIN) {
-            popUpTo(Routes.MAIN)
-            launchSingleTop = true
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val homeListState = rememberLazyListState()
+    val homeFocus = remember { FocusRequester() }
+    var filtersVisible by rememberSaveable { mutableStateOf(true) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val atTop by remember {
+        derivedStateOf {
+            homeListState.firstVisibleItemIndex == 0 &&
+                homeListState.firstVisibleItemScrollOffset < 120
         }
     }
 
-    NavHost(navController = navController, startDestination = Routes.MAIN) {
-        composable(Routes.MAIN) {
-            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-                when (page) {
-                    0 -> HomeRoute(
-                        viewModel = homeVm,
-                        compareCount = compareCount,
-                        onOpenMenu = { navController.navigate(Routes.MENU) },
-                        onOpenFavorites = { goTab(1) },
-                        onOpenCompare = { goTab(2) },
-                        onToggleCompare = compareVm::toggle,
-                    )
-                    1 -> FavoritesRoute(
-                        viewModel = favoritesVm,
-                        onOpenMenu = { navController.navigate(Routes.MENU) },
-                        onHome = { goTab(0) },
-                        onOpenCompare = { goTab(2) },
-                        compareCount = compareCount,
-                        onToggleCompare = compareVm::toggle,
-                    )
-                    else -> CompareRoute(
-                        viewModel = compareVm,
-                        onOpenMenu = { navController.navigate(Routes.MENU) },
-                        onHome = { goTab(0) },
-                        onOpenFavorites = { goTab(1) },
-                        compareCount = compareCount,
-                    )
+    fun goTab(page: Int) {
+        scope.launch { runCatching { pagerState.animateScrollToPage(page) } }
+    }
+    fun revealSearch() {
+        scope.launch {
+            runCatching { homeListState.animateScrollToItem(0) }
+            homeFocus.requestFocus()
+            keyboard?.show()
+        }
+    }
+    fun openDrawer() {
+        scope.launch { drawerState.open() }
+    }
+    fun drawerGo(page: Int) {
+        scope.launch {
+            drawerState.close()
+            runCatching { pagerState.animateScrollToPage(page) }
+        }
+    }
+
+    // Back closes the drawer first, never the app from under it.
+    if (drawerState.isOpen || drawerState.isAnimationRunning) {
+        BackHandler { scope.launch { drawerState.close() } }
+    }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                MenuDrawerContent(
+                    dataVersion = syncState?.dataVersion ?: 0,
+                    lastUpdated = syncState?.generatedAt,
+                    onClose = { scope.launch { drawerState.close() } },
+                    onCellular = { homeVm.setType(Types.CELLULAR); drawerGo(0) },
+                    onBroadband = { homeVm.setType(Types.BROADBAND); drawerGo(0) },
+                    onFavorites = { drawerGo(1) },
+                    onCompare = { drawerGo(2) },
+                    onSettings = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Routes.SETTINGS)
+                    },
+                    onPrivacy = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Routes.PRIVACY)
+                    },
+                )
+            }
+        },
+    ) {
+        NavHost(navController = navController, startDestination = Routes.MAIN) {
+            composable(Routes.MAIN) {
+                val tab = pagerState.currentPage
+                Scaffold(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    topBar = {
+                        when (tab) {
+                            1 -> NetTopBar(
+                                title = stringResource(R.string.favorites_title),
+                                onMenu = ::openDrawer,
+                            )
+                            2 -> NetTopBar(
+                                title = stringResource(R.string.compare_title),
+                                onMenu = ::openDrawer,
+                                actionText = if (compareState.items.isNotEmpty()) {
+                                    stringResource(R.string.compare_clear)
+                                } else {
+                                    null
+                                },
+                                onAction = if (compareState.items.isNotEmpty()) {
+                                    compareVm::clear
+                                } else {
+                                    null
+                                },
+                            )
+                            else -> NetTopBar(
+                                onMenu = ::openDrawer,
+                                onSearch = if (!atTop) ::revealSearch else null,
+                                onToggleFilters = { filtersVisible = !filtersVisible },
+                                filtersVisible = filtersVisible,
+                            )
+                        }
+                    },
+                    bottomBar = {
+                        NetBottomBar(
+                            onHome = { goTab(0) },
+                            onFavorites = { goTab(1) },
+                            onCompare = { goTab(2) },
+                            selected = when (tab) {
+                                1 -> "favorites"
+                                2 -> "compare"
+                                else -> "home"
+                            },
+                            compareCount = compareCount,
+                        )
+                    },
+                ) { padding ->
+                    HorizontalPager(
+                        state = pagerState,
+                        beyondViewportPageCount = 1,
+                        modifier = Modifier.fillMaxSize()
+                            .padding(padding)
+                            .background(MaterialTheme.colorScheme.background),
+                    ) { page ->
+                        when (page) {
+                            0 -> HomeRoute(
+                                viewModel = homeVm,
+                                listState = homeListState,
+                                focusRequester = homeFocus,
+                                filtersVisible = filtersVisible,
+                                onToggleCompare = compareVm::toggle,
+                            )
+                            1 -> FavoritesRoute(
+                                viewModel = favoritesVm,
+                                onToggleCompare = compareVm::toggle,
+                            )
+                            else -> CompareRoute(viewModel = compareVm)
+                        }
+                    }
                 }
             }
-        }
-        composable(Routes.MENU) {
-            MenuScreen(
-                dataVersion = syncState?.dataVersion ?: 0,
-                lastUpdated = syncState?.generatedAt,
-                onClose = { navController.popBackStack() },
-                onCellular = { homeVm.setType(Types.CELLULAR); goTab(0) },
-                onBroadband = { homeVm.setType(Types.BROADBAND); goTab(0) },
-                onFavorites = { goTab(1) },
-                onCompare = { goTab(2) },
-                onSettings = { navController.navigate(Routes.SETTINGS) },
-                onPrivacy = { navController.navigate(Routes.PRIVACY) },
-            )
-        }
-        composable(Routes.ONBOARDING) {
-            OnboardingScreen(
-                selected = pendingRegion,
-                onSelect = { pendingRegion = it },
-                onDone = {
-                    scope.launch {
-                        container.userPrefs.setRegion(pendingRegion)
-                        container.userPrefs.setOnboardingDone()
-                        navController.popBackStack(Routes.MAIN, inclusive = false)
-                    }
-                },
-                onSkip = {
-                    scope.launch {
-                        container.userPrefs.setOnboardingDone()
-                        navController.popBackStack(Routes.MAIN, inclusive = false)
-                    }
-                },
-            )
-        }
-        composable(Routes.SETTINGS) {
-            SettingsScreen(
-                region = region,
-                onRegion = { scope.launch { container.userPrefs.setRegion(it) } },
-                dataVersion = syncState?.dataVersion ?: 0,
-                lastUpdated = syncState?.generatedAt,
-                onBack = { navController.popBackStack() },
-                onPrivacy = { navController.navigate(Routes.PRIVACY) },
-            )
-        }
-        composable(Routes.PRIVACY) {
-            PrivacyScreen(onBack = { navController.popBackStack() })
+            composable(Routes.ONBOARDING) {
+                OnboardingScreen(
+                    selected = pendingRegion,
+                    onSelect = { pendingRegion = it },
+                    onDone = {
+                        scope.launch {
+                            container.userPrefs.setRegion(pendingRegion)
+                            container.userPrefs.setOnboardingDone()
+                            navController.popBackStack(Routes.MAIN, inclusive = false)
+                        }
+                    },
+                    onSkip = {
+                        scope.launch {
+                            container.userPrefs.setOnboardingDone()
+                            navController.popBackStack(Routes.MAIN, inclusive = false)
+                        }
+                    },
+                )
+            }
+            composable(Routes.SETTINGS) {
+                SettingsScreen(
+                    region = region,
+                    onRegion = { scope.launch { container.userPrefs.setRegion(it) } },
+                    dataVersion = syncState?.dataVersion ?: 0,
+                    lastUpdated = syncState?.generatedAt,
+                    onBack = { navController.popBackStack() },
+                    onPrivacy = { navController.navigate(Routes.PRIVACY) },
+                )
+            }
+            composable(Routes.PRIVACY) {
+                PrivacyScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 

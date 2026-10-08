@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
-import com.netbanding.app.ui.components.NetBottomBar
-import com.netbanding.app.ui.components.NetTopBar
 import com.netbanding.app.ui.components.formatPricePeriode
 import com.netbanding.app.ui.components.formatQuota
 import com.netbanding.app.ui.home.formatIdr
@@ -35,39 +32,14 @@ import com.netbanding.app.ui.home.formatIdr
 @Composable
 fun CompareRoute(
     viewModel: CompareViewModel,
-    onOpenMenu: () -> Unit,
-    onHome: () -> Unit,
-    onOpenFavorites: () -> Unit,
-    compareCount: Int,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            NetTopBar(
-                title = stringResource(R.string.compare_title),
-                onMenu = onOpenMenu,
-                actionText = if (state.items.isNotEmpty()) stringResource(R.string.compare_clear) else null,
-                onAction = if (state.items.isNotEmpty()) viewModel::clear else null,
-            )
-        },
-        bottomBar = {
-            NetBottomBar(
-                onHome = onHome,
-                onFavorites = onOpenFavorites,
-                onCompare = {},
-                selected = "compare",
-                compareCount = compareCount,
-            )
-        },
-    ) { padding ->
-        if (state.items.size < 2) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.compare_empty))
-            }
-        } else {
+    if (state.items.size < 2) {
+        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.compare_empty))
+        }
+    } else {
             val items = state.items
             val cheapest = items.minOf { it.monthlyTotal }
             val fastest = items.mapNotNull { it.speedMbps }.maxOrNull()
@@ -79,7 +51,7 @@ fun CompareRoute(
             val ppnYes = stringResource(R.string.compare_included)
             val ppnNo = stringResource(R.string.compare_excluded)
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -139,7 +111,6 @@ fun CompareRoute(
                 }
             }
         }
-    }
 }
 
 @Composable

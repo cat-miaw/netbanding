@@ -104,6 +104,7 @@
     <string name="nav_home">Beranda</string>
     <string name="action_search">Cari</string>
     <string name="action_filter">Filter</string>
+    <string name="clear_search">Hapus pencarian</string>
     <string name="quota_title">Kuota</string>
     <string name="active_title">Masa aktif</string>
     <string name="speed_title">Kecepatan</string>
