@@ -52,6 +52,7 @@ fun PackageDetailSheet(
     history: List<PricePoint>,
     onFavorite: () -> Unit,
     onCompare: () -> Unit,
+    isCompared: Boolean = false,
     onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -135,7 +136,7 @@ fun PackageDetailSheet(
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                Text("+ ${stringResource(R.string.compare_add)}")
+                Text(if (isCompared) "✓ ${stringResource(R.string.compare_added)}" else "+ ${stringResource(R.string.compare_add)}")
             }
             OutlinedButton(
                 onClick = onFavorite,

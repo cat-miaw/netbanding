@@ -61,6 +61,7 @@ interface PackageDao {
           CASE WHEN :sort = 'pergb' THEN
             CASE WHEN p.quota_mb > 0 THEN CAST(p.monthly_total AS REAL) / p.quota_mb END END ASC,
           p.monthly_total ASC
+        LIMIT :limit OFFSET :offset
         """,
     )
     fun observePackages(
@@ -74,7 +75,41 @@ interface PackageDao {
         periods: List<String>,
         periodCount: Int,
         sort: String,
+        limit: Int = -1,
+        offset: Int = 0,
     ): Flow<List<PackageWithIsp>>
+
+    /** Same WHERE as observePackages; drives pagination (LIMIT -1 = all). */
+    @Query(
+        """
+        SELECT COUNT(DISTINCT p.id)
+        FROM packages p
+        LEFT JOIN package_regions r ON r.package_id = p.id
+        JOIN isps i ON i.id = p.isp_id
+        WHERE p.is_active = 1
+          AND (:type IS NULL OR p.type = :type)
+          AND (:region = 'JAVA_ALL' OR r.region_code = :region OR r.region_code = 'JAVA_ALL')
+          AND (:maxMonthly IS NULL OR p.monthly_total <= :maxMonthly)
+          AND (:minSpeed IS NULL OR p.speed_mbps >= :minSpeed)
+          AND (:query IS NULL OR p.name LIKE '%' || :query || '%' OR i.name LIKE '%' || :query || '%')
+          AND (:ispCount = 0 OR p.isp_id IN (:ispIds))
+          AND (:periodCount = 0
+            OR ('daily' IN (:periods) AND p.validity_days BETWEEN 1 AND 6)
+            OR ('weekly' IN (:periods) AND p.validity_days BETWEEN 7 AND 21)
+            OR ('monthly' IN (:periods) AND (p.validity_days > 21 OR p.validity_days IS NULL)))
+        """,
+    )
+    fun observeCount(
+        region: String,
+        type: String?,
+        maxMonthly: Long?,
+        minSpeed: Int?,
+        query: String?,
+        ispIds: List<String>,
+        ispCount: Int,
+        periods: List<String>,
+        periodCount: Int,
+    ): Flow<Int>
 
     @Query("SELECT * FROM isps ORDER BY name")
     fun observeIsps(): Flow<List<IspEntity>>

@@ -31,13 +31,29 @@ class PackageRepository(
         ispIds: Set<String> = emptySet(),
         periods: Set<String> = emptySet(),
         sort: String = "cheapest",
+        limit: Int = -1,
+        offset: Int = 0,
     ): Flow<List<Package>> =
         db.packageDao().observePackages(
             region, type, maxMonthly, minSpeed, query?.takeIf { it.isNotBlank() },
-            ispIds.toList(), ispIds.size, periods.toList(), periods.size, sort,
+            ispIds.toList(), ispIds.size, periods.toList(), periods.size, sort, limit, offset,
         )
             .map { rows -> rows.map { it.toDomain() } }
             .onStart { withContext(Dispatchers.IO) { seedImporter.importIfEmpty() } }
+
+    fun observeCount(
+        region: String = "JAVA_ALL",
+        type: String? = null,
+        maxMonthly: Long? = null,
+        minSpeed: Int? = null,
+        query: String? = null,
+        ispIds: Set<String> = emptySet(),
+        periods: Set<String> = emptySet(),
+    ): Flow<Int> =
+        db.packageDao().observeCount(
+            region, type, maxMonthly, minSpeed, query?.takeIf { it.isNotBlank() },
+            ispIds.toList(), ispIds.size, periods.toList(), periods.size,
+        )
 
     fun observeIsps(): Flow<List<IspEntity>> = db.packageDao().observeIsps()
         .onStart { withContext(Dispatchers.IO) { seedImporter.importIfEmpty() } }

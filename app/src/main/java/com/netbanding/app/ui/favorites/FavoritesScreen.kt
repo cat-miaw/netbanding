@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FavoritesRoute(
     viewModel: FavoritesViewModel,
+    compareIds: Set<String>,
     onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -56,6 +57,7 @@ fun FavoritesRoute(
                     onClick = { selected = pkg },
                     onFavorite = { viewModel.toggleFavorite(pkg) },
                     onCompare = { onToggleCompare(pkg) },
+                    isCompared = pkg.id in compareIds,
                 )
             }
         }
@@ -68,6 +70,7 @@ fun FavoritesRoute(
             PackageDetailSheet(
                 pkg = pkg,
                 history = history,
+                isCompared = pkg.id in compareIds,
                 onFavorite = {
                     viewModel.toggleFavorite(pkg)
                     scope.launch { sheetState.hide(); selected = null }

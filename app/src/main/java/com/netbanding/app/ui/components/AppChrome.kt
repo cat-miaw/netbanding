@@ -237,7 +237,12 @@ fun NetBottomBar(
             selected = selected == "compare",
             onClick = onCompare,
             icon = { Icon(Icons.AutoMirrored.Filled.CompareArrows, null) },
-            label = { Text(stringResource(R.string.compare_title)) },
+            label = {
+                Text(
+                    if (compareCount > 0) stringResource(R.string.compare_open, compareCount)
+                    else stringResource(R.string.compare_title),
+                )
+            },
             colors = colors,
         )
     }
@@ -249,5 +254,52 @@ fun PageHeadline(title: String, sub: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold))
         Text(sub, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/**
+ * Compact page strip: « 1 … 4 5 6 … 12 ». Pure window math lives in
+ * [pageWindow] so it can be unit-tested.
+ */
+fun pageWindow(page: Int, pageCount: Int): List<Int?> {
+    val keep = (setOf(0, pageCount - 1) + (page - 1..page + 1))
+        .filter { it in 0 until pageCount }.sorted()
+    val out = mutableListOf<Int?>()
+    keep.forEachIndexed { i, p ->
+        if (i > 0 && p - keep[i - 1] > 1) out += null
+        out += p
+    }
+    return out
+}
+
+@Composable
+fun PageControls(
+    page: Int,
+    pageCount: Int,
+    onPage: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (pageCount <= 1) return
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = { onPage(page - 1) }, enabled = page > 0) { Text("«") }
+        pageWindow(page, pageCount).forEach { p ->
+            if (p == null) {
+                Text("…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                TextButton(onClick = { onPage(p) }) {
+                    Text(
+                        "${p + 1}",
+                        fontWeight = if (p == page) FontWeight.ExtraBold else FontWeight.Normal,
+                        color = if (p == page) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        TextButton(onClick = { onPage(page + 1) }, enabled = page < pageCount - 1) { Text("»") }
     }
 }

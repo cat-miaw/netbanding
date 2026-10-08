@@ -40,6 +40,9 @@ object Periods {
     const val MONTHLY = "monthly"
 }
 
+/** Packages per page; SQL LIMIT/OFFSET keeps big catalogs light on RAM. */
+const val PAGE_SIZE = 15
+
 enum class SyncStatus { IDLE, SYNCING, FAILED }
 
 data class IspOption(val id: String, val name: String, val category: String)
@@ -57,6 +60,9 @@ data class HomeUiState(
     val periods: Set<String> = emptySet(),
     val sort: String = Sorts.CHEAPEST,
     val region: String = "JAVA_ALL",
+    val page: Int = 0,
+    val totalCount: Int = 0,
+    val pageCount: Int = 1,
     val syncStatus: SyncStatus = SyncStatus.IDLE,
     val lastUpdated: String? = null,
     val showStale: Boolean = false,
@@ -78,6 +84,7 @@ class HomeViewModel(
     private val maxMonthly = savedState.getStateFlow("max", -1L)
     private val minSpeed = savedState.getStateFlow("spd", -1)
     private val sort = savedState.getStateFlow("sort", Sorts.CHEAPEST)
+    private val page = savedState.getStateFlow("page", 0)
     private val ispIds = MutableStateFlow<Set<String>>(
         savedState.get<ArrayList<String>>("isps")?.toSet() ?: emptySet(),
     )
@@ -90,20 +97,22 @@ class HomeViewModel(
     private data class Keys(
         val region: String, val q: String, val type: String,
         val max: Long, val spd: Int, val sort: String,
-        val isps: Set<String>, val periods: Set<String>,
+        val isps: Set<String>, val periods: Set<String>, val page: Int,
     )
 
     private val keys: kotlinx.coroutines.flow.Flow<Keys> = combine(
         combine(prefs.region, query.debounce(400), tab) { r, q, t -> Triple(r, q, t) },
-        combine(maxMonthly, minSpeed, sort) { m, sp, so -> Triple(m, sp, so) },
+        combine(maxMonthly, minSpeed, sort, page, ::PageKeys),
         combine(ispIds, periods) { isps, per -> isps to per },
     ) { a, b, c ->
         Keys(
             region = a.first, q = a.second, type = a.third,
-            max = b.first, spd = b.second, sort = b.third,
-            isps = c.first, periods = c.second,
+            max = b.max, spd = b.spd, sort = b.sort,
+            isps = c.first, periods = c.second, page = b.page,
         )
     }
+
+    private data class PageKeys(val max: Long, val spd: Int, val sort: String, val page: Int)
 
     val uiState: StateFlow<HomeUiState> = combine(
         keys.flatMapLatest { k ->
@@ -124,23 +133,39 @@ class HomeViewModel(
                     ispIds = k.isps,
                     periods = k.periods,
                     sort = effectiveSort,
+                    limit = PAGE_SIZE,
+                    offset = k.page * PAGE_SIZE,
+                ),
+                repository.observeCount(
+                    region = k.region,
+                    type = k.type,
+                    maxMonthly = k.max.takeIf { it > 0 },
+                    minSpeed = spd,
+                    query = k.q,
+                    ispIds = k.isps,
+                    periods = k.periods,
                 ),
                 repository.observeIsps(),
-            ) { items, ispList ->
-                Triple(items, ispList.map { IspOption(it.id, it.name, it.category) }, k)
+            ) { items, total, ispList ->
+                Triple(items, total to ispList.map { IspOption(it.id, it.name, it.category) }, k)
             }
         },
         syncStatus,
         updateApp,
         prefs.syncState,
     ) { data, status, needUpdate, syncState ->
-        val (items, ispList, k) = data
+        val (items, totalAndIsps, k) = data
+        val (total, ispList) = totalAndIsps
+        val pages = ((total + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
         HomeUiState(
             isLoading = false, items = items,
             isps = ispList,
             query = k.q, type = k.type, maxMonthly = k.max.takeIf { it > 0 },
             minSpeed = k.spd.takeIf { it > 0 },
             ispIds = k.isps, periods = k.periods, sort = k.sort, region = k.region,
+            page = k.page.coerceIn(0, pages - 1),
+            totalCount = total,
+            pageCount = pages,
             syncStatus = status,
             lastUpdated = syncState.generatedAt,
             showStale = isStale(syncState.generatedAt),
@@ -180,7 +205,7 @@ class HomeViewModel(
         }
     }
 
-    fun setQuery(q: String) { savedState["q"] = q }
+    fun setQuery(q: String) { savedState["q"] = q; resetPage() }
     fun setType(t: String) {
         savedState["tab"] = t
         // Selections rarely carry across types; reset them on tab switch.
@@ -188,30 +213,37 @@ class HomeViewModel(
         savedState["isps"] = ArrayList<String>()
         periods.value = emptySet()
         savedState["periods"] = ArrayList<String>()
+        resetPage()
     }
-    fun setBudget(max: Long?) { savedState["max"] = max ?: -1L }
-    fun setMinSpeed(spd: Int?) { savedState["spd"] = spd ?: -1 }
-    fun setSort(s: String) { savedState["sort"] = s }
+    fun setBudget(max: Long?) { savedState["max"] = max ?: -1L; resetPage() }
+    fun setMinSpeed(spd: Int?) { savedState["spd"] = spd ?: -1; resetPage() }
+    fun setSort(s: String) { savedState["sort"] = s; resetPage() }
+    fun setPage(p: Int) { savedState["page"] = p.coerceAtLeast(0) }
+    private fun resetPage() { savedState["page"] = 0 }
     fun toggleIsp(id: String) {
         val next = if (id in ispIds.value) ispIds.value - id else ispIds.value + id
         ispIds.value = next
         savedState["isps"] = ArrayList(next.toList())
+        resetPage()
     }
 
     fun togglePeriod(id: String) {
         val next = if (id in periods.value) periods.value - id else periods.value + id
         periods.value = next
         savedState["periods"] = ArrayList(next.toList())
+        resetPage()
     }
 
     fun setIspIds(ids: Set<String>) {
         ispIds.value = ids
         savedState["isps"] = ArrayList(ids.toList())
+        resetPage()
     }
 
     fun setPeriods(ids: Set<String>) {
         periods.value = ids
         savedState["periods"] = ArrayList(ids.toList())
+        resetPage()
     }
 
     fun toggleFavorite(pkg: Package) {

@@ -117,6 +117,21 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   search keeps the search bar + "Hapus pencarian" reset (never strand
   the user: the field lives inside the list, not in a branch that
   vanishes on empty results).
+- Scale + compare overhaul (2026-10-08, committed): SQL LIMIT/OFFSET +
+  COUNT paging, 15/page with « 1 … n » strip (page resets on any filter
+  change, list jumps to top). Compare: card/sheet buttons show
+  ✓ Dibandingkan (CompareViewModel.selectedIds), nav shows Banding (n);
+  empty state has icon + Lihat paket; rows only appear when relevant
+  (no speed rows for cellular); Kuota shows totals only, new Per GB row
+  carries the ✓; Masa aktif longest wins (broadband ranks 30d); Total ✓
+  only on equal billing cycles, else a "tidak sebanding" note.
+- Drawer swipe (2026-10-08): rightward drag on Beranda opens the drawer.
+  Passive detectors always lose the slop race to the pager, so a custom
+  parent-first detector consumes the slop-crossing event itself. Two
+  gotchas found by logcat: (1) `awaitFirstDown()` ignores presses that
+  cards already consumed for ripple → `requireUnconsumed = false`;
+  (2) touches starting at the system edge are skipped so back-gesture
+  keeps working.
 
 ## Scraping playbook & per-ISP quirks
 

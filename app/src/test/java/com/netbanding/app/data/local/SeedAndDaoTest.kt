@@ -79,6 +79,21 @@ class SeedAndDaoTest {
         assertEquals(375000, pts.single().price)
     }
 
+    @Test fun paging_limitOffsetAndCountAgree() = runTest {
+        SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
+        val dao = db.packageDao()
+        val total = dao.observeCount("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0).first()
+        assertEquals(29, total)
+        val p1 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 15, 0).first()
+        val p2 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 15, 15).first()
+        assertEquals(15, p1.size)
+        assertEquals(14, p2.size)
+        assertTrue((p1 + p2).map { it.id }.toSet().size == 29)
+        // Same order as the unpaged query.
+        val all = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
+        assertEquals(all.map { it.id }, (p1 + p2).map { it.id })
+    }
+
     @Test fun favorites_addRemoveReflectedInFlow() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
