@@ -138,8 +138,11 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   an `Animatable` offset: open-drag forwards deltas, close-drag on the
   panel, half-width settle both ways. Scrim tap + BackHandler close.
 - Chrome auto-hide (2026-10-08): top + bottom bars hide on scroll down,
-  return on scroll up (home list drives it, instant toggle — the slide
-  animation relaid out the list every frame and lagged on weak GPUs).
+  return on scroll up (home list drives it). Asymmetric travel
+  thresholds (hide after 48px down, show after 160px up, direction-flip
+  resets) so flings can't flap the transition mid-flight; 150ms
+  slide+fade so it finishes instead of lingering half-slid over content
+  on weak GPUs. Instant toggle was tried and rejected (felt wrong).
 - Polish: cards get 1dp outlineVariant borders; NetTopBar uses
   statusBarsPadding (notch-aware) instead of the 28dp hack; JAVA_ALL
   label is "Pulau Jawa"; menu rows are clean text rows (only the active
