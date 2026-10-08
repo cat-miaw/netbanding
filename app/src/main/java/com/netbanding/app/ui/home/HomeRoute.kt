@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.domain.model.Package
 
@@ -15,6 +16,8 @@ fun HomeRoute(
     focusRequester: FocusRequester,
     filtersVisible: Boolean,
     compareIds: Set<String>,
+    topInset: Dp,
+    bottomInset: Dp,
     onToggleCompare: (Package) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -24,6 +27,8 @@ fun HomeRoute(
         listState = listState,
         focusRequester = focusRequester,
         filtersVisible = filtersVisible,
+        topInset = topInset,
+        bottomInset = bottomInset,
         onQuery = viewModel::setQuery,
         onBudget = viewModel::setBudget,
         onSpeed = viewModel::setMinSpeed,

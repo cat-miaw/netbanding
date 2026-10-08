@@ -99,70 +99,96 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
   (needs physical device). Play Console not yet created.
 - OPEN: Biznet modem rental Rp 50rb (unverifiable on site); FirstMedia
   seed is reseller data (re-verify vs official site); more islands.
-- UI redesign (2026-10-08, uncommitted): mockup-driven facelift — bottom
-  nav is Beranda/Favorit/Bandingkan (type switch lives ONLY in the top
-  segmented control, no dupe), new PackageCard (quota/speed info box,
-  + Bandingkan / Detail paket row), detail sheet (Kuota+Masa aktif boxes,
-  Bandingkan/Simpan buttons), full-screen Menu ("Mau cari apa?") replaces
-  the drawer, grouped Settings ("Sesuai kebutuhanmu"). Provider filter
-  kept (row 2, full width; + speed filter on broadband). Background Paper.
-- Emulator top-strip gotcha (2026-10-08): taps at y<~130px never reach
-  the app (SystemUI touch zone). NetTopBar carries 28dp extra top padding
-  so the hamburger sits clear. Verify top-bar taps via uiautomator dump.
-- Tabs v2 (2026-10-08, committed): Beranda/Favorit/Bandingkan are ONE
-  HorizontalPager under a SINGLE Scaffold — bars never slide, only the
-  highlight moves; `beyondViewportPageCount=1` + solid pager background
-  kills the tap-blink. Menu is a ModalNavigationDrawer over the current
-  tab (explicit BackHandler closes it; M3 doesn't by default). Empty
-  search keeps the search bar + "Hapus pencarian" reset (never strand
-  the user: the field lives inside the list, not in a branch that
-  vanishes on empty results).
-- Scale + compare overhaul (2026-10-08, committed): SQL LIMIT/OFFSET +
-  COUNT paging, 15/page with « 1 … n » strip (page resets on any filter
-  change, list jumps to top). Compare: card/sheet buttons show
-  ✓ Dibandingkan (CompareViewModel.selectedIds), nav shows Banding (n);
-  empty state has icon + Lihat paket; rows only appear when relevant
-  (no speed rows for cellular); Kuota shows totals only, new Per GB row
-  carries the ✓; Masa aktif longest wins (broadband ranks 30d); Total ✓
-  only on equal billing cycles, else a "tidak sebanding" note.
-- Drawer swipe (2026-10-08): rightward drag on Beranda opens the drawer.
-  Passive detectors always lose the slop race to the pager, so a custom
-  parent-first detector consumes the slop-crossing event itself. Two
-  gotchas found by logcat: (1) `awaitFirstDown()` ignores presses that
-  cards already consumed for ripple → `requireUnconsumed = false`;
-  (2) touches starting at the system edge are skipped so back-gesture
-  keeps working.
-- Custom follow-finger drawer (2026-10-08, committed): stock
-  ModalNavigationDrawer can't be driven mid-gesture (and this BOM's
-  AnchoredDraggable API differs), so the drawer is a 320dp Surface over
-  an `Animatable` offset: open-drag forwards deltas, close-drag on the
-  panel, half-width settle both ways. Scrim tap + BackHandler close.
-- Chrome auto-hide (2026-10-08): top + bottom bars hide on scroll down,
-  return on scroll up (home list drives it). Asymmetric travel
-  thresholds (hide after 48px down, show after 160px up, direction-flip
-  resets) so flings can't flap the transition mid-flight; 150ms
-  slide+fade so it finishes instead of lingering half-slid over content
-  on weak GPUs. Instant toggle was tried and rejected (felt wrong).
-- Polish: cards get 1dp outlineVariant borders; NetTopBar uses
-  statusBarsPadding (notch-aware) instead of the 28dp hack; JAVA_ALL
-  label is "Pulau Jawa"; menu rows are clean text rows (only the active
-  Seluler keeps its tint), matching the mockup.
-- Phone trial (2026-10-08): release APK 1.86 MB
-  (`app/build/outputs/apk/release/app-release.apk`, debug-signed),
-  verified on emulator incl. onboarding + seed. Debug builds will
-  always animate worse than this on weak hardware (no R8, JIT cold).
-- Phone feedback round (2026-10-08, committed): drawer settle needs
-  only 35% travel + 700px/s fling (was half-width); chrome uses
-  expand/shrink+fade with no layout snap; cards keep 1dp borders;
-  drawer content respects status/nav bars; menu rows + top bar get
-  inset hairline dividers; dropdown popups are white + 14dp rounded
-  like search; favorites empty matches compare empty (icon + browse);
-  detail buttons single-line. Lint clean, release AAB 4.25 MB.
-- Follow-ups (2026-10-08, committed): top-bar icons go box-less (clean
-  rows + hairline only); footer shows "Menampilkan A–B dari N paket" so
-  paging state is always legible (1 page = strip hidden by design);
-  region dropdown popup white. Gotcha: Scaffold topBar stacks multiple
-  children at the origin — NetTopBar wraps Row+Divider in a Column.
+- OPEN: Biznet modem rental Rp 50rb (unverifiable on site); FirstMedia
+  seed is reseller data (re-verify vs official site); more islands.
+
+## UI architecture (as-built 2026-10-08 — read this before touching UI)
+
+Single `Scaffold` in `TemplateNavHost` owns everything. One
+`HorizontalPager` (3 pages: Beranda/Favorit/Bandingkan,
+`beyondViewportPageCount=1`) holds tab contents that are Scaffold-free.
+Bottom taps and left/right swipes both just change the page — tabs never
+push routes, so the chrome never rebuilds (this killed the old tap-blink).
+VMs are activity-scoped so tab state survives swipes/drawer jumps.
+
+- **Top bar** (`NetTopBar`, `ui/components/AppChrome.kt`): burger/back box,
+  title, optional search + filter icons, optional text action. Bare
+  `IconButton`s (box backgrounds removed per feedback), hairline
+  `HorizontalDivider` below (inset 16dp). The bar + divider MUST be
+  wrapped in a `Column` — Scaffold's topBar slot overlays multiple
+  children at the origin (a stray full-width strip at y0 taught us).
+  Uses `statusBarsPadding()` (notch-aware; the old 28dp hack died).
+- **Bottom nav** (`NetBottomBar`): Beranda/Favorit/Bandingkan(+count via
+  `compare_open`). Type switch lives ONLY in the top segmented control.
+- **Overlay chrome, X-style**: NEITHER bar lives in a Scaffold slot.
+  Both float over the full-bleed pager (`Box` overlays, top/bottom
+  aligned) and animate with pure draw-phase motion (slide+fade inside a
+  fixed-size box). NOTHING EVER RESIZES — this is the entire fix for the
+  scroll-jump saga below. Lists carry constant insets measured once via
+  `onGloballyPositioned` (`listTopPad`/`listBottomPad` passed down to all
+  three tabs); hiding bars reveals already-laid-out content, zero snap.
+- **Chrome auto-hide**: home list drives it via `snapshotFlow` on
+  (index, offset) with directional accumulation (`acc` resets on
+  direction flip): hide after 48px down-travel, show after 160px up
+  (flings can't flap it), always shown near top and on tabs 1–2.
+- **Search**: lives INSIDE the list (header item) so empty results can
+  never strand the user; empty state has "Hapus pencarian" reset.
+  Header scrolls away; a top-bar search icon appears past 120px and
+  scrolls-to-top + focuses + shows keyboard (`revealSearch`).
+  Filters toggle via top-bar Tune button (default shown).
+- **Drawer**: custom, NOT `ModalNavigationDrawer` (can't be driven
+  mid-gesture; this BOM's AnchoredDraggable differs). 320dp `Surface`
+  over an `Animatable` offset: pager-level drag detector forwards deltas
+  (open), panel detector (close), half→35% travel + manual fling velocity
+  settle both ways, scrim + BackHandler close. Detector rules carved in
+  blood: parent-first must CONSUME the slop-crossing event (passive
+  detectors always lose to the pager); `awaitFirstDown(
+  requireUnconsumed=false)` because cards eat presses for ripple;
+  touches starting <24dp from the left edge are ignored (system back).
+  Drawer content (`MenuDrawerContent`) highlights the live tab+type.
+- **Paging**: SQL `LIMIT/OFFSET` + `COUNT` (same WHERE), 15/page
+  (`PAGE_SIZE`), `« 1 … n »` strip (`pageWindow`, unit-tested), page
+  resets on any filter change, list jumps to top, footer always shows
+  "Menampilkan A–B dari N paket" (strip hides on 1 page BY DESIGN).
+- **Compare** (`CompareScreen.kt` pure helpers + `CompareLogicTest`):
+  empty states have icon + "Lihat paket"; card/sheet/nav show
+  ✓ Dibandingkan / Banding (n) via `selectedIds`; rows render only when
+  relevant (no speed rows for cellular); Kuota = totals, Per GB row
+  carries the ✓; Masa aktif longest wins (broadband ranks 30d);
+  Total ✓ only on equal billing cycles, else "tidak sebanding" note.
+- **Cards** (`PackageCard`): 18dp, 1dp outlineVariant border, quota box,
+  + Bandingkan (✓ state) / Detail paket row.
+
+## UI jump saga (why the chrome works this way — don't regress this)
+
+1. Slide in Scaffold slots → per-frame LazyColumn remeasure → dropped
+   frames on weak GPUs. 2. Fade-only → AnimatedVisibility snaps slot
+   size at exit START → list jumped under the still-fading bar (caught
+   on a video frame). 3. Two-phase (fade, collapse after) → the collapse
+   snap is a glaring single-frame jump at 120Hz. 4. Expand/shrink →
+   still resizes every frame. FINAL: overlay bars + full-bleed list =
+   show/hide touches layout NEVER (the overlay top bar carries its own
+   solid background — without it, list text scrolls visibly underneath).
+   Verified against X frame-by-frame: X also floats its bottom bar over
+   a full-bleed feed (X keeps its top logo row fixed; we hide ours, so
+   our lists keep a measured top inset and hiding top leaves calm space).
+
+## UI gotchas & verification toolkit
+
+- Emulator top-strip: taps at y<~130px die in the SystemUI zone
+  (statusBarsPadding fixed the hamburger; verify via dump bounds).
+- `adb shell uiautomator dump /sdcard/x.xml` + pull + grep `text=` is
+  the standard probe; `adb shell input tap/swipe` for interaction.
+- `read` tool opens PNG screenshots (pull via
+  `adb shell screencap -p /sdcard/x.png` first — NEVER `exec-out`
+  redirect on Windows, it corrupts); ffmpeg exists for video frames;
+  PIL installable for pixel scans (caught a y0 divider + a system
+  dialog dimming the screen this way).
+- Fresh `am start` re-triggers the notification-permission dialog
+  (dismissed, not granted) — it dims screenshots and eats the first tap.
+- Phone trial builds: `./gradlew :app:assembleRelease` (R8, debug key),
+  1.88 MB APK; AAB 4.25 MB (< 8 MB). Emulator animates worse than any
+  real phone — judge motion on device, logic on emulator.
 
 ## Scraping playbook & per-ISP quirks
 

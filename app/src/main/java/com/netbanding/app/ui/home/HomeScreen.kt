@@ -31,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
@@ -66,6 +67,7 @@ fun HomeTabContent(
     listState: LazyListState,
     focusRequester: FocusRequester,
     filtersVisible: Boolean,
+    topInset: Dp,
     onQuery: (String) -> Unit,
     onBudget: (Long?) -> Unit,
     onSpeed: (Int?) -> Unit,
@@ -80,6 +82,7 @@ fun HomeTabContent(
     onRefresh: () -> Unit,
     onToggleCompare: (Package) -> Unit,
     compareIds: Set<String>,
+    bottomInset: Dp,
     onPage: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -119,7 +122,7 @@ fun HomeTabContent(
             else -> LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(start = 16.dp, top = topInset, end = 16.dp, bottom = bottomInset),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "header", contentType = "header") {
