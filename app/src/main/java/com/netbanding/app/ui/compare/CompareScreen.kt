@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,26 +25,41 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
+import com.netbanding.app.ui.components.NetBottomBar
+import com.netbanding.app.ui.components.NetTopBar
 import com.netbanding.app.ui.components.formatPricePeriode
 import com.netbanding.app.ui.components.formatQuota
 import com.netbanding.app.ui.home.formatIdr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CompareRoute(viewModel: CompareViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun CompareRoute(
+    viewModel: CompareViewModel,
+    onOpenMenu: () -> Unit,
+    onHome: () -> Unit,
+    onOpenFavorites: () -> Unit,
+    compareCount: Int,
+    modifier: Modifier = Modifier,
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.compare_title)) },
-                navigationIcon = { TextButton(onClick = onBack) { Text("‹") } },
-                actions = {
-                    if (state.items.isNotEmpty()) TextButton(onClick = viewModel::clear) {
-                        Text(stringResource(R.string.compare_clear))
-                    }
-                },
+            NetTopBar(
+                title = stringResource(R.string.compare_title),
+                onMenu = onOpenMenu,
+                actionText = if (state.items.isNotEmpty()) stringResource(R.string.compare_clear) else null,
+                onAction = if (state.items.isNotEmpty()) viewModel::clear else null,
+            )
+        },
+        bottomBar = {
+            NetBottomBar(
+                onHome = onHome,
+                onFavorites = onOpenFavorites,
+                onCompare = {},
+                selected = "compare",
+                compareCount = compareCount,
             )
         },
     ) { padding ->
