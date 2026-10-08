@@ -45,6 +45,8 @@ import com.netbanding.app.ui.components.SectionLabel
 fun MenuDrawerContent(
     dataVersion: Int,
     lastUpdated: String?,
+    selectedTab: Int,
+    homeType: String,
     onClose: () -> Unit,
     onCellular: () -> Unit,
     onBroadband: () -> Unit,
@@ -80,18 +82,29 @@ fun MenuDrawerContent(
             icon = Icons.Filled.SignalCellularAlt,
             title = stringResource(R.string.tab_cellular),
             sub = stringResource(R.string.menu_cellular_desc),
-            highlighted = true,
+            highlighted = selectedTab == 0 && homeType == "cellular",
             onClick = onCellular,
         )
         MenuRow(
             icon = Icons.Filled.Wifi,
             title = stringResource(R.string.tab_broadband),
             sub = stringResource(R.string.menu_broadband_desc),
+            highlighted = selectedTab == 0 && homeType == "broadband",
             onClick = onBroadband,
         )
         SectionLabel(stringResource(R.string.menu_mine))
-        MenuRow(icon = Icons.Filled.FavoriteBorder, title = stringResource(R.string.favorites_title), onClick = onFavorites)
-        MenuRow(icon = Icons.AutoMirrored.Filled.CompareArrows, title = stringResource(R.string.compare_title), onClick = onCompare)
+        MenuRow(
+            icon = Icons.Filled.FavoriteBorder,
+            title = stringResource(R.string.favorites_title),
+            highlighted = selectedTab == 1,
+            onClick = onFavorites,
+        )
+        MenuRow(
+            icon = Icons.AutoMirrored.Filled.CompareArrows,
+            title = stringResource(R.string.compare_title),
+            highlighted = selectedTab == 2,
+            onClick = onCompare,
+        )
         HorizontalDivider(
             color = cs.outlineVariant,
             modifier = Modifier.padding(horizontal = 12.dp),

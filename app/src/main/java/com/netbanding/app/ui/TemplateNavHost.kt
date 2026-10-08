@@ -7,6 +7,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -34,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -148,6 +152,7 @@ fun TemplateNavHost(
     val compareCount by compareVm.count.collectAsState(initial = 0)
     val compareState by compareVm.uiState.collectAsStateWithLifecycle()
     val compareIds by compareVm.selectedIds.collectAsStateWithLifecycle()
+    val homeUiState by homeVm.uiState.collectAsStateWithLifecycle()
 
     // One pager + one chrome for the three tabs: swipes and taps only
     // change the page, never the bars around it.
@@ -239,74 +244,29 @@ fun TemplateNavHost(
                 val tab = pagerState.currentPage
                 // Two-phase chrome visibility: AnimatedVisibility snaps the
                 // slot size at exit START, so the list jumped underneath the
+                // X-style chrome: both bars float OVER the full-bleed list.
+                // Nothing ever resizes, so there is no layout snap and no
+                // remeasure storm — show/hide is pure draw-phase motion.
+                // The top bar stays fixed-height; hiding it leaves calm
+                // background space instead of janking the list.
+                var navBarH by remember { mutableIntStateOf(0) }
+                var topBarH by remember { mutableIntStateOf(0) }
+                val listBottomPad = remember(navBarH, density) {
+                    with(density) { navBarH.toDp() } + 16.dp
+                }
+                val listTopPad = remember(topBarH, density) {
+                    with(density) { topBarH.toDp() } + 16.dp
+                }
                 Scaffold(
                     containerColor = MaterialTheme.colorScheme.background,
-                    // Flap-proof show/hide (see homeNavVisible): quick to hide,
-                    // deliberate to show, so flings never restart it mid-flight.
-                    // Size animates continuously (no snap).
-                    topBar = {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)) +
-                                expandVertically(tween(200), expandFrom = Alignment.Top),
-                            exit = fadeOut(tween(150)) +
-                                shrinkVertically(tween(200), shrinkTowards = Alignment.Top),
-                        ) {
-                            when (tab) {
-                            1 -> NetTopBar(
-                                title = stringResource(R.string.favorites_title),
-                                onMenu = ::openDrawer,
-                            )
-                            2 -> NetTopBar(
-                                title = stringResource(R.string.compare_title),
-                                onMenu = ::openDrawer,
-                                actionText = if (compareState.items.isNotEmpty()) {
-                                    stringResource(R.string.compare_clear)
-                                } else {
-                                    null
-                                },
-                                onAction = if (compareState.items.isNotEmpty()) {
-                                    compareVm::clear
-                                } else {
-                                    null
-                                },
-                            )
-                            else -> NetTopBar(
-                                onMenu = ::openDrawer,
-                                onSearch = if (!atTop) ::revealSearch else null,
-                                onToggleFilters = { filtersVisible = !filtersVisible },
-                                filtersVisible = filtersVisible,
-                            )
-                            }
-                        }
-                    },
-                    bottomBar = {
-                        AnimatedVisibility(
-                            visible = tab != 0 || homeNavVisible,
-                            enter = fadeIn(tween(150)) +
-                                expandVertically(tween(200), expandFrom = Alignment.Bottom),
-                            exit = fadeOut(tween(150)) +
-                                shrinkVertically(tween(200), shrinkTowards = Alignment.Bottom),
-                        ) {
-                            NetBottomBar(
-                                onHome = { goTab(0) },
-                                onFavorites = { goTab(1) },
-                                onCompare = { goTab(2) },
-                                selected = when (tab) {
-                                    1 -> "favorites"
-                                    2 -> "compare"
-                                    else -> "home"
-                                },
-                                compareCount = compareCount,
-                            )
-                        }
-                    },
                 ) { padding ->
-                    HorizontalPager(
+                    Box(
+                        Modifier.fillMaxSize().padding(padding),
+                    ) {
+                        HorizontalPager(
                         state = pagerState,
                         beyondViewportPageCount = 1,
                         modifier = Modifier.fillMaxSize()
-                            .padding(padding)
                             // Rightward drag on Beranda opens the drawer. Passive
                             // detectors always lose the slop race to the pager,
                             // so this consumes the slop-crossing event itself
@@ -388,21 +348,108 @@ fun TemplateNavHost(
                                 focusRequester = homeFocus,
                                 filtersVisible = filtersVisible,
                                 compareIds = compareIds,
+                                topInset = listTopPad,
+                                bottomInset = listBottomPad,
                                 onToggleCompare = compareVm::toggle,
                             )
                             1 -> FavoritesRoute(
                                 viewModel = favoritesVm,
                                 compareIds = compareIds,
+                                topInset = listTopPad,
+                                bottomInset = listBottomPad,
                                 onToggleCompare = compareVm::toggle,
                                 onBrowse = { goTab(0) },
                             )
                             else -> CompareRoute(
                                 viewModel = compareVm,
+                                topInset = listTopPad,
+                                bottomInset = listBottomPad,
                                 onBrowse = { goTab(0) },
                             )
                         }
                     }
+                    // Bottom nav floats over the full-bleed pager. The overlay
+                    // box never changes size, so show/hide is pure draw-phase
+                    // motion: zero remeasure, zero snap, zero dropped frames.
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = fadeIn(tween(150)) +
+                                slideInVertically(tween(200)) { it },
+                            exit = fadeOut(tween(150)) +
+                                slideOutVertically(tween(200)) { it },
+                        ) {
+                            Box(
+                                Modifier.onGloballyPositioned {
+                                    navBarH = it.size.height
+                                },
+                            ) {
+                                NetBottomBar(
+                                    onHome = { goTab(0) },
+                                    onFavorites = { goTab(1) },
+                                    onCompare = { goTab(2) },
+                                    selected = when (tab) {
+                                        1 -> "favorites"
+                                        2 -> "compare"
+                                        else -> "home"
+                                    },
+                                    compareCount = compareCount,
+                                )
+                            }
+                        }
+                    }
+                    // Top bar floats too: same visibility, slides up and out.
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        AnimatedVisibility(
+                            visible = tab != 0 || homeNavVisible,
+                            enter = fadeIn(tween(150)) +
+                                slideInVertically(tween(200)) { -it },
+                            exit = fadeOut(tween(150)) +
+                                slideOutVertically(tween(200)) { -it },
+                        ) {
+                            Box(
+                                Modifier.onGloballyPositioned {
+                                    topBarH = it.size.height
+                                }
+                                    .background(MaterialTheme.colorScheme.background),
+                            ) {
+                                when (tab) {
+                                1 -> NetTopBar(
+                                    title = stringResource(R.string.favorites_title),
+                                    onMenu = ::openDrawer,
+                                )
+                                2 -> NetTopBar(
+                                    title = stringResource(R.string.compare_title),
+                                    onMenu = ::openDrawer,
+                                    actionText = if (compareState.items.isNotEmpty()) {
+                                        stringResource(R.string.compare_clear)
+                                    } else {
+                                        null
+                                    },
+                                    onAction = if (compareState.items.isNotEmpty()) {
+                                        compareVm::clear
+                                    } else {
+                                        null
+                                    },
+                                )
+                                else -> NetTopBar(
+                                    onMenu = ::openDrawer,
+                                    onSearch = if (!atTop) ::revealSearch else null,
+                                    onToggleFilters = { filtersVisible = !filtersVisible },
+                                    filtersVisible = filtersVisible,
+                                )
+                                }
+                            }
+                        }
+                    }
                 }
+            }
             }
             composable(Routes.ONBOARDING) {
                 OnboardingScreen(
@@ -517,6 +564,8 @@ fun TemplateNavHost(
             MenuDrawerContent(
                 dataVersion = syncState?.dataVersion ?: 0,
                 lastUpdated = syncState?.generatedAt,
+                selectedTab = pagerState.currentPage,
+                homeType = homeUiState.type,
                 onClose = { closeDrawer() },
                 onCellular = { homeVm.setType(Types.CELLULAR); drawerGo(0) },
                 onBroadband = { homeVm.setType(Types.BROADBAND); drawerGo(0) },

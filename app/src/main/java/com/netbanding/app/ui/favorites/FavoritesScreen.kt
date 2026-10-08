@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netbanding.app.R
@@ -42,6 +43,8 @@ import kotlinx.coroutines.launch
 fun FavoritesRoute(
     viewModel: FavoritesViewModel,
     compareIds: Set<String>,
+    topInset: Dp,
+    bottomInset: Dp,
     onToggleCompare: (Package) -> Unit,
     onBrowse: () -> Unit,
     modifier: Modifier = Modifier,
@@ -77,7 +80,7 @@ fun FavoritesRoute(
     } else {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = topInset, end = 16.dp, bottom = bottomInset),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(items = state.items, key = { it.id }, contentType = { "package" }) { pkg ->
