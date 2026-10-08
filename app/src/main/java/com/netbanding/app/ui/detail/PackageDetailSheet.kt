@@ -2,25 +2,39 @@ package com.netbanding.app.ui.detail
 
 import android.content.Intent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import java.net.URLEncoder
 import com.netbanding.app.R
 import com.netbanding.app.domain.model.Package
 import com.netbanding.app.domain.model.PricePoint
@@ -32,16 +46,17 @@ import com.netbanding.app.ui.components.periodeFor
 import com.netbanding.app.ui.home.Types
 import com.netbanding.app.ui.home.formatIdr
 
-/** Blueprint 7.6 detail sheet: True Cost breakdown + history + disclaimer + source. */
 @Composable
 fun PackageDetailSheet(
     pkg: Package,
     history: List<PricePoint>,
     onFavorite: () -> Unit,
     onCompare: () -> Unit,
+    onDismiss: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val uri = LocalUriHandler.current
+    val cs = MaterialTheme.colorScheme
     val cost = remember(pkg) {
         CalculateTrueCost().invoke(
             basePrice = pkg.basePrice,
@@ -51,108 +66,137 @@ fun PackageDetailSheet(
             speedMbps = pkg.speedMbps,
         )
     }
-    Column(modifier = modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        val context = LocalContext.current
-        Text(pkg.name, style = MaterialTheme.typography.headlineSmall)
-        Text(pkg.ispName, style = MaterialTheme.typography.labelLarge)
-        Text(stringResource(R.string.base_price, formatIdr(pkg.basePrice)))
-        if (!pkg.taxInclusive) Text(stringResource(R.string.ppn_line, formatIdr(cost.taxedBase - pkg.basePrice)))
-        if (pkg.deviceRentalFee > 0) Text(stringResource(R.string.rental_line, formatIdr(pkg.deviceRentalFee)))
-        Text(
-            stringResource(
-                R.string.total_line,
-                formatIdr(cost.monthlyTotal),
-                periodeFor(pkg.validityDays),
-            ),
-            style = MaterialTheme.typography.titleLarge,
-        )
-        pkg.quotaMb?.let { Text(stringResource(R.string.quota_line, formatQuota(it))) }
-        pkg.validityDays?.let { Text(stringResource(R.string.validity_line, formatValidity(it))) }
-        if (pkg.type == Types.BROADBAND) {
-            Text(
-                if (pkg.installFee == null) stringResource(R.string.install_unknown)
-                else stringResource(R.string.install_line, formatIdr(pkg.installFee)),
-            )
-            Text(stringResource(R.string.first_month, formatIdr(cost.firstMonthTotal)))
+    Column(modifier = modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(pkg.ispName, style = MaterialTheme.typography.bodySmall, color = cs.primary)
+                Text(pkg.name, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold))
+            }
+            if (onDismiss != null) {
+                IconButton(onClick = onDismiss) {
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
+                }
+            }
         }
-        cost.pricePerMbps?.let { Text(stringResource(R.string.per_mbps, formatIdr(it))) }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                stringResource(R.string.base_price, formatIdr(pkg.basePrice)),
+                style = MaterialTheme.typography.bodySmall,
+                color = cs.onSurfaceVariant,
+            )
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text("Total: ", style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
+                Text(
+                    formatIdr(cost.monthlyTotal),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                )
+                Text("/${periodeFor(pkg.validityDays)}", style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (pkg.type == Types.CELLULAR) {
+                InfoBox(
+                    title = stringResource(R.string.quota_title),
+                    value = pkg.quotaMb?.let(::formatQuota) ?: "-",
+                    icon = { Icon(Icons.Filled.Storage, null, tint = cs.tertiary) },
+                    modifier = Modifier.weight(1f),
+                )
+                InfoBox(
+                    title = stringResource(R.string.active_title),
+                    value = pkg.validityDays?.let { formatValidity(it) } ?: "-",
+                    icon = { Icon(Icons.Filled.CalendarMonth, null, tint = cs.tertiary) },
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                InfoBox(
+                    title = stringResource(R.string.speed_title),
+                    value = pkg.speedMbps?.let { "$it Mbps" } ?: "-",
+                    icon = { Icon(Icons.Filled.Storage, null, tint = cs.tertiary) },
+                    modifier = Modifier.weight(1f),
+                )
+                InfoBox(
+                    title = stringResource(R.string.active_title),
+                    value = pkg.validityDays?.let { formatValidity(it) } ?: "Bulanan",
+                    icon = { Icon(Icons.Filled.CalendarMonth, null, tint = cs.tertiary) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
         HistorySection(history)
-        Text(stringResource(R.string.disclaimer), style = MaterialTheme.typography.bodySmall)
-        Button(onClick = { uri.openUri(pkg.ispWebsite) }, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "ⓘ  " + stringResource(R.string.disclaimer),
+            style = MaterialTheme.typography.bodySmall,
+            color = cs.onSurfaceVariant,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onCompare,
+                colors = ButtonDefaults.buttonColors(containerColor = cs.primary),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                Text("+ ${stringResource(R.string.compare_add)}")
+            }
+            OutlinedButton(
+                onClick = onFavorite,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(
+                    if (pkg.isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 6.dp),
+                )
+                Text(stringResource(R.string.save))
+            }
+        }
+        val context = LocalContext.current
+        OutlinedButton(
+            onClick = { uri.openUri(pkg.ispWebsite) },
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(stringResource(R.string.open_provider))
-        }
-        OutlinedButton(
-            onClick = onFavorite,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                stringResource(if (pkg.isFavorite) R.string.unfavorite else R.string.favorite),
-            )
-        }
-        OutlinedButton(
-            onClick = onCompare,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(R.string.compare_add))
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(
-                onClick = {
-                    val text = "${pkg.name} – ${formatPricePeriode(pkg.monthlyTotal, pkg.validityDays)} " +
-                        "(${pkg.ispName}) via NetBanding\n${pkg.sourceUrl}"
-                    context.startActivity(
-                        Intent.createChooser(
-                            Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, text)
-                            },
-                            null,
-                        ),
-                    )
-                },
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.share))
-            }
-            OutlinedButton(
-                onClick = {
-                    val title = URLEncoder.encode("[Salah harga] ${pkg.name}", "UTF-8")
-                    val body = URLEncoder.encode(
-                        "Paket: ${pkg.id}\nHarga tampil: ${formatIdr(pkg.basePrice)}\n" +
-                            "Harga benar: (isi di sini)\nSumber/bukti: (tautan atau tangkapan layar)",
-                        "UTF-8",
-                    )
-                    uri.openUri(
-                        "https://github.com/cat-miaw/netbanding/issues/new?title=$title&body=$body",
-                    )
-                },
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(stringResource(R.string.report_price))
-            }
         }
     }
 }
 
 @Composable
+private fun InfoBox(title: String, value: String, icon: @Composable () -> Unit, modifier: Modifier = Modifier) {
+    val cs = MaterialTheme.colorScheme
+    Column(
+        modifier = modifier.clip(RoundedCornerShape(12.dp)).background(cs.surfaceVariant).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        icon()
+        Text(title, style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+    }
+}
+
+@Composable
 private fun HistorySection(history: List<PricePoint>, modifier: Modifier = Modifier) {
+    val cs = MaterialTheme.colorScheme
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(R.string.history_title), style = MaterialTheme.typography.titleMedium)
-        if (history.size < 2) {
-            Text(
-                stringResource(R.string.history_empty),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        } else {
-            StepChart(history, modifier = Modifier.fillMaxWidth().height(120.dp))
-            Text(
-                stringResource(
-                    R.string.history_range,
-                    formatCompact(history.first().price),
-                    formatCompact(history.last().price),
-                ),
-                style = MaterialTheme.typography.bodySmall,
-            )
+        Text(stringResource(R.string.history_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+        Box(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(cs.surfaceVariant).padding(12.dp),
+        ) {
+            if (history.size < 2) {
+                Text(stringResource(R.string.history_empty), style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant)
+            } else {
+                Column {
+                    StepChart(history, modifier = Modifier.fillMaxWidth().height(80.dp))
+                    Text(
+                        stringResource(
+                            R.string.history_range,
+                            formatCompact(history.first().price),
+                            formatCompact(history.last().price),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
         }
     }
 }
@@ -162,10 +206,6 @@ private fun formatCompact(amount: Long): String =
     else if (amount >= 1000) "${amount / 1000}rb"
     else amount.toString()
 
-/**
- * Step-line chart on raw Canvas: no chart dependency, negligible APK impact.
- * Flat segments between recordings (blueprint 4.5: the chart is a step line).
- */
 @Composable
 private fun StepChart(points: List<PricePoint>, modifier: Modifier = Modifier) {
     val color = MaterialTheme.colorScheme.primary

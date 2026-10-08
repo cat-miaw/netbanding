@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, onToggleCo
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.favorites_title)) },
@@ -63,6 +65,7 @@ fun FavoritesRoute(viewModel: FavoritesViewModel, onBack: () -> Unit, onToggleCo
                         pkg = pkg,
                         onClick = { selected = pkg },
                         onFavorite = { viewModel.toggleFavorite(pkg) },
+                        onCompare = { onToggleCompare(pkg) },
                     )
                 }
             }
