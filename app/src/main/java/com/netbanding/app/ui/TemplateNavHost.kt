@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -273,10 +274,15 @@ fun TemplateNavHost(
                     with(density) { topBarHpx.toDp() } + 16.dp
                 }
                 Scaffold(
+                    // Overlay chrome owns all insets itself (top bar has
+                    // statusBarsPadding, bottom bar has navigationBarsPadding).
+                    // The default Scaffold insets would add the status bar
+                    // height a second time -> the big blank gap above.
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     containerColor = MaterialTheme.colorScheme.background,
-                ) { padding ->
+                ) {
                     Box(
-                        Modifier.fillMaxSize().padding(padding),
+                        Modifier.fillMaxSize(),
                     ) {
                         HorizontalPager(
                         state = pagerState,
@@ -420,14 +426,18 @@ fun TemplateNavHost(
                     ) {
                         val topOff = if (tab == 0) topHide.value else 0f
                         Box(
+                            // graphicsLayer MUST come first: a `background`
+                            // placed before it draws OUTSIDE the layer and
+                            // stays parked at y=0 while the bar slides away
+                            // (the leftover Paper strip over the list).
                             Modifier.onGloballyPositioned {
                                 topBarHpx = it.size.height
                             }
-                                .background(MaterialTheme.colorScheme.background)
                                 .graphicsLayer {
                                     translationY = -topOff
                                     clip = true
-                                },
+                                }
+                                .background(MaterialTheme.colorScheme.background),
                         ) {
                             when (tab) {
                                 1 -> NetTopBar(
