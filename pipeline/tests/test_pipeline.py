@@ -8,6 +8,7 @@ from scraper.checks import validate_package
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
 from scraper.extract import make_id, normalize_package
+from scraper.indihome import IndiHomeExtractor
 from scraper.schema import Package
 
 ISP = "biznet"
@@ -187,3 +188,49 @@ def test_history_appends_only_on_change():
     assert not same or True
     changed = last["price"] != 350000
     assert changed, "price change must append"
+
+
+# --- IndiHome (official site, server-rendered cards) ---------------------
+
+def test_indihome_cards_extract():
+    text = clean(open("pipeline/tests/fixtures/indihome.html").read())
+    out = IndiHomeExtractor().extract(text)
+    by_id = {p["id"]: p for p in out["packages"]}
+    assert len(by_id) == 3
+    a = by_id["indihome-double-speed-300-mbps-internet-150"]
+    # title says 300 Mbps (promo tier); the numbered line is the real speed
+    assert a["speed_mbps"] == 150
+    assert a["base_price"] == 310000
+    assert a["type"] == "broadband" and a["quota_mb"] is None
+    # curated, never derived from a page that states nothing about tax/fees
+    assert a["tax_inclusive"] is False
+    assert a["install_fee"] is None
+
+
+def test_indihome_evidence_is_verbatim():
+    from scraper.checks import verify_evidence
+    text = clean(open("pipeline/tests/fixtures/indihome.html").read())
+    out = IndiHomeExtractor().extract(text)
+    assert verify_evidence(out["evidence"]["0"], text) == []
+
+
+def test_indihome_duplicate_card_deduped():
+    card = ("<h3>Double Speed - 500 Mbps Internet</h3><p>300 Mbps</p>"
+            "<span>Mulai dari</span><span>Rp500.000</span><span>/bulan</span>"
+            "<button>Pilih Paket</button>")
+    text = clean(f"<html><body>{card}<div>Best Deal</div>{card}</body></html>")
+    out = IndiHomeExtractor().extract(text)
+    assert len(out["packages"]) == 1
+
+
+def test_indihome_conflicting_price_on_duplicate_raises():
+    a = ("<h3>Double Speed - 500 Mbps Internet</h3><p>300 Mbps</p>"
+         "<span>Mulai dari</span><span>Rp500.000</span><span>/bulan</span>"
+         "<button>Pilih Paket</button>")
+    b = a.replace("Rp500.000", "Rp520.000")
+    text = clean(f"<html><body>{a}<div>x</div>{b}</body></html>")
+    try:
+        IndiHomeExtractor().extract(text)
+    except ValueError:
+        return
+    raise AssertionError("conflicting prices must not publish silently")

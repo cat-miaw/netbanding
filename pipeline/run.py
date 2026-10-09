@@ -16,6 +16,7 @@ from scraper.clean import clean, content_hash
 from scraper.diff import classify
 from scraper.extract import DeepSeekExtractor, normalize_package
 from scraper.firstmedia import FirstMediaExtractor
+from scraper.indihome import IndiHomeExtractor
 from scraper.telkomsel import TelkomselExtractor
 from scraper.xlultra import XlUltraExtractor
 from scraper.fetch import fetch
@@ -30,6 +31,7 @@ DEACTIVATE_AFTER_MISSES = 3
 EXTRACTORS = {
     "deepseek": DeepSeekExtractor,
     "regex-firstmedia": FirstMediaExtractor,
+    "regex-indihome": IndiHomeExtractor,
     "regex-telkomsel": TelkomselExtractor,
     "regex-xlultra": XlUltraExtractor,
 }
