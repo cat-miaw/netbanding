@@ -128,9 +128,15 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
 - **Overlay chrome, X-style**: NEITHER bar lives in a Scaffold slot.
   Both float over the full-bleed pager (`Box` overlays, top/bottom
   aligned) and ride the finger 1:1 via `graphicsLayer.translationY`
-  driven by list scroll `dy` (`topHide`/`bottomHide` Animatables, fixed
-  travel 200/120dp, 250ms-debounce settle to nearer end past 60dp).
+  driven by list scroll `dy` (`topHide`/`bottomHide` Animatables, travel
+  = the bar's OWN measured height, 250ms-debounce settle to the nearer
+  end at 50% of travel).
   NO fade/snap (the old AnimatedVisibility pop died per feedback).
+  Travel MUST equal the bar's height (2026-10-09): the old fixed
+  200dp/120dp budgets gave the 94dp top bar a ~290px dead zone, so on an
+  up-scroll it lagged the finger by ~1.5s and then popped in, while the
+  84dp bottom bar tracked 1:1. Frame-measured with the column-probe
+  below; both bars now start and finish together.
   Lists carry CONSTANT insets measured once via `onGloballyPositioned`
   (`listTopPad`/`listBottomPad` passed down to all three tabs); hiding
   bars reveals already-laid-out content, zero snap. (2026-10-08 lesson:
@@ -143,9 +149,13 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   (2026-10-09 fix — see gotchas).
 - **Chrome auto-hide**: home list drives it via `snapshotFlow` on
   (index, offset): down-travel pushes both bars out pixel-for-pixel,
-  up-travel pulls them back (single collector + 250ms-debounce settle;
+  up-travel pulls them back (single collector + 250ms-debounce settle to
+  half of each bar's travel;
   the old split `isScrollInProgress` settle never fired reliably).
-  Always shown near top and on tabs 1–2. Bars only — insets constant.
+  Random `index` jump = synthetic dy of ±10000 (saturates = instant),
+  which is intended for pagination/jump-to-top slams. Always shown near
+  top (eased in over 200ms — a `snapTo(0f)` there was a visible pop) and
+  on tabs 1–2. Bars only — insets constant.
 - **Search**: lives INSIDE the list (header item) so empty results can
   never strand the user; empty state has "Hapus pencarian" reset.
   Header scrolls away; a top-bar search icon appears past 120px and
@@ -200,6 +210,17 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   Diagnosed by pixel-scanning a screenshot for a uniform `#FBFAF7` band
   (PIL; colors from `theme/Color.kt`) — the band's bottom edge matched
   the measured bar height. Fixed + verified on `api34_low`.
+- **Chrome-motion probe (2026-10-09)**: to judge bar motion, don't eyeball
+  it — `adb shell screenrecord` the gesture, `ffmpeg -fps_mode passthrough`
+  to frames, then probe ONE COLUMN per bar: top bar = walk y down from 0
+  while `px[540][y]` is Paper (x540 is the title row's empty centre) →
+  edge = bar height − `topHide`; bottom bar = walk y up from the bottom
+  while `px[10][y]`/`px[1070][y]` are white → edge = bar top + `bottomHide`.
+  Compare per-frame deltas of the two bars: unequal start frames or
+  deltas = the bars aren't tracking the finger together. MP4 shifts
+  colours a few units and drops frames (~10-16fps), so match with a ±5
+  tolerance, never exact equality. Video beats a slow screencap loop
+  (screencap+pull is ~0.4s/frame, so it misses fast gestures entirely).
 - Emulator top-strip: taps at y<~130px die in the SystemUI zone
   (statusBarsPadding fixed the hamburger; verify via dump bounds).
 - `adb shell uiautomator dump /sdcard/x.xml` + pull + grep `text=` is
