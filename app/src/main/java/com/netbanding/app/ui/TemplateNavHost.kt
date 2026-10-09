@@ -176,11 +176,17 @@ fun TemplateNavHost(
     val bottomHide = remember { Animatable(0f) }
     var topBarHpx by remember { mutableIntStateOf(0) }
     var navBarHpx by remember { mutableIntStateOf(0) }
-    // Chrome travel: fixed generous distances (measured bar height proved
-    // unreliable across inset frames). Both bars fully exit; settle snaps
-    // to the nearer end past a 60dp threshold. 1:1 with the finger.
-    fun topMax(): Float = with(density) { 200.dp.toPx() }
-    fun bottomMax(): Float = with(density) { 120.dp.toPx() }
+    // Chrome travel == the bar's OWN measured height, so a bar starts
+    // sliding out the instant the list moves and is exactly gone when the
+    // travel is used up. Frame-measured 2026-10-09: fixed 200/120dp travel
+    // left the (94dp) top bar a ~290px dead zone before it budged, so on
+    // an up-scroll it lagged the finger and then popped in late, while the
+    // (84dp) bottom bar tracked 1:1. Fallbacks only apply before the first
+    // onGloballyPositioned lands.
+    fun topMax(): Float =
+        if (topBarHpx > 0) topBarHpx.toFloat() else with(density) { 96.dp.toPx() }
+    fun bottomMax(): Float =
+        if (navBarHpx > 0) navBarHpx.toFloat() else with(density) { 88.dp.toPx() }
     LaunchedEffect(homeListState) {
         var prev = 0 to 0
         var settleJob: kotlinx.coroutines.Job? = null
@@ -195,9 +201,19 @@ fun TemplateNavHost(
             }
             prev = index to offset
             if (index == 0 && offset < 120) {
-                settleJob?.cancel()
-                if (topHide.value != 0f) topHide.snapTo(0f)
-                if (bottomHide.value != 0f) bottomHide.snapTo(0f)
+                // At the very top both bars belong on screen. Ease them back
+                // in rather than snapping: a snap here is a visible pop on
+                // fast up-scrolls (both bars jump in a single frame).
+                if ((topHide.value != 0f || bottomHide.value != 0f) &&
+                    settleJob?.isActive != true
+                ) {
+                    settleJob = launch {
+                        launch {
+                            if (topHide.value != 0f) topHide.animateTo(0f, tween(200))
+                        }
+                        if (bottomHide.value != 0f) bottomHide.animateTo(0f, tween(200))
+                    }
+                }
                 return@collect
             }
             if (dy != 0f) {
@@ -209,9 +225,11 @@ fun TemplateNavHost(
                     kotlinx.coroutines.delay(250)
                     val tm = topMax()
                     val bm = bottomMax()
-                    val settleAt = with(density) { 60.dp.toPx() }
-                    val topTarget = if (topHide.value > settleAt) tm else 0f
-                    val bottomTarget = if (bottomHide.value > settleAt) bm else 0f
+                    // "Nearer end wins" is now half of each bar's OWN travel,
+                    // so a short bar and a tall bar settle at the same point
+                    // in their reveal.
+                    val topTarget = if (topHide.value > tm * 0.5f) tm else 0f
+                    val bottomTarget = if (bottomHide.value > bm * 0.5f) bm else 0f
                     if (topHide.value != topTarget) {
                         runCatching { topHide.animateTo(topTarget, tween(220)) }
                     }
