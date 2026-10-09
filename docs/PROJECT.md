@@ -43,8 +43,10 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
    on 2 GB devices matters more than DI fashion. All deps `by lazy`.
 2. **No chart dependency**: custom Canvas step-line for price history.
 3. **MyRepublic = `manual` source** (JS shell): hand-curated seed,
-   pipeline skips it. Biznet = DeepSeek LLM. FirstMedia, Telkomsel, XL =
-   deterministic regex/JSON parsers (no LLM, $0). Telkomsel `keep`s its SERU
+   pipeline skips it. Biznet = DeepSeek LLM. FirstMedia, IndiHome,
+   Telkomsel, XL = deterministic regex/JSON parsers (no LLM, $0).
+   The IndiHome **official** site is server-rendered (never the telkomsel
+   LP — see quirks). Telkomsel `keep`s its SERU
    packs (different page, still curated); XL `keep`s its Flex/VIP packs
    (ULTRA 5G+ family page is the automated one). Express-purchase flows are
    number-gated, out of scope. FirstMedia summary table is stale — trust
@@ -275,6 +277,37 @@ Quirks ledger:
   every run by design; PR #4 is the standing watch item. Curated seed
   stands. Cards repeat 50 Mbps for all tiers — true speeds come from the
   comparison table (prompt rule).
+- **IndiHome — use the OFFICIAL site, not the Telkomsel LP (2026-10-09)**:
+  two different hosts, one is a trap.
+  *Wall*: `telkomsel.com/landingpage/regular/nasional` is a Next.js
+  **order funnel**. Static fetch works (5.8k chars) but `clean()` yields
+  only the `__NEXT_DATA__` shell — six tab configs (`promo`, `internet`,
+  `internetmovie`, `internetgamer`, `internettv`, `bayarsekaligus`) with
+  `id_packages` (66/49/52/51/74/53) + a *plaintext* `api_key`
+  (`AO_ML2_1P_IH`…) + `from_api`, and **zero prices**. Rows come from
+  `POST landingpage/api/lp/fmc/v1/get-package`,
+  `{token, code, data:{channel, packageCategory, installDetails,
+  locDetails, feasibleType, pid, cpid}}`, key in header **`x-api-key`**
+  (`apiKeyQuick`) — a CryptoJS AES blob (`U2FsdGVkX1…` = `Salted__`,
+  passphrase in the bundle). Plaintext `api_key`, `apiKeyExt` and the raw
+  blob ALL return `{code:999,"API key not accessible"}`, and it needs an
+  install-location payload (`fmc/v1/install-loc`). Do NOT add AES-key
+  extraction: brittle, and it defeats an access gate (blueprint 11).
+  *Way through*: **`indihome.co.id` is server-rendered** — same price
+  cards, 34.6k cleaned chars, no JS. `pipeline/scraper/indihome.py`
+  (`regex-indihome`) parses the rigid block `title / <speed> Mbps /
+  Mulai dari / Rp<price> / /bulan / Pilih Paket` → 21 unique plans
+  (24 card occurrences; repeats across "Best Deal" and its own tab are
+  deduped, conflicting prices raise).
+  Gotchas: card titles are promo tier names ("Double Speed - 500 Mbps")
+  and do NOT match the speed beneath → **the numbered line is the
+  speed**, and the id includes it (`indihome-<title>-<speed>`), so the
+  same title at two speeds stays distinct. The page states **no PPN,
+  install fee, rental or ONT anywhere**, so `tax_inclusive` is a curated
+  constant in the extractor (False = ex-PPN, maintainer-confirmed) and
+  `install_fee` stays `None` ("Tanya provider") — never derived.
+  `device_rental_fee=0` assumes the ONT is bundled (stated on the LP,
+  silent on the plan page): **watch item**.
 
 ## Everyday commands
 

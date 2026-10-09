@@ -26,6 +26,13 @@ isps:
     pages:
       - url: https://firstmedia-tv.id/
         mode: static
+  - id: indihome
+    note: "Biggest broadband ISP. AUTOMATABLE via the official site (server-rendered, 34.6k cleaned chars, ~24 cards in a rigid <title>/<speed> Mbps/Mulai dari/Rp<price>/bulan block) - deterministic regex extractor is IMPLEMENTED (regex-indihome). Do NOT use the telkomsel.com LP: that is a Next.js order funnel whose packages come from POST landingpage/api/lp/fmc/v1/get-package behind a CryptoJS AES x-api-key (raw key -> {code:999,'API key not accessible'}) plus an install-location step - walled, reconned in PROJECT.md quirks ledger. NOTE the official page states NO PPN / install fee / rental anywhere, so tax_inclusive=false is a curated human decision (confirmed 2026-10-09), not page evidence; install_fee stays null. Card titles are promo tier names ('Double Speed - 500 Mbps'); trust the numbered speed line, not the title."
+    extractor: regex-indihome
+    default_regions: ["JAVA_ALL"]
+    pages:
+      - url: https://www.indihome.co.id/
+        mode: static
   - id: telkomsel
     note: "Recommendation cards on /simpati via deterministic regex (name/quota/validity/price/Beli blocks). SERU packs live on a different page and are curated (keep). express-purchase needs a SIMPATI number (skeleton loaders) — out of scope."
     extractor: regex-telkomsel

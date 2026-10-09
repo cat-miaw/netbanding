@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
-  "data_version": 13,
-  "generated_at": "2026-10-07T12:46:46Z",
+  "data_version": 14,
+  "generated_at": "2026-10-09T06:04:07Z",
   "ppn_rate": 0.11,
   "files": {
     "catalog": {
       "path": "catalog.json",
-      "sha256": "f4a3ea9e65b0aeabffab597601cb903a1fe626170fa2eff6fc2d3a5cf09d00de",
-      "bytes": 48846
+      "sha256": "938fb11e57f2a8d7a575c87fa8e2af491316da5b2dc90434b2bc6ebc4cd69ecd",
+      "bytes": 63426
     },
     "history": {
       "path": "history.json",
-      "sha256": "46561a75119ed72a30cedd818f59a00dab5657fbb23aaa258c2d2d6dbba58cc2",
-      "bytes": 10469
+      "sha256": "d5dfcc54ad51b457d4a806adced2e6151ec0b1dbb1d12648bd5687b1644fecca",
+      "bytes": 14126
     }
   }
 }

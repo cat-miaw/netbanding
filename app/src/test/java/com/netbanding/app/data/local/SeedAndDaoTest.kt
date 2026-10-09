@@ -23,17 +23,17 @@ class SeedAndDaoTest {
 
     @After fun close() { db.close() }
 
-    @Test fun seedImporter_loads18Packages() = runTest {
+    @Test fun seedImporter_loads94Packages() = runTest {
         val ok = SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         assertTrue(ok)
-        assertEquals(41, db.packageDao().activeCount())
+        assertEquals(94, db.packageDao().activeCount())
     }
 
     @Test fun sqlSort_cheapestFirst_andBudgetFilter() = runTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val all = dao.observePackages("JAVA_ALL", null, null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
-        assertEquals(41, all.size)
+        assertEquals(94, all.size)
         val totals = all.map { it.monthly_total }
         assertEquals(totals.sorted(), totals)
         // Cheapest overall = XL Xtra Kuota 2GB: Rp5.600 incl. PPN.
@@ -47,8 +47,8 @@ class SeedAndDaoTest {
         val dao = db.packageDao()
         val bb = dao.observePackages("JAVA_ALL", "broadband", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         val cell = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
-        assertEquals(12, bb.size)
-        assertEquals(29, cell.size)
+        assertEquals(33, bb.size)
+        assertEquals(61, cell.size)
         assertTrue(cell.all { it.monthly_total >= 5_000 })
     }
 
@@ -56,7 +56,7 @@ class SeedAndDaoTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val rows = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "pergb").first()
-        assertEquals(29, rows.size)
+        assertEquals(61, rows.size)
         val ratios = rows.map { it.monthly_total.toDouble() / (it.quota_mb ?: 1) }
         assertEquals(ratios.sorted(), ratios)
     }
@@ -83,12 +83,13 @@ class SeedAndDaoTest {
         SeedImporter(context, db, CalculateTrueCost()).importIfEmpty()
         val dao = db.packageDao()
         val total = dao.observeCount("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0).first()
-        assertEquals(29, total)
-        val p1 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 15, 0).first()
-        val p2 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 15, 15).first()
-        assertEquals(15, p1.size)
-        assertEquals(14, p2.size)
-        assertTrue((p1 + p2).map { it.id }.toSet().size == 29)
+        assertEquals(61, total)
+        // Page size 31 = ceil(61/2): two pages must cover every row exactly once.
+        val p1 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 31, 0).first()
+        val p2 = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest", 31, 31).first()
+        assertEquals(31, p1.size)
+        assertEquals(30, p2.size)
+        assertTrue((p1 + p2).map { it.id }.toSet().size == 61)
         // Same order as the unpaged query.
         val all = dao.observePackages("JAVA_ALL", "cellular", null, null, null, emptyList(), 0, emptyList(), 0, "cheapest").first()
         assertEquals(all.map { it.id }, (p1 + p2).map { it.id })

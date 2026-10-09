@@ -509,5 +509,152 @@
       "tax_inclusive": true,
       "recorded_at": "2026-10-07T12:46:46Z"
     }
+  ],
+  "indihome-double-speed-300-mbps-internet-150": [
+    {
+      "price": 310000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-300-mbps-internet-movie-netflix-150": [
+    {
+      "price": 355000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-movie-complete-200": [
+    {
+      "price": 460000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-maxstream-tv-200": [
+    {
+      "price": 495000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-movie-complete-100": [
+    {
+      "price": 390000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-300-mbps-internet-movie-complete-150": [
+    {
+      "price": 420000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-movie-complete-300": [
+    {
+      "price": 610000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-100": [
+    {
+      "price": 280000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-200": [
+    {
+      "price": 350000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-300": [
+    {
+      "price": 500000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-game-100": [
+    {
+      "price": 330000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-300-mbps-internet-game-150": [
+    {
+      "price": 360000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-game-200": [
+    {
+      "price": 400000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-game-300": [
+    {
+      "price": 550000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-maxstream-tv-100": [
+    {
+      "price": 425000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-300-mbps-internet-maxstream-tv-150": [
+    {
+      "price": 455000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-double-speed-500-mbps-internet-maxstream-tv-300": [
+    {
+      "price": 645000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-200-mbps-internet-100": [
+    {
+      "price": 280000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-200-mbps-internet-movie-netflix-100": [
+    {
+      "price": 310000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-200-mbps-internet-movie-complete-100": [
+    {
+      "price": 390000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-200-mbps-internet-game-100": [
+    {
+      "price": 330000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-09T06:04:07Z"
+    }
   ]
 }
