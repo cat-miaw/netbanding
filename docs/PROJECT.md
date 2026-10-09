@@ -136,6 +136,11 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   bars reveals already-laid-out content, zero snap. (2026-10-08 lesson:
   collapsing insets with the bars reintroduced the scroll jump via the
   near-top snap teleport + per-frame remeasure — reverted same day.)
+  Since the overlays own every inset, the MAIN `Scaffold` sets
+  `contentWindowInsets = WindowInsets(0,0,0,0)` and ignores its padding
+  lambda — otherwise the status bar is insetted twice (big blank gap).
+  The top bar's solid background MUST sit INSIDE its translation layer
+  (2026-10-09 fix — see gotchas).
 - **Chrome auto-hide**: home list drives it via `snapshotFlow` on
   (index, offset): down-travel pushes both bars out pixel-for-pixel,
   up-travel pulls them back (single collector + 250ms-debounce settle;
@@ -187,6 +192,14 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
 
 ## UI gotchas & verification toolkit
 
+- **Overlay background draw order (2026-10-09)**: `background()` placed
+  BEFORE `graphicsLayer{}` draws OUTSIDE the layer, so it stays parked at
+  y0 while the bar's content translates away — a leftover `Paper` strip
+  over the list (same rule as `background().clip()` not clipping but
+  `clip().background()` doing so). Background goes AFTER the layer.
+  Diagnosed by pixel-scanning a screenshot for a uniform `#FBFAF7` band
+  (PIL; colors from `theme/Color.kt`) — the band's bottom edge matched
+  the measured bar height. Fixed + verified on `api34_low`.
 - Emulator top-strip: taps at y<~130px die in the SystemUI zone
   (statusBarsPadding fixed the hamburger; verify via dump bounds).
 - `adb shell uiautomator dump /sdcard/x.xml` + pull + grep `text=` is

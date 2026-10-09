@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -211,8 +212,9 @@ fun NetBottomBar(
     compareCount: Int = 0,
 ) {
     // Custom compact bar (~58dp) instead of M3 NavigationBar (~80dp):
-    // same look, much less vertical bulk.
-    Column(Modifier.background(MaterialTheme.colorScheme.surface)) {
+    // same look, much less vertical bulk. navigationBarsPadding keeps it
+    // above the gesture pill; the surface background extends underneath.
+    Column(Modifier.background(MaterialTheme.colorScheme.surface).navigationBarsPadding()) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 8.dp),
