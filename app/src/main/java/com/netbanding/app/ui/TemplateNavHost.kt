@@ -102,6 +102,13 @@ fun AppLogo(modifier: Modifier = Modifier, size: Int = 40) {
     }
 }
 
+// The main Scaffold below deliberately ignores its content-padding lambda:
+// overlay chrome owns every inset itself (top bar has statusBarsPadding, the
+// bottom bar has navigationBarsPadding) and contentWindowInsets is zeroed, so
+// applying that padding would add the status bar height a SECOND time -> the
+// big blank gap. Lint can't know that, hence the targeted suppression.
+// (See docs/PROJECT.md "Overlay chrome, X-style".)
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun TemplateNavHost(
     container: AppContainer,

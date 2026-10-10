@@ -180,6 +180,10 @@ VMs are activity-scoped so tab state survives swipes/drawer jumps.
   Since the overlays own every inset, the MAIN `Scaffold` sets
   `contentWindowInsets = WindowInsets(0,0,0,0)` and ignores its padding
   lambda — otherwise the status bar is insetted twice (big blank gap).
+  Lint flags that as `UnusedMaterial3ScaffoldPaddingParameter` (a hard
+  error, fails `:app:lintRelease`); it is suppressed on `TemplateNavHost`
+  with an explanatory comment. Do NOT "fix" it by consuming the padding —
+  that reintroduces the double inset.
   The top bar's solid background MUST sit INSIDE its translation layer
   (2026-10-09 fix — see gotchas).
 - **Chrome auto-hide**: home list drives it via `snapshotFlow` on
