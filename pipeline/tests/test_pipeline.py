@@ -1,5 +1,6 @@
 """Fixture HTML -> expected JSON per ISP; validators, diff classifier, history logic."""
 import json
+import os
 import sys
 
 sys.path.insert(0, "pipeline")
@@ -7,6 +8,14 @@ sys.path.insert(0, "pipeline")
 from scraper.checks import validate_package
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
+from scraper.extract import (
+    AgnesExtractor,
+    DeepSeekExtractor,
+    FallbackExtractor,
+    LLMExtractor,
+    parse_chain,
+    parse_extraction,
+)
 from scraper.extract import make_id, normalize_package
 from scraper.indihome import IndiHomeExtractor
 from scraper.schema import Package
@@ -234,3 +243,167 @@ def test_indihome_conflicting_price_on_duplicate_raises():
     except ValueError:
         return
     raise AssertionError("conflicting prices must not publish silently")
+
+
+# --- LLM provider chain (Agnes primary, DeepSeek fallback) -------------------
+
+class _FakeLLM:
+    """Offline stand-in for LLMExtractor: no network, controllable outcome."""
+
+    requires_key = True
+
+    def __init__(self, name, key="k", result=None, error=None):
+        self.name = name
+        self._key = key
+        self._result = result or {"packages": [{"product": name}], "evidence": {}, "tokens": 7}
+        self._error = error
+        self.calls = 0
+
+    @property
+    def available(self):
+        return bool(self._key)
+
+    def extract(self, text):
+        self.calls += 1
+        if self._error:
+            raise RuntimeError(self._error)
+        return dict(self._result)
+
+
+def test_parse_chain_default_order_and_dedup():
+    assert parse_chain("") == ["agnes", "deepseek"]
+    assert parse_chain("deepseek") == ["deepseek"]
+    assert parse_chain("deepseek, agnes ,deepseek") == ["deepseek", "agnes"]
+    # unknown names are dropped; if that empties the list we keep the default
+    assert parse_chain("nope") == ["agnes", "deepseek"]
+
+
+def test_agnes_and_deepseek_defaults():
+    a = AgnesExtractor(api_key="x")
+    assert a.base_url == "https://apihub.agnes-ai.com/v1"
+    assert a.model == "agnes-2.5-flash" and a.available
+    d = DeepSeekExtractor(api_key="y")
+    assert d.base_url == "https://api.deepseek.com" and d.model == "deepseek-chat"
+    assert not AgnesExtractor(api_key="").available
+
+
+def test_chain_falls_back_to_next_provider_on_failure():
+    dead = _FakeLLM("agnes", error="402 insufficient balance")
+    alive = _FakeLLM("deepseek")
+    out = FallbackExtractor([dead, alive]).extract("text")
+    assert out["provider"] == "deepseek" and dead.calls == 1 and alive.calls == 1
+
+
+def test_chain_skips_providers_without_a_key():
+    keyless = _FakeLLM("agnes", key="")
+    alive = _FakeLLM("deepseek")
+    out = FallbackExtractor([keyless, alive]).extract("text")
+    assert out["provider"] == "deepseek" and keyless.calls == 0
+
+
+def test_chain_raises_when_all_providers_fail():
+    chain = FallbackExtractor([_FakeLLM("agnes", error="boom"),
+                               _FakeLLM("deepseek", error="402")])
+    try:
+        chain.extract("text")
+    except RuntimeError as e:
+        assert "agnes: boom" in str(e) and "deepseek: 402" in str(e)
+        return
+    raise AssertionError("all-fail must raise so run.py logs a real reason")
+
+
+def test_chain_raises_when_no_provider_has_a_key():
+    chain = FallbackExtractor([_FakeLLM("agnes", key=""), _FakeLLM("deepseek", key="")])
+    assert chain.available is False
+    try:
+        chain.extract("text")
+    except RuntimeError as e:
+        assert "no LLM provider has an API key" in str(e)
+        return
+    raise AssertionError("keyless chain must not attempt a request")
+
+
+def test_dotenv_loader_sets_missing_and_keeps_real_env(tmp_path, monkeypatch):
+    import run
+    monkeypatch.delenv("AGNES_API_KEY", raising=False)
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "from-real-env")
+    env = tmp_path / ".env"
+    env.write_text(
+        "# comment line\n"
+        "AGNES_API_KEY=sk-agnes-key\n"
+        'DEEPSEEK_API_KEY="from-file"\n'
+        "EXTRACTOR_CHAIN=deepseek,agnes\n"
+        "\n"
+        "not-a-kv-line\n",
+        encoding="utf-8",
+    )
+    run._load_dotenv(str(env))
+    assert os.environ["AGNES_API_KEY"] == "sk-agnes-key"
+    assert os.environ["DEEPSEEK_API_KEY"] == "from-real-env"  # real env wins
+    assert os.environ["EXTRACTOR_CHAIN"] == "deepseek,agnes"
+
+
+def test_parse_extraction_accepts_all_provider_shapes():
+    # documented wrapper object
+    wrapped = parse_extraction(
+        '{"packages": [{"product": "A"}], "evidence": {"0": {"base_price": "Rp1"}}}')
+    assert wrapped["packages"] == [{"product": "A"}]
+    assert wrapped["evidence"]["0"] == {"base_price": "Rp1"}
+    # bare array (some providers)
+    assert parse_extraction('[{"product": "B"}]')["packages"] == [{"product": "B"}]
+    # single bare package object (observed from Agnes under json_object mode)
+    bare = parse_extraction('{"product": "C", "base_price": 250000, "tax_inclusive": false}')
+    assert bare["packages"] == [
+        {"product": "C", "base_price": 250000, "tax_inclusive": False}]
+    # junk / empty stays empty, never raises
+    assert parse_extraction('{"note": "no plans"}')["packages"] == []
+
+
+class _FlakyLLM(LLMExtractor):
+    """LLMExtractor with a scripted sequence of replies (no network)."""
+
+    name = "flaky"
+    env_key = "FLAKY_KEY"
+    default_base_url = "http://example.invalid"
+    default_model = "m"
+
+    def __init__(self, replies, tries=None):
+        super().__init__(api_key="k", tries=tries if tries is not None else len(replies))
+        self._replies = list(replies)
+        self.calls = 0
+
+    def _call(self, text):
+        out = self._replies[min(self.calls, len(self._replies) - 1)]
+        self.calls += 1
+        return out
+
+
+_EMPTY = {"packages": [], "evidence": {}, "tokens": 5}
+_FULL = {"packages": [{"product": "HOME 0D"}], "evidence": {}, "tokens": 9}
+
+
+def test_provider_retries_a_degenerate_empty_reply():
+    llm = _FlakyLLM([_EMPTY, _FULL])
+    out = llm.extract("text")
+    assert len(out["packages"]) == 1 and llm.calls == 2
+
+
+def test_provider_gives_up_after_tries():
+    llm = _FlakyLLM([_EMPTY], tries=3)
+    out = llm.extract("text")
+    assert out["packages"] == [] and llm.calls == 3
+
+
+def test_chain_treats_zero_packages_as_failure_then_falls_through():
+    empty = _FakeLLM("agnes", result=dict(_EMPTY))
+    good = _FakeLLM("deepseek")
+    out = FallbackExtractor([empty, good]).extract("text")
+    assert out["provider"] == "deepseek"
+
+
+def test_chain_returns_empty_when_every_provider_finds_nothing():
+    a = _FakeLLM("agnes", result=dict(_EMPTY))
+    b = _FakeLLM("deepseek", result=dict(_EMPTY))
+    out = FallbackExtractor([a, b]).extract("text")
+    # run.py turns this into extract_empty (keeps prior data), not a hard error
+    assert out["packages"] == [] and out["provider"] == "deepseek"

@@ -43,8 +43,8 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
    on 2 GB devices matters more than DI fashion. All deps `by lazy`.
 2. **No chart dependency**: custom Canvas step-line for price history.
 3. **MyRepublic = `manual` source** (JS shell): hand-curated seed,
-   pipeline skips it. Biznet = DeepSeek LLM. FirstMedia, IndiHome,
-   Telkomsel, XL = deterministic regex/JSON parsers (no LLM, $0).
+   pipeline skips it. Biznet = LLM (provider chain, see #9). FirstMedia,
+   IndiHome, Telkomsel, XL = deterministic regex/JSON parsers (no LLM, $0).
    The IndiHome **official** site is server-rendered (never the telkomsel
    LP — see quirks). Telkomsel `keep`s its SERU
    packs (different page, still curated); XL `keep`s its Flex/VIP packs
@@ -64,6 +64,36 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
    install rows hidden for cellular, per-GB sort instead of per-Mbps.
    Biznet `install_fee=null` (undisclosed — never guess). Rp 50rb modem
    rental still OPEN (unverified, see below).
+9. **LLM provider chain with fallback** (2026-10-11, blueprint D5 amended):
+   DeepSeek credit ran out, so Agnes AI (free tier, OpenAI-compatible,
+   `https://apihub.agnes-ai.com/v1`, model **`agnes-2.5-flash`**) became the
+   primary and DeepSeek the fallback. `extract.py` has an `LLMExtractor` base
+   + `AgnesExtractor` / `DeepSeekExtractor`, wrapped by `FallbackExtractor`
+   (tries providers in order, first usable success wins, keyless providers
+   skipped, a 0-package reply counts as failure and falls through). Order
+   comes from `EXTRACTOR_CHAIN` (default `agnes,deepseek`); a single provider
+   can be pinned per ISP in `sources.yaml` (`extractor: agnes|deepseek`).
+   Local keys live in gitignored `.env` (loaded by `run.py`); CI uses the
+   `AGNES_API_KEY` + `DEEPSEEK_API_KEY` secrets. `run.py` logs `provider` per
+   ISP in the run log.
+
+   Free-tier gotchas (all probed live 2026-10-11, 4 trials each):
+   - **Model choice matters**: `agnes-2.5-flash` returned all 4 Biznet plans
+     4/4; `agnes-3.0-flash` returned an **empty** array 3/4; `agnes-2.5-pro`
+     and `agnes-3.0-flash-max` are **HTTP 403 "Insufficient user quota"** (not
+     in the free tier). Don't "upgrade" the model without re-probing.
+   - Backends are **non-deterministic even at temperature 0**: replies vary
+     between full/empty/duplicated across identical calls. `LLMExtractor.extract`
+     retries a 0-package reply (`LLM_TRIES`, default 2).
+   - Under `response_format: json_object` Agnes may return a **single bare
+     package object** instead of the wrapper array — `parse_extraction`
+     normalizes wrapper / bare-array / bare-object shapes (regression-tested).
+     Without json_object mode it wraps replies in ```json fences instead, so
+     keep json_object on.
+   - It can also emit **duplicate plans**; run.py collapses same-id rows after
+     validation and routes disagreeing duplicates to review (publish() only
+     guards cross-ISP dups). A null `tax_inclusive` fails validation → review,
+     never publishes.
 
 ## Gotchas (learned the hard way)
 
@@ -82,8 +112,8 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 - **Re-running an old Actions run pins the old commit** — always dispatch
   fresh (or `gh workflow run scrape --ref main`).
 - **Repo settings needed**: Pages source = GitHub Actions; Actions must be
-  allowed to create PRs (review flow); `DEEPSEEK_API_KEY` secret for real
-  extraction.
+  allowed to create PRs (review flow); `AGNES_API_KEY` (primary) +
+  `DEEPSEEK_API_KEY` (fallback) secrets for real extraction.
 - **`gh` CLI lives at `C:\Program Files\GitHub CLI\gh.exe`**, not on PATH.
   Authenticated as cat-miaw. Use it for runs/PRs/logs (no browser needed).
 - Emulator `api34_low` (1080x2340): taps need device pixels (screenshot
@@ -91,12 +121,15 @@ docs/                 PRIVACY.md, RELEASE.md (checklist), this file
 - Seed names: FirstMedia "Internet Only Starter" has NO speed in name
   (speed lives in subtitle) — don't "fix" this, it's the seed.
 
-## Current state (2026-10-07)
+## Current state (2026-10-11)
 
+- **LLM extraction moved off DeepSeek** (credit exhausted) onto Agnes AI free
+  tier, DeepSeek kept as automatic fallback (see decision #9). Verified live:
+  Agnes extracted Biznet's 4 plans with verbatim evidence. 29 pytest green.
 - Data v10+, 47 packages: Biznet 4, MyRepublic 5, FirstMedia 9 broadband;
   Telkomsel 14 + XL 15 cellular. App + pipeline + Pages deploy all live.
 - v1.1 shipped: favorites, compare (max 3, best-value highlights),
-  price-drop alerts, cellular tab. 22 JVM tests + 13 pytest, all green.
+  price-drop alerts, cellular tab. 22 JVM tests + pytest, all green.
 - Release AAB 3.74 MB (< 8 MB). Baseline Profile NOT yet generated
   (needs physical device). Play Console not yet created.
 - OPEN: Biznet modem rental Rp 50rb (unverifiable on site); FirstMedia
@@ -248,7 +281,8 @@ New ISP, same drill every time:
 2. **Embedded JSON first** (`type="application/json"`, `__NEXT_DATA__`):
    integer prices + typed rows beat text scraping. Template: `xlultra.py`.
 3. **Else rigid text blocks** → regex extractor + curated id map
-   (`firstmedia.py`, `telkomsel.py`). Else → DeepSeek LLM last resort
+   (`firstmedia.py`, `telkomsel.py`). Else → LLM last resort (Agnes primary,
+   DeepSeek fallback)
    (costs money; needs PPN/install stated on-page or every run reviews).
 4. **Ids deterministic** (`{isp}-{slug}-{speed|validity}`); renames in
    `aliases:`, other-page packs in `keep:` (never counted as removed).
@@ -317,6 +351,7 @@ Quirks ledger:
 python -m pytest pipeline/tests/ -q                  # pipeline tests
 python pipeline/validate.py                           # contract check
 python pipeline/run.py --fetch-only [--isp biznet]   # baseline, $0
+python pipeline/run.py [--isp biznet]                # real run (needs .env key)
 gh workflow run scrape --ref main --repo cat-miaw/netbanding
 gh run watch <id> --repo cat-miaw/netbanding
 ```

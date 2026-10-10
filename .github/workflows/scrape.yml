@@ -31,6 +31,9 @@ jobs:
           ${{ inputs.fetch_only == true && '--fetch-only' || '' }}
         name: Run scraper
         env:
+          # Agnes AI (free tier) is the primary LLM provider; DeepSeek falls
+          # back automatically if AGNES_API_KEY is absent or Agnes errors.
+          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       - uses: actions/upload-artifact@v4
         if: always()

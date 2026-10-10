@@ -32,7 +32,7 @@ Cellular data packages, user accounts, reviews, push notifications (FCM), in-app
 - Cold start < 2 s on a 2 GB device; AAB < 8 MB.
 - App works fully in airplane mode after first launch (seed data bundled).
 - Weekly pipeline runs unattended; bad extractions never reach users silently.
-- Monthly infra cost ≈ $0 (DeepSeek usage = cents).
+- Monthly infra cost ≈ $0 (LLM extraction runs on the Agnes AI free tier; DeepSeek is a paid fallback only).
 
 ---
 
@@ -44,7 +44,7 @@ Cellular data packages, user accounts, reviews, push notifications (FCM), in-app
 | D2 | Broadband first, cellular in v1.1 | Locked |
 | D3 | Free, no monetization, no analytics | Locked |
 | D4 | **Backend = static JSON files on GitHub Pages** (replaces Supabase) | **Recommended, confirm** |
-| D5 | LLM extraction via DeepSeek, only when page content changed | Locked |
+| D5 | LLM extraction via a provider chain (Agnes AI primary, DeepSeek fallback), only when page content changed | Locked (amended 2026-10-11: DeepSeek credit exhausted; Agnes AI added as primary, DeepSeek kept as fallback) |
 | D6 | Retrofit + OkHttp + kotlinx.serialization, manual DI (template default, replaces Hilt for cold start), Room, Compose M3 | Locked (amended 2026-10-07: Hilt dropped for <2s start on 2 GB devices) |
 | D7 | ISP logos bundled as local vector/webp assets, no Coil | Locked |
 | D8 | Money stored as `Long` IDR (never Float/Double) | Locked |
@@ -65,7 +65,7 @@ Cellular data packages, user accounts, reviews, push notifications (FCM), in-app
   sources.yaml (ISP pages)
     -> fetch (httpx; Playwright only if JS-rendered)
     -> clean to text + content hash  (unchanged hash = skip, no LLM call)
-    -> DeepSeek extraction (temperature 0, strict JSON)
+    -> LLM extraction, provider chain Agnes -> DeepSeek (temperature 0, strict JSON)
     -> Pydantic validation + sanity rules
     -> diff vs data/catalog.json
     -> small/safe change: auto-commit   |   suspicious change: open PR for manual review
@@ -206,7 +206,7 @@ price_per_mbps  = monthly_total / speed_mbps       (only if speed known)
 ### 6.1 Stages
 1. **Fetch** each URL in `sources.yaml` (`mode: static | playwright`). Polite: custom User-Agent, 2-5 s delay, retries with backoff. Respect robots.txt and review each ISP's ToS.
 2. **Clean**: strip scripts/nav/footer, convert to compact text, compute SHA-256. If hash equals last run's, **skip LLM** (saves cost, avoids drift).
-3. **Extract** with DeepSeek: `temperature=0`, JSON output, schema from `schema.py`.
+3. **Extract** with the LLM provider chain (Agnes AI primary, DeepSeek fallback; see `extract.py`): `temperature=0`, JSON output, schema from `schema.py`.
 4. **Validate** with Pydantic + sanity rules:
    - broadband `base_price` 100,000-2,000,000; cellular `base_price` 5,000-500,000; `speed_mbps` 5-2000 (broadband only); `install_fee` 0-2,000,000
    - `tax_inclusive` must be non-null; `id` must match slug pattern
@@ -227,13 +227,13 @@ price_per_mbps  = monthly_total / speed_mbps       (only if speed known)
 - A failed/empty extraction **keeps the previous data**; it only stops updating `last_verified_at` (the app then shows it as stale).
 - Packages are deactivated only after 3 consecutive misses.
 - Keep saved HTML fixtures + expected JSON per ISP; run them in CI so prompt/parser changes don't regress.
-- Extractor sits behind an interface (`Extractor.extract(text) -> dict`) so DeepSeek can be swapped for another model or a regex/selector parser for very stable pages.
+- Extractor sits behind an interface (`Extractor.extract(text) -> dict`) so the LLM provider can be swapped (or chained with fallback) or replaced by a regex/selector parser for very stable pages.
 
 ### 6.4 Candidate ISPs (verify scrapability first)
 IndiHome (Telkom), Biznet Home, MyRepublic, First Media, Iconnet (PLN), CBN, Oxygen.id, Megavision. Start with 3 easiest, then expand. Expected size: ~10 ISPs x 3-10 plans = ~50-100 packages.
 
 ### 6.5 Workflows
-- `scrape.yml`: cron weekly + manual `workflow_dispatch`. Secrets: `DEEPSEEK_API_KEY`.
+- `scrape.yml`: cron weekly + manual `workflow_dispatch`. Secrets: `AGNES_API_KEY` (primary), `DEEPSEEK_API_KEY` (fallback).
 - `pages.yml`: publish `data/` to GitHub Pages on change.
 - `app-ci.yml`: build + unit tests on PR.
 - Note: GitHub disables scheduled workflows in public repos after ~60 days without repo activity. The weekly data commit normally counts, but set a reminder to check the run history monthly.
@@ -306,7 +306,7 @@ With a few hundred rows, list scrolling is rarely the bottleneck. The real low-e
 | Item | Cost |
 |---|---|
 | GitHub (public repo): Actions, Pages, storage | $0 |
-| DeepSeek API (hash-skip; ~100 pages/week) | Cents/month (check current pricing) |
+| LLM API (hash-skip; ~100 pages/week) | $0 on Agnes AI free tier; DeepSeek fallback = cents/month (check current pricing) |
 | Hosting/CDN | $0 (GitHub Pages) |
 | Crash reporting | $0 (Firebase Crashlytics) or skip; prefer Play Console's built-in crash reports (no extra SDK) |
 | Domain | Not needed (use `github.io` URL) |
@@ -399,7 +399,7 @@ If you want to avoid even the Play fee at first: distribute APK via GitHub Relea
 > Read BLUEPRINT sections 4, 7.4, 7.5, 12. Implement SyncRepository and SyncWorker exactly per 7.4 (manifest check, sha256 verify, single-transaction replace, favorites preserved, schema_version guard). Add tests for success, rollback on corrupt payload, and "no change" paths.
 
 **Phase 4:**
-> Read BLUEPRINT sections 4, 5, 6, 12. Implement the pipeline for ISP `<name>` first: fetch, clean+hash, DeepSeek extractor behind an `Extractor` interface, Pydantic validation, diff classifier, publish step, fixture tests. Evidence quotes must be logged to `pipeline/runs/`, not shipped in `data/`.
+> Read BLUEPRINT sections 4, 5, 6, 12. Implement the pipeline for ISP `<name>` first: fetch, clean+hash, LLM extractor (provider chain) behind an `Extractor` interface, Pydantic validation, diff classifier, publish step, fixture tests. Evidence quotes must be logged to `pipeline/runs/`, not shipped in `data/`.
 
 ---
 
