@@ -16,3 +16,5 @@ pipeline/runs/
 pipeline/state/*_tmp.json
 __pycache__/
 .pytest_cache/
+# Local pipeline secrets (LLM API keys). CI uses GitHub Actions secrets.
+.env

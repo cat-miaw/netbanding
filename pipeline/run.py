@@ -2,7 +2,9 @@
 Failed/empty extractions keep previous data (only last_verified_at goes stale).
 
 First run: use --fetch-only to baseline page hashes with zero LLM cost and
-zero data changes. Real extraction needs DEEPSEEK_API_KEY.
+zero data changes. Real LLM extraction needs AGNES_API_KEY (free tier) or
+DEEPSEEK_API_KEY; the default extractor is a fallback chain (see extract.py),
+ordered by EXTRACTOR_CHAIN and skipping providers without a key.
 """
 import argparse
 import json
@@ -14,7 +16,12 @@ import yaml
 from scraper.checks import validate_catalog, validate_package, verify_evidence
 from scraper.clean import clean, content_hash
 from scraper.diff import classify
-from scraper.extract import DeepSeekExtractor, normalize_package
+from scraper.extract import (
+    AgnesExtractor,
+    DeepSeekExtractor,
+    FallbackExtractor,
+    normalize_package,
+)
 from scraper.firstmedia import FirstMediaExtractor
 from scraper.indihome import IndiHomeExtractor
 from scraper.telkomsel import TelkomselExtractor
@@ -28,13 +35,34 @@ RUNS_DIR = "pipeline/runs"
 REVIEW_FILE = "pipeline/review.json"
 DEACTIVATE_AFTER_MISSES = 3
 
+DEFAULT_EXTRACTOR = "llm"  # fallback chain (Agnes -> DeepSeek), see extract.py
+
 EXTRACTORS = {
+    "llm": FallbackExtractor,
+    "agnes": AgnesExtractor,
     "deepseek": DeepSeekExtractor,
     "regex-firstmedia": FirstMediaExtractor,
     "regex-indihome": IndiHomeExtractor,
     "regex-telkomsel": TelkomselExtractor,
     "regex-xlultra": XlUltraExtractor,
 }
+
+
+def _load_dotenv(path: str = ".env") -> None:
+    """Minimal .env loader (no dependency); real env vars always win.
+
+    Lets a local run pick up AGNES_API_KEY / DEEPSEEK_API_KEY without exporting
+    them every time. CI supplies them as secrets instead; .env is gitignored.
+    """
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
 
 
 def _load(path: str, default):
@@ -54,6 +82,7 @@ def main() -> int:
     ap.add_argument("--fetch-only", action="store_true")
     ap.add_argument("--isp", default=None)
     args = ap.parse_args()
+    _load_dotenv()
 
     sources = yaml.safe_load(open("pipeline/sources.yaml"))
     catalog = validate_catalog(json.load(open("data/catalog.json")))
@@ -73,7 +102,8 @@ def main() -> int:
             log["status"] = "manual_seed"
             run_log["isps"][isp["id"]] = log
             continue
-        extractor = EXTRACTORS.get(isp.get("extractor", "deepseek"), DeepSeekExtractor)()
+        extractor = EXTRACTORS.get(
+            isp.get("extractor", DEFAULT_EXTRACTOR), FallbackExtractor)()
         family_pages: dict = {}
         try:
             texts = []
@@ -118,8 +148,8 @@ def main() -> int:
             run_log["isps"][isp["id"]] = log
             continue
         hashes[isp["id"]] = h
-        needs_key = isinstance(extractor, DeepSeekExtractor)
-        if args.fetch_only or (needs_key and not os.environ.get("DEEPSEEK_API_KEY")):
+        needs_key = getattr(extractor, "requires_key", False)
+        if args.fetch_only or (needs_key and not getattr(extractor, "available", True)):
             log["status"] = "baseline_no_llm" if args.fetch_only else "skipped_no_key"
             run_log["isps"][isp["id"]] = log
             continue
@@ -160,6 +190,8 @@ def main() -> int:
             log.update(status="extract_failed", error=str(e))
             run_log["isps"][isp["id"]] = log
             continue
+        if out.get("provider"):
+            log["provider"] = out["provider"]  # which chain member answered
         log["tokens"] = out.get("tokens", 0)
         log["evidence"] = out.get("evidence", {})
         log["chars"] = len(text)
@@ -189,6 +221,27 @@ def main() -> int:
             review["items"].append({"isp": isp["id"], "reason": "validation", "errors": errs})
             run_log["isps"][isp["id"]] = log
             continue
+        # An LLM provider can repeat a plan (same deterministic id). publish()
+        # only guards cross-ISP dups, so collapse same-id rows here; a duplicate
+        # that disagrees on money is a parse problem -> review, never publish.
+        by_id: dict = {}
+        dup_conflicts = []
+        for p in pkgs:
+            prev = by_id.get(p.id)
+            if prev is None:
+                by_id[p.id] = p
+            elif any(getattr(prev, f) != getattr(p, f) for f in
+                     ("base_price", "quota_mb", "validity_days", "tax_inclusive")):
+                dup_conflicts.append(p.id)
+        if dup_conflicts:
+            log.update(status="needs_review",
+                       reasons=[f"duplicate ids differ: {dup_conflicts}"])
+            review["needs_review"] = True
+            review["items"].append(
+                {"isp": isp["id"], "reason": "duplicate ids differ", "ids": dup_conflicts})
+            run_log["isps"][isp["id"]] = log
+            continue
+        pkgs = list(by_id.values())
         old_isp = [p for p in catalog.packages if p.isp_id == isp["id"] and p.is_active]
         keep = set(isp.get("keep", []))
         seen = {p.id for p in pkgs}
