@@ -656,5 +656,33 @@
       "tax_inclusive": false,
       "recorded_at": "2026-10-09T06:04:07Z"
     }
+  ],
+  "indihome-double-speed-150-mbps-internet-speed-asli-75-mbps-150": [
+    {
+      "price": 310000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-12T08:19:42Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-150-mbps-internet-speed-asli-75-mbps-150": [
+    {
+      "price": 355000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-12T08:19:42Z"
+    }
+  ],
+  "indihome-double-speed-150-mbps-internet-movie-netflix-speed-asli-75-mbps-200": [
+    {
+      "price": 460000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-12T08:19:42Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-movie-complet-speed-asli-100-mbps-200": [
+    {
+      "price": 495000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-10-12T08:19:42Z"
+    }
   ]
 }

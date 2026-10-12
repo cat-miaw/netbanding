@@ -212,6 +212,29 @@
       "updated_at": "2026-10-07T00:00:00Z"
     },
     {
+      "id": "indihome-bayar-sekaligus-150-mbps-internet-speed-asli-75-mbps-150",
+      "isp_id": "indihome",
+      "name": "Bayar Sekaligus - 150 Mbps Internet (speed asli 75 mbps)",
+      "type": "broadband",
+      "speed_mbps": 150,
+      "quota_mb": null,
+      "validity_days": null,
+      "contract_months": null,
+      "base_price": 355000,
+      "tax_inclusive": false,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.indihome.co.id/",
+      "is_active": true,
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
+    },
+    {
       "id": "indihome-bayar-sekaligus-200-mbps-internet-100",
       "isp_id": "indihome",
       "name": "Bayar Sekaligus - 200 Mbps Internet",
@@ -231,8 +254,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-bayar-sekaligus-200-mbps-internet-game-100",
@@ -254,8 +277,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-bayar-sekaligus-200-mbps-internet-movie-complete-100",
@@ -277,8 +300,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-bayar-sekaligus-200-mbps-internet-movie-netflix-100",
@@ -300,8 +323,54 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
+    },
+    {
+      "id": "indihome-double-speed-150-mbps-internet-movie-netflix-speed-asli-75-mbps-200",
+      "isp_id": "indihome",
+      "name": "Double Speed - 150 Mbps Internet+Movie Netflix (speed asli 75 mbps)",
+      "type": "broadband",
+      "speed_mbps": 200,
+      "quota_mb": null,
+      "validity_days": null,
+      "contract_months": null,
+      "base_price": 460000,
+      "tax_inclusive": false,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.indihome.co.id/",
+      "is_active": true,
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
+    },
+    {
+      "id": "indihome-double-speed-150-mbps-internet-speed-asli-75-mbps-150",
+      "isp_id": "indihome",
+      "name": "Double Speed - 150 Mbps Internet (speed asli 75 mbps)",
+      "type": "broadband",
+      "speed_mbps": 150,
+      "quota_mb": null,
+      "validity_days": null,
+      "contract_months": null,
+      "base_price": 310000,
+      "tax_inclusive": false,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.indihome.co.id/",
+      "is_active": true,
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-200-mbps-internet-100",
@@ -323,8 +392,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-200-mbps-internet-game-100",
@@ -346,8 +415,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-200-mbps-internet-maxstream-tv-100",
@@ -369,8 +438,31 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
+    },
+    {
+      "id": "indihome-double-speed-200-mbps-internet-movie-complet-speed-asli-100-mbps-200",
+      "isp_id": "indihome",
+      "name": "Double Speed - 200 Mbps Internet+Movie Complet (speed asli 100 mbps)",
+      "type": "broadband",
+      "speed_mbps": 200,
+      "quota_mb": null,
+      "validity_days": null,
+      "contract_months": null,
+      "base_price": 495000,
+      "tax_inclusive": false,
+      "device_rental_fee": 0,
+      "install_fee": null,
+      "fup_note": null,
+      "promo_note": null,
+      "regions": [
+        "JAVA_ALL"
+      ],
+      "source_url": "https://www.indihome.co.id/",
+      "is_active": true,
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-200-mbps-internet-movie-complete-100",
@@ -392,8 +484,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-300-mbps-internet-150",
@@ -415,8 +507,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-300-mbps-internet-game-150",
@@ -438,8 +530,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-300-mbps-internet-maxstream-tv-150",
@@ -461,8 +553,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-300-mbps-internet-movie-complete-150",
@@ -484,31 +576,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
-    },
-    {
-      "id": "indihome-double-speed-300-mbps-internet-movie-netflix-150",
-      "isp_id": "indihome",
-      "name": "Double Speed - 300 Mbps Internet+Movie Netflix",
-      "type": "broadband",
-      "speed_mbps": 150,
-      "quota_mb": null,
-      "validity_days": null,
-      "contract_months": null,
-      "base_price": 355000,
-      "tax_inclusive": false,
-      "device_rental_fee": 0,
-      "install_fee": null,
-      "fup_note": null,
-      "promo_note": null,
-      "regions": [
-        "JAVA_ALL"
-      ],
-      "source_url": "https://www.indihome.co.id/",
-      "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-200",
@@ -530,8 +599,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-300",
@@ -553,8 +622,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-game-200",
@@ -576,8 +645,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-game-300",
@@ -599,8 +668,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-maxstream-tv-200",
@@ -622,8 +691,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-maxstream-tv-300",
@@ -645,8 +714,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-movie-complete-200",
@@ -668,8 +737,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "indihome-double-speed-500-mbps-internet-movie-complete-300",
@@ -691,8 +760,8 @@
       ],
       "source_url": "https://www.indihome.co.id/",
       "is_active": true,
-      "last_verified_at": "2026-10-09T06:04:07Z",
-      "updated_at": "2026-10-09T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:42Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "myrepublic-nexus-300",
@@ -829,8 +898,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "telkomsel-pasti-70k-8gb",
@@ -852,8 +921,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-5g-15gb",
@@ -875,8 +944,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-5g-6gb",
@@ -898,8 +967,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "telkomsel-seru-bulanan-15gb",
@@ -1105,8 +1174,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "telkomsel-super-seru-promo-25gb",
@@ -1128,8 +1197,8 @@
       ],
       "source_url": "https://www.telkomsel.com/simpati",
       "is_active": true,
-      "last_verified_at": "2026-10-07T11:19:08Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:19:46Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-l",
@@ -1151,8 +1220,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-m",
@@ -1174,8 +1243,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-mini-17gb",
@@ -1197,8 +1266,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-mini-34gb",
@@ -1220,8 +1289,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-mini-7gb",
@@ -1243,8 +1312,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-s",
@@ -1266,8 +1335,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-sm",
@@ -1289,8 +1358,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-xl-28d",
@@ -1312,8 +1381,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-akrab-xxl-28d",
@@ -1335,8 +1404,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmax-100gb-28d",
@@ -1358,8 +1427,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmax-150gb-28d",
@@ -1381,8 +1450,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmax-400gb-400gb-5g-28d",
@@ -1404,8 +1473,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmax-600gb-600gb-5g-28d",
@@ -1427,8 +1496,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmax-65gb-28d",
@@ -1450,8 +1519,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmini-150gb-14d",
@@ -1473,8 +1542,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-14d",
@@ -1496,8 +1565,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-flexmini-75gb-7d",
@@ -1519,8 +1588,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-4xl-28d",
@@ -1542,8 +1611,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-5xl-45d",
@@ -1565,8 +1634,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-l",
@@ -1611,8 +1680,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-m",
@@ -1657,8 +1726,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-m-plus-28d",
@@ -1680,8 +1749,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-s",
@@ -1726,8 +1795,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-xl",
@@ -1772,8 +1841,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-xxl-28d",
@@ -1795,8 +1864,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-flex-xxxl-28d",
@@ -1818,8 +1887,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-mini-10gb-7d",
@@ -1841,8 +1910,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-mini-15gb-7d",
@@ -1864,8 +1933,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-mini-2-5-gb-7d",
@@ -1887,8 +1956,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-mini-4-gb-7d",
@@ -1910,8 +1979,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-mini-6-gb-7d",
@@ -1933,8 +2002,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-10-gb-28d",
@@ -1956,8 +2025,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-20-gb-28d",
@@ -1979,8 +2048,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-32-gb-28d",
@@ -2002,8 +2071,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-52-gb-28d",
@@ -2025,8 +2094,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-75-gb-28d",
@@ -2048,8 +2117,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-plus-l-plus-28d",
@@ -2071,8 +2140,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-vip-20gb",
@@ -2094,8 +2163,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-vip-52gb",
@@ -2117,8 +2186,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-vip-plus-10-gb-30d",
@@ -2140,8 +2209,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-vip-plus-32-gb-30d",
@@ -2163,8 +2232,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-combo-vip-plus-75-gb-30d",
@@ -2186,8 +2255,8 @@
       ],
       "source_url": "https://www.xl.co.id/produk/paket-dan-addon/xl-ultra-5g",
       "is_active": true,
-      "last_verified_at": "2026-10-07T12:46:46Z",
-      "updated_at": "2026-10-07T02:00:00Z"
+      "last_verified_at": "2026-10-12T08:20:14Z",
+      "updated_at": "2026-10-12T02:00:00Z"
     },
     {
       "id": "xl-xtra-kuota-2gb",
