@@ -16,6 +16,17 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def prune_history(history: dict, catalog: Catalog) -> dict:
+    """Drop keys that have no row in catalog.
+
+    The app stores history with a FOREIGN KEY to packages; an orphan row
+    makes every later sync fail with "Gagal memperbarui" (observed when
+    v17 -> v23 skipped the versions that introduced those package ids).
+    """
+    ids = {p.id for p in catalog.packages}
+    return {k: v for k, v in history.items() if k in ids}
+
+
 def publish(
     old_catalog: Catalog,
     isp_id: str,
@@ -43,6 +54,7 @@ def publish(
         pts = history.setdefault(pkg.id, [])
         if not pts or pts[-1]["price"] != pkg.base_price or pts[-1]["tax_inclusive"] != pkg.tax_inclusive:
             pts.append({"price": pkg.base_price, "tax_inclusive": pkg.tax_inclusive, "recorded_at": now})
+    history = prune_history(history, catalog)
 
     manifest = json.load(open(f"{DATA_DIR}/manifest.json"))
     manifest["data_version"] += 1

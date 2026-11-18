@@ -212,6 +212,20 @@ def test_history_appends_only_on_change():
     assert changed, "price change must append"
 
 
+def test_publish_prunes_orphan_history():
+    # Orphan history rows violate the app's package_id foreign key and make
+    # sync fail permanently ("Gagal memperbarui") after a skipped version.
+    from scraper.publish import prune_history
+    from scraper.schema import Catalog
+
+    pkg = validate_package(good_raw(), ISP)[0]
+    hist = {
+        pkg.id: [{"price": 250000, "tax_inclusive": False, "recorded_at": "t0"}],
+        "biznet-removed-last-month": [{"price": 100000, "tax_inclusive": False, "recorded_at": "t0"}],
+    }
+    assert prune_history(hist, Catalog(isps=[], packages=[pkg])) == {pkg.id: hist[pkg.id]}
+
+
 # --- IndiHome (official site, server-rendered cards) ---------------------
 
 def test_indihome_cards_extract():
