@@ -684,5 +684,33 @@
       "tax_inclusive": false,
       "recorded_at": "2026-10-12T08:19:42Z"
     }
+  ],
+  "indihome-ekstra-speed-75-mbps-internet-50": [
+    {
+      "price": 230000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-11-18T13:50:36Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-75": [
+    {
+      "price": 240000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-11-18T13:50:36Z"
+    }
+  ],
+  "indihome-bayar-sekaligus-200-mbps-internet-75": [
+    {
+      "price": 240000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-11-18T13:50:36Z"
+    }
+  ],
+  "indihome-double-speed-200-mbps-internet-movie-netflix-75": [
+    {
+      "price": 270000,
+      "tax_inclusive": false,
+      "recorded_at": "2026-11-18T13:50:36Z"
+    }
   ]
 }
