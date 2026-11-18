@@ -2,6 +2,14 @@ name: pages
 on:
   push:
     branches: [main]
+  # The scraper's auto-commit uses GITHUB_TOKEN, and pushes made with that
+  # token do NOT trigger other workflows (GitHub anti-loop rule). Deploy
+  # after a successful scrape too, otherwise data/ changes sit on main
+  # until a human pushes/merge something (v17 -> v20 lag in Oct/Nov 2026).
+  workflow_run:
+    workflows: ["scrape"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -9,12 +17,15 @@ permissions:
   id-token: write
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
