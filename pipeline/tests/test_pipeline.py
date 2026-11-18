@@ -63,6 +63,19 @@ def test_clean_keeps_nextjs_json_data():
     assert "menu" not in text
 
 
+def test_clean_keeps_template_content():
+    # bs4 html.parser puts <template> text in TemplateString nodes, which
+    # get_text() skips by default. indihome.co.id moved its plan cards there;
+    # losing them made the extractor report a fake 100% package-count drop.
+    html = ('<html><body><template>'
+            '<p>Double Speed - 500 Mbps Internet</p><p>200 Mbps</p>'
+            '<p>Mulai dari</p><p>Rp350.000</p><p>/bulan</p><p>Pilih Paket</p>'
+            "</template></body></html>")
+    text = clean(html)
+    assert "Rp350.000" in text and "Pilih Paket" in text
+    assert len(IndiHomeExtractor().extract(text)["packages"]) == 1
+
+
 def test_validate_accepts_good_package():
     pkg, errs = validate_package(good_raw(), ISP)
     assert errs == [] and isinstance(pkg, Package)

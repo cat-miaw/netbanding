@@ -2,9 +2,15 @@
 import hashlib
 import re
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, CData, NavigableString, TemplateString
 
 _WS = re.compile(r"\s+")
+
+# BeautifulSoup's html.parser marks text inside <template> as TemplateString,
+# which get_text() skips by default. Sites (e.g. indihome.co.id) moved their
+# package cards into templates, so without this the page cleans down to the
+# two hardcoded cards and every scrape looks like a 100% count drop.
+_TEXT_TYPES = (NavigableString, CData, TemplateString)
 
 
 def clean(html: str) -> str:
@@ -21,7 +27,7 @@ def clean(html: str) -> str:
         embedded += "\n" + next_data.get_text(separator=" ")
     for tag in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
         tag.decompose()
-    text = soup.get_text(separator="\n")
+    text = soup.get_text(separator="\n", types=_TEXT_TYPES)
     lines = [_WS.sub(" ", ln).strip() for ln in text.splitlines()]
     lines = [ln for ln in lines if ln]
     out = "\n".join(lines)
