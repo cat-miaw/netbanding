@@ -347,6 +347,12 @@ Quirks ledger:
   `device_rental_fee=0` assumes the ONT is bundled (stated on the LP,
   silent on the plan page): **watch item**.
 
+Update 2026-11-18: the IndiHome site moved most cards into `<template>`
+elements. bs4's `html.parser` stores those as `TemplateString`, which
+`get_text()` skips by default, so `clean()` saw only 2 of 24 cards and
+every run tripped "package count dropped 100%". `clean()` now passes
+`types=(NavigableString, CData, TemplateString)`; all 24 cards parse again.
+
 ## Everyday commands
 
 ```bash
