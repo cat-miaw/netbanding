@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "data_version": 24,
-  "generated_at": "2026-11-18T14:00:10Z",
+  "data_version": 27,
+  "generated_at": "2026-11-23T10:00:17Z",
   "ppn_rate": 0.11,
   "files": {
     "catalog": {
       "path": "catalog.json",
-      "sha256": "793113fbd6c96ddf31f094c445e0d19cf640e4266741e8d0902e671c4f61ac94",
+      "sha256": "dc62eb5a55d6cefcb3b47fa1da33b52600cff27dfdf9d8ffbe80493e777ced68",
       "bytes": 65423
     },
     "history": {
